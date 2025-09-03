@@ -3,10 +3,29 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Jubiläums‑Finder</title>
-  <meta name="description" content="Berechne besondere Jubiläen (z. B. 1000 Tage, 100 Wochen, 333 000 Sekunden) ab einem Startdatum und exportiere sie als .ics‑Kalender." />
+  <title>Jubiläums‑Finder v2</title>
+  <meta name="description" content="Berechne besondere Jubiläen (z. B. 1000 Tage, 100 Wochen, 333 000 Sekunden) ab einem Startdatum und exportiere sie als .ics‑Kalender. Hell/Dunkel/System, 10‑Jahres‑Blöcke." />
   <style>
+    /* =====================
+       THEME TOKENS
+       ===================== */
     :root{
+      /* Light (default) */
+      --bg: #ffffff;
+      --panel: #f7f7fb;
+      --muted: #555;
+      --text: #111;
+      --brand: #0ea5e9; /* cyan */
+      --accent: #8b5cf6; /* violet */
+      --ok: #10b981;     /* green */
+      --warn: #f59e0b;   /* amber */
+      --danger: #ef4444; /* red */
+      --card: #fff;
+      --border: #e5e7eb;
+      --shadow: 0 2px 8px rgba(0,0,0,.08);
+      --radius: 12px;
+    }
+    [data-theme="dark"]{
       --bg: #0b0c0f;
       --panel: #111318;
       --muted: #a3adba;
@@ -18,34 +37,41 @@
       --danger: #f87171;
       --card: #141821;
       --border: #1f2530;
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
       --radius: 16px;
     }
-    html,body{height:100%;}
+
+    /* =====================
+       LAYOUT & BASICS
+       ===================== */
+    html,body{height:100%}
     body{
       margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      color:var(--text); background: radial-gradient(1200px 800px at 80% -10%, #122034 0%, transparent 60%),
-                            radial-gradient(900px 600px at -10% 10%, #1b1330 0%, transparent 60%),
-                            var(--bg);
+      color:var(--text); background:var(--bg);
+      transition: background .25s ease, color .25s ease;
     }
-    .wrap{max-width:1100px; margin:0 auto; padding:28px;}
-    header{display:flex; gap:16px; align-items:center; justify-content:space-between; margin-bottom:20px;}
+    .wrap{max-width:1100px; margin:0 auto; padding:28px}
+    header{display:flex; gap:16px; align-items:center; justify-content:space-between; margin-bottom:20px}
     .title{display:flex; gap:14px; align-items:center}
-    .logo{width:44px; height:44px; display:grid; place-items:center; border-radius:12px; background:linear-gradient(135deg, var(--accent), var(--brand)); box-shadow: var(--shadow)}
-    .logo span{font-weight:800; color:#0b0c0f}
+    .logo{width:44px; height:44px; display:grid; place-items:center; border-radius:12px; background:linear-gradient(135deg, var(--accent), var(--brand)); box-shadow:var(--shadow)}
+    .logo span{font-weight:800; color:#fff}
     h1{font-size:20px; margin:0}
     .muted{color:var(--muted)}
 
-    .grid{display:grid; grid-template-columns: 340px 1fr; gap:20px}
+    .theme-toggle{display:flex; gap:8px}
+    .theme-toggle button{padding:6px 10px; border-radius:10px; border:1px solid var(--border); background:var(--card); cursor:pointer; font-size:13px}
+    .theme-toggle button[aria-pressed="true"]{outline:2px solid var(--brand)}
+
+    .grid{display:grid; grid-template-columns: 360px 1fr; gap:20px}
     @media (max-width: 980px){ .grid{grid-template-columns: 1fr} }
 
-    .panel{background:var(--panel); border:1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow)}
+    .panel{background:var(--panel); border:1px solid var(--border); border-radius: var(--radius); box-shadow:var(--shadow)}
     .panel .hd{padding:16px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between}
     .panel .bd{padding:18px}
 
     form .field{display:grid; gap:8px; margin-bottom:14px}
     label{font-size:13px; color:var(--muted)}
-    input[type="text"], input[type="date"], input[type="time"], select {
+    input[type="text"], input[type="date"], input[type="time"]{
       background: var(--card); border:1px solid var(--border); color:var(--text);
       border-radius: 12px; padding:12px 12px; font-size:14px; outline:none; width:100%;
     }
@@ -56,31 +82,25 @@
     .chips{display:flex; flex-wrap:wrap; gap:10px}
     .chip{display:inline-flex; align-items:center; gap:8px; background:var(--card); border:1px solid var(--border); padding:8px 10px; border-radius:999px; font-size:13px}
 
-    .btn{appearance:none; cursor:pointer; background:linear-gradient(135deg, var(--brand), var(--accent)); color:#0b0c0f; font-weight:700; border:none; padding:12px 14px; border-radius:12px; box-shadow:var(--shadow)}
+    .btn{appearance:none; cursor:pointer; background:linear-gradient(135deg, var(--brand), var(--accent)); color:#fff; font-weight:700; border:none; padding:12px 14px; border-radius:12px; box-shadow:var(--shadow)}
     .btn.secondary{background:transparent; color:var(--text); border:1px solid var(--border)}
-    .btn.ghost{background:transparent; color:var(--muted); border: none}
+    .btn.ghost{background:transparent; color:var(--muted); border:none}
     .btn:disabled{opacity:.6; cursor:not-allowed}
 
-    .tabs{display:flex; gap:6px; padding:6px; background:var(--card); border:1px solid var(--border); border-radius:12px; width:max-content}
-    .tab{padding:10px 12px; border-radius:8px; font-weight:600; cursor:pointer}
-    .tab.active{background:var(--panel); border:1px solid var(--border)}
-
-    /* List */
+    /* LIST */
     .list{display:grid; gap:10px}
     .item{display:flex; gap:14px; align-items:center; background:var(--card); border:1px solid var(--border); padding:12px; border-radius:14px}
-    .tag{font-size:12px; color:#0b0c0f; padding:3px 8px; border-radius:999px; background:var(--brand); font-weight:800}
     .when{font-weight:700}
     .sub{font-size:12px; color:var(--muted)}
     .grow{flex:1}
-
-    /* Calendar */
-    .cal-wrap{display:grid; gap:10px}
-    .cal-head{display:flex; align-items:center; justify-content:space-between}
-    .cal{display:grid; grid-template-columns: repeat(7, 1fr); gap:6px}
-    .dow{font-size:12px; color:var(--muted); text-align:center}
-    .day{background:var(--card); border:1px solid var(--border); border-radius:12px; min-height:90px; padding:8px; display:flex; flex-direction:column; gap:6px}
-    .day .num{font-size:12px; color:var(--muted)}
-    .pill{font-size:11px; border-radius:999px; padding:4px 6px; background: #0f172a; border:1px solid #1f2937; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .tag{font-size:12px; color:#fff; padding:3px 8px; border-radius:999px; font-weight:800; margin-left:auto}
+    .tag.years{background:var(--brand)}
+    .tag.months{background:var(--accent)}
+    .tag.weeks{background:var(--ok)}
+    .tag.days{background:var(--warn)}
+    .tag.hours{background:var(--danger)}
+    .tag.minutes{background:#16a34a}
+    .tag.seconds{background:#d97706}
 
     .toolbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
     .spacer{flex:1}
@@ -89,10 +109,11 @@
 
     footer{margin-top:26px; color:var(--muted); font-size:12px}
     a { color: var(--brand) }
-    .kbd{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; background:#0f172a; border:1px solid #1f2937; padding:2px 6px; border-radius:6px; font-size:12px}
+    .kbd{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; background:#eef2ff; border:1px solid #c7d2fe; padding:2px 6px; border-radius:6px; font-size:12px}
+    [data-theme="dark"] .kbd{background:#0f172a; border:1px solid #1f2937}
   </style>
 </head>
-<body>
+<body data-theme="light" data-theme-mode="system">
   <div class="wrap">
     <header>
       <div class="title">
@@ -102,7 +123,11 @@
           <div class="muted">Berechne besondere Meilensteine & exportiere sie als Kalender (.ics)</div>
         </div>
       </div>
-      <div class="muted">Heutiges Datum: <span id="today"></span></div>
+      <div class="theme-toggle" role="group" aria-label="Theme">
+        <button data-mode="light" aria-pressed="false" title="Hell">☀️</button>
+        <button data-mode="dark" aria-pressed="false" title="Dunkel">🌙</button>
+        <button data-mode="system" aria-pressed="true" title="System">💻</button>
+      </div>
     </header>
 
     <div class="grid">
@@ -121,7 +146,6 @@
                 <input id="date" type="date" required />
               </div>
               <div class="field">
-                <label for="time">Uhrzeit (optional, für Stunden/Minuten/Sekunden)</label>
                 <input id="time" type="time" step="1" />
               </div>
             </div>
@@ -133,9 +157,9 @@
                 <label class="chip"><input type="checkbox" name="unit" value="months" checked/> Monate</label>
                 <label class="chip"><input type="checkbox" name="unit" value="weeks" checked/> Wochen</label>
                 <label class="chip"><input type="checkbox" name="unit" value="days" checked/> Tage</label>
-                <label class="chip"><input type="checkbox" name="unit" value="hours"/> Stunden</label>
-                <label class="chip"><input type="checkbox" name="unit" value="minutes"/> Minuten</label>
-                <label class="chip"><input type="checkbox" name="unit" value="seconds"/> Sekunden</label>
+                <label class="chip"><input type="checkbox" name="unit" value="hours" checked/> Stunden</label>
+                <label class="chip"><input type="checkbox" name="unit" value="minutes" checked/> Minuten</label>
+                <label class="chip"><input type="checkbox" name="unit" value="seconds" checked/> Sekunden</label>
               </div>
             </div>
 
@@ -145,36 +169,12 @@
                 <label class="chip"><input type="checkbox" name="pattern" value="pow10" checked/> 10^k (100, 1000, …)</label>
                 <label class="chip"><input type="checkbox" name="pattern" value="fivePow10" checked/> 5×10^k (5, 50, 500, …)</label>
                 <label class="chip"><input type="checkbox" name="pattern" value="repdigit" checked/> Schnapszahlen (11, 222, 3333, …)</label>
-                <label class="chip"><input type="checkbox" name="pattern" value="repdigitPow10" checked/> Schnaps×10^k (z. B. 333 000)</label>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="field">
-                <label for="horizon">Zeithorizont</label>
-                <select id="horizon">
-                  <option value="P3M">Nächste 3 Monate</option>
-                  <option value="P6M" selected>Nächste 6 Monate</option>
-                  <option value="P1Y">Nächstes Jahr</option>
-                  <option value="P2Y">Nächste 2 Jahre</option>
-                  <option value="P5Y">Nächste 5 Jahre</option>
-                  <option value="P10Y">Nächste 10 Jahre</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="limit">Max. Einträge (Liste)</label>
-                <select id="limit">
-                  <option>50</option>
-                  <option selected>100</option>
-                  <option>200</option>
-                  <option>500</option>
-                </select>
+                <label class="chip"><input type="checkbox" name="pattern" value="repdigitPow10"/> Schnaps×10^k (z. B. 333 000)</label>
               </div>
             </div>
 
             <div class="row" style="margin-top:8px">
-              <button class="btn" id="btnGenerate" type="submit">Berechnen</button>
-              <button class="btn secondary" id="btnExample" type="button">Beispiel (01.01.2020)</button>
+              <button class="btn" id="btnGenerate" type="submit">Jubiläen ausrechnen</button>
             </div>
           </form>
         </div>
@@ -184,39 +184,63 @@
         <div class="hd">
           <strong>📊 Ergebnisse</strong>
           <div class="toolbar">
-            <div class="tabs" role="tablist" aria-label="Ansicht">
-              <button class="tab active" id="tabList" data-tab="list" role="tab" aria-selected="true">Liste</button>
-              <button class="tab" id="tabCal" data-tab="cal" role="tab" aria-selected="false">Kalender</button>
-            </div>
             <div class="spacer"></div>
             <button class="btn secondary" id="btnIcsSel" title="Gewählte Einträge exportieren" disabled>.ics ausgewählt</button>
             <button class="btn" id="btnIcsAll" title="Alle angezeigten Einträge exportieren" disabled>.ics alle</button>
           </div>
         </div>
         <div class="bd" id="results">
-          <div class="empty">Noch nichts berechnet. Wähle oben ein Datum und klicke <span class="kbd">Berechnen</span>. Oder nutze den Beispiel‑Button.</div>
+          <div class="empty">Noch nichts berechnet. Wähle oben ein Datum und klicke <span class="kbd">Jubiläen ausrechnen</span>.</div>
+        </div>
+        <div class="bd" id="moreWrap" style="display:none">
+          <button class="btn secondary" id="btnMore">Weitere 10 Jahre laden</button>
         </div>
       </section>
     </div>
 
     <footer>
-      <p>💡 Tipp: Du kannst nach dem Export die .ics in jeden Kalender (Apple, Google, Outlook, Fantastical …) importieren. Ereignisse sind zeitbasiert (UTC), standardmäßig auf 1 Stunde Länge gesetzt. Für klassische Jahrestage kannst du alternativ alle‑Tage‑Events aktivieren (Code‑Schalter <span class="kbd">asAllDay</span> im JS).</p>
+      <p>💡 Tipp: Du kannst nach dem Export die .ics in jeden Kalender importieren (Apple, Google, Outlook, …). Ereignisse sind einstündig (UTC). </p>
     </footer>
   </div>
 
   <script>
-  // ---------- Utilities ----------
+  // ---------- Helpers ----------
   const $ = (sel, el=document) => el.querySelector(sel);
   const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
 
-  const fmt = new Intl.DateTimeFormat(undefined, { dateStyle: 'full', timeStyle: 'short' });
-  const fmtDate = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' });
-  const fmtNum = new Intl.NumberFormat(undefined);
-  const todayEl = document.getElementById('today');
-  todayEl.textContent = fmtDate.format(new Date());
+  // Theme handling (light/dark/system) with persistence
+  const body = document.body;
+  const mm = window.matchMedia('(prefers-color-scheme: dark)');
+  function applyTheme(mode){
+    if(mode==='system'){
+      body.setAttribute('data-theme', mm.matches? 'dark':'light');
+      body.dataset.themeMode = 'system';
+    }else{
+      body.setAttribute('data-theme', mode);
+      body.dataset.themeMode = mode;
+    }
+    // UI state
+    $$('.theme-toggle button').forEach(b=>b.setAttribute('aria-pressed','false'));
+    const btn = $(`.theme-toggle button[data-mode="${mode}"]`);
+    if(btn) btn.setAttribute('aria-pressed','true');
+    // persist
+    localStorage.setItem('themeMode', mode);
+  }
+  $$('.theme-toggle button').forEach(btn=>{
+    btn.addEventListener('click', ()=> applyTheme(btn.getAttribute('data-mode')));
+  });
+  mm.addEventListener?.('change', ()=>{ if((localStorage.getItem('themeMode')||'system')==='system') applyTheme('system'); });
+  applyTheme(localStorage.getItem('themeMode')||'system');
 
+  // Intl formatters
+  const fmtFull = new Intl.DateTimeFormat('de-DE', { dateStyle: 'full', timeStyle: 'short' });
+  const fmtDate = new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium' });
+  const fmtNum = new Intl.NumberFormat('de-DE');
+
+  // Durations
   const MS = { second: 1000, minute: 60_000, hour: 3_600_000, day: 86_400_000, week: 7*86_400_000 };
 
+  // Robust adders with month/day clamping
   function daysInMonth(y, m){ return new Date(y, m+1, 0).getDate(); }
   function addYears(d, n){
     const dt = new Date(d.getTime());
@@ -239,16 +263,16 @@
     dt.setFullYear(ny, nm, Math.min(day, dim));
     return dt;
   }
-  function addDays(d, n){ return new Date(d.getTime() + n*MS.day); }
   function addWeeks(d, n){ return new Date(d.getTime() + n*MS.week); }
+  function addDays(d, n){ return new Date(d.getTime() + n*MS.day); }
   function addHours(d, n){ return new Date(d.getTime() + n*MS.hour); }
   function addMinutes(d, n){ return new Date(d.getTime() + n*MS.minute); }
   function addSeconds(d, n){ return new Date(d.getTime() + n*MS.second); }
 
-  function isRepdigit(n){ const s = String(n); return s.length>1 && /^([1-9])\1+$/.test(s); }
+  // Patterns
   function makeRepdigits(max){
     const set = new Set();
-    for(let len=2; len<=6; len++){
+    for(let len=2; len<=12; len++){
       for(let d=1; d<=9; d++){
         const val = Number(String(d).repeat(len));
         if(val<=max) set.add(val);
@@ -258,9 +282,9 @@
   }
   function makeRepdigitsTimesPow10(max){
     const set = new Set();
-    for(let len=2; len<=4; len++){
+    for(let len=2; len<=12; len++){
       for(let d=1; d<=9; d++){
-        for(let k=1; k<=6; k++){
+        for(let k=1; k<=12; k++){
           const val = Number(String(d).repeat(len)) * 10**k;
           if(val<=max) set.add(val);
         }
@@ -268,35 +292,65 @@
     }
     return set;
   }
-  function makePowersOf10(max){
-    const set = new Set();
-    for(let k=1; 10**k <= max; k++) set.add(10**k);
-    return set;
-  }
-  function makeFiveTimesPow10(max){
-    const set = new Set();
-    for(let k=0; 5*10**k <= max; k++) set.add(5*10**k);
-    return set;
+  function makePowersOf10(max){ const set=new Set(); for(let k=1; 10**k<=max; k++) set.add(10**k); return set; }
+  function makeFiveTimesPow10(max){ const set=new Set(); for(let k=0; 5*10**k<=max; k++) set.add(5*10**k); return set; }
+
+  function buildCandidates(maxN, patterns){
+    let s=new Set();
+    if(patterns.pow10) for(const v of makePowersOf10(maxN)) s.add(v);
+    if(patterns.fivePow10) for(const v of makeFiveTimesPow10(maxN)) s.add(v);
+    if(patterns.repdigit) for(const v of makeRepdigits(maxN)) s.add(v);
+    if(patterns.repdigitPow10) for(const v of makeRepdigitsTimesPow10(maxN)) s.add(v);
+    return Array.from(s).sort((a,b)=>a-b);
   }
 
+  // Grammar helpers (Dativ in Zeitangaben: in X Monaten, in X Jahren, …)
+  const unitDE = {
+    years: ['Jahr','Jahre','Jahren'],
+    months:['Monat','Monate','Monaten'],
+    weeks: ['Woche','Wochen','Wochen'],
+    days:  ['Tag','Tage','Tagen'],
+    hours: ['Stunde','Stunden','Stunden'],
+    minutes:['Minute','Minuten','Minuten'],
+    seconds:['Sekunde','Sekunden','Sekunden'],
+  };
+  function labelDE(unit, n){ const [sg, pl] = unitDE[unit]; return n===1? sg : pl; }
+  function dativeDE(unit, n){ const [sg, , datPl] = unitDE[unit]; return n===1? sg : datPl; }
+
+  function inHuman(from, to){
+    const ms = to - from;
+    const s = Math.floor(ms/1000);
+    const m = Math.floor(s/60);
+    const h = Math.floor(m/60);
+    const d = Math.floor(h/24);
+    const mo = Math.floor(d/30.44);
+    const y = Math.floor(d/365.2425);
+    if(y>0) return `in ${y} ${dativeDE('years', y)}`;
+    if(mo>0) return `in ${mo} ${dativeDE('months', mo)}`;
+    const w = Math.floor(d/7);
+    if(w>0) return `in ${w} ${dativeDE('weeks', w)}`;
+    if(d>0) return `in ${d} ${dativeDE('days', d)}`;
+    if(h>0) return `in ${h} ${dativeDE('hours', h)}`;
+    if(m>0) return `in ${m} ${dativeDE('minutes', m)}`;
+    return `in ${s} ${dativeDE('seconds', s)}`;
+  }
+
+  // ICS helpers
   function isoDateTimeUTC(d){
-    // YYYYMMDDTHHMMSSZ
-    const pad = (n) => String(n).padStart(2,'0');
+    const pad = (n)=> String(n).padStart(2,'0');
     return (
-      d.getUTCFullYear().toString() +
-      pad(d.getUTCMonth()+1) +
-      pad(d.getUTCDate()) + 'T' +
-      pad(d.getUTCHours()) +
-      pad(d.getUTCMinutes()) +
-      pad(d.getUTCSeconds()) + 'Z'
+      d.getUTCFullYear().toString()+
+      pad(d.getUTCMonth()+1)+
+      pad(d.getUTCDate())+'T'+
+      pad(d.getUTCHours())+
+      pad(d.getUTCMinutes())+
+      pad(d.getUTCSeconds())+'Z'
     );
   }
-
   function escapeICS(text){
     return text.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/,/g, "\\,").replace(/;/g, "\\;");
   }
-
-  function buildICS(events, meta={name:"Jubiläums‑Kalender"}, asAllDay=false){
+  function buildICS(events){
     const now = new Date();
     let ics = [
       'BEGIN:VCALENDAR',
@@ -306,126 +360,117 @@
       'METHOD:PUBLISH',
     ];
     for(const ev of events){
-      const uid = `${ev.id}@jubilaeum.app`;
-      const dtstamp = isoDateTimeUTC(now);
-      const summary = escapeICS(ev.title);
-      const desc = escapeICS(ev.desc || '');
+      const uid = `${ev.id}@jubilaeum`;
       ics.push('BEGIN:VEVENT');
       ics.push(`UID:${uid}`);
-      ics.push(`DTSTAMP:${dtstamp}`);
-      ics.push(`SUMMARY:${summary}`);
-      if(desc) ics.push(`DESCRIPTION:${desc}`);
-      if(asAllDay){
-        const d = new Date(ev.date);
-        const y = d.getUTCFullYear();
-        const m = String(d.getUTCMonth()+1).padStart(2,'0');
-        const day = String(d.getUTCDate()).padStart(2,'0');
-        ics.push(`DTSTART;VALUE=DATE:${y}${m}${day}`);
-      }else{
-        const start = new Date(ev.date);
-        const end = new Date(start.getTime() + 60*60*1000); // 1h
-        ics.push(`DTSTART:${isoDateTimeUTC(start)}`);
-        ics.push(`DTEND:${isoDateTimeUTC(end)}`);
-      }
+      ics.push(`DTSTAMP:${isoDateTimeUTC(now)}`);
+      ics.push(`SUMMARY:${escapeICS(ev.title)}`);
+      ics.push(`DESCRIPTION:${escapeICS(ev.desc)}`);
+      ics.push(`DTSTART:${isoDateTimeUTC(ev.date)}`);
+      ics.push(`DTEND:${isoDateTimeUTC(new Date(ev.date.getTime()+60*60*1000))}`);
       ics.push('END:VEVENT');
     }
     ics.push('END:VCALENDAR');
     return ics.join('\r\n');
   }
-
   function download(filename, content){
     const blob = new Blob([content], {type:'text/calendar;charset=utf-8'});
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename; a.click();
+    const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
     setTimeout(()=>URL.revokeObjectURL(url), 2000);
   }
 
-  function parseDurationISO(dur){
-    // very small ISO 8601 subset: PnM|P1Y|P6M etc
-    const m = /^P(?:(\d+)Y)?(?:(\d+)M)?$/.exec(dur) || /^P(\d+)M$/.exec(dur);
-    // We only use PnM / PnY
-    return dur;
-  }
+  // Core compute
+  function unitAdder(unit){ return ({years:addYears, months:addMonths, weeks:addWeeks, days:addDays, hours:addHours, minutes:addMinutes, seconds:addSeconds})[unit]; }
+  function unitMs(unit){ return ({weeks:MS.week, days:MS.day, hours:MS.hour, minutes:MS.minute, seconds:MS.second})[unit] || null; }
 
-  function horizonEnd(start, code){
-    const d = new Date(start.getTime());
-    switch(code){
-      case 'P3M': return addMonths(d, 3);
-      case 'P6M': return addMonths(d, 6);
-      case 'P1Y': return addYears(d, 1);
-      case 'P2Y': return addYears(d, 2);
-      case 'P5Y': return addYears(d, 5);
-      case 'P10Y': return addYears(d, 10);
-      default: return addMonths(d, 6);
+  function diffMonths(a, b){ return (b.getFullYear()-a.getFullYear())*12 + (b.getMonth()-a.getMonth()); }
+  function yearsBetween(a,b){ return Math.floor((b - a)/MS.day / 365.2425); }
+
+  function computeRange(start, opts, end){
+    const now = new Date();
+    const events = [];
+
+    function pushEvent(date, n, unit){
+      if(date < now || date > end) return;
+      const title = `${fmtNum.format(n)} ${labelDE(unit,n)} seit ${opts.label||'Start'}`;
+      const short = `${fmtNum.format(n)} ${labelDE(unit,n)}`;
+      const startText = new Intl.DateTimeFormat('de-DE',{ dateStyle:'long', timeStyle:'short' }).format(start) + ' Uhr';
+      const desc = `${fmtNum.format(n)} ${labelDE(unit,n)} seit ${startText}`;
+      events.push({
+        id: `${unit}-${n}-${date.getTime()}`,
+        unit, n, date, title, short,
+        inHuman: inHuman(now, date),
+        tag: unit,
+        desc,
+      });
     }
+
+    const units = opts.units;
+    const patterns = opts.patterns;
+
+    for(const unit of units){
+      const add = unitAdder(unit);
+      if(unit==='years'){
+        const maxN = yearsBetween(start, end) + 2; // a bit generous
+        for(const n of buildCandidates(maxN, patterns)){
+          pushEvent(add(start, n), n, unit);
+        }
+      }else if(unit==='months'){
+        const maxN = diffMonths(start, end) + 2;
+        for(const n of buildCandidates(maxN, patterns)){
+          pushEvent(add(start, n), n, unit);
+        }
+      }else{
+        const per = unitMs(unit);
+        const maxN = Math.floor((end - start)/per) + 1;
+        for(const n of buildCandidates(maxN, patterns)){
+          pushEvent(add(start, n), n, unit);
+        }
+      }
+    }
+
+    events.sort((a,b)=> a.date - b.date || a.n - b.n);
+    return events;
   }
 
-  function buildCandidates(maxN, patterns){
-    let s = new Set();
-    if(patterns.pow10) for(const v of makePowersOf10(maxN)) s.add(v);
-    if(patterns.fivePow10) for(const v of makeFiveTimesPow10(maxN)) s.add(v);
-    if(patterns.repdigit) for(const v of makeRepdigits(maxN)) s.add(v);
-    if(patterns.repdigitPow10) for(const v of makeRepdigitsTimesPow10(maxN)) s.add(v);
-    return Array.from(s).sort((a,b)=>a-b);
-  }
-
-  function plural(n, unit){
-    const map = {
-      years:['Jahr','Jahre'], months:['Monat','Monate'], weeks:['Woche','Wochen'], days:['Tag','Tage'], hours:['Stunde','Stunden'], minutes:['Minute','Minuten'], seconds:['Sekunde','Sekunden']
-    };
-    const [one, many] = map[unit];
-    return n===1 ? one : many;
-  }
-
-  function unitAdder(unit){
-    return ({years:addYears, months:addMonths, weeks:addWeeks, days:addDays, hours:addHours, minutes:addMinutes, seconds:addSeconds})[unit];
-  }
-
-  function unitMs(unit){
-    return ({weeks:MS.week, days:MS.day, hours:MS.hour, minutes:MS.minute, seconds:MS.second})[unit] || null;
-  }
-
-  function toLocalDateInputValue(d){
-    const z = new Date(d.getTime()-d.getTimezoneOffset()*60000);
-    return z.toISOString().slice(0,10);
-  }
-
-  // ---------- App State ----------
+  // ---------- State & Rendering ----------
   const state = {
+    start: null,
+    label: '',
+    units: ['years','months','weeks','days','hours','minutes','seconds'],
+    patterns: { pow10:true, fivePow10:true, repdigit:true, repdigitPow10:true },
+    blockYears: 10,
+    loadedBlocks: 0, // how many 10y blocks loaded
     events: [],
     selected: new Set(),
-    listLimit: 100,
-    asAllDay: false,
-    view: 'list',
   };
 
-  // ---------- Rendering ----------
   function renderEmpty(){
-    $('#results').innerHTML = '<div class="empty">Keine Einträge im gewählten Zeitraum. Erhöhe ggf. den Zeithorizont oder aktiviere weitere Einheiten/Muster.</div>';
+    $('#results').innerHTML = '<div class="empty">Keine Einträge im Zeitraum. Prüfe Einheiten/Muster oder lade weitere Jahre.</div>';
     $('#btnIcsAll').disabled = true;
     $('#btnIcsSel').disabled = true;
+    $('#moreWrap').style.display = 'none';
   }
 
   function renderList(){
-    const box = $('#results');
     if(!state.events.length) return renderEmpty();
-    const rows = state.events.slice(0, state.listLimit).map(ev=>{
+    const rows = state.events.map(ev=>{
       const checked = state.selected.has(ev.id) ? 'checked' : '';
+      const tagText = ({years:'Jahre', months:'Monate', weeks:'Wochen', days:'Tage', hours:'Stunden', minutes:'Minuten', seconds:'Sekunden'})[ev.tag];
       return `
         <div class="item">
           <input type="checkbox" aria-label="auswählen" data-id="${ev.id}" ${checked} />
-          <span class="tag">${ev.unitLabel}</span>
           <div class="grow">
             <div class="when">${ev.title}</div>
-            <div class="sub">${fmt.format(ev.date)} • in ${ev.inHuman}</div>
+            <div class="sub">${fmtFull.format(ev.date)} • ${ev.inHuman}</div>
           </div>
-          <div class="muted">#${fmtNum.format(ev.n)}</div>
+          <span class="tag ${ev.tag}">${tagText}</span>
         </div>`;
     }).join('');
-    box.innerHTML = `<div class="list">${rows}</div>`;
+    $('#results').innerHTML = `<div class="list">${rows}</div>`;
 
-    // attach listeners for checkboxes
+    // listeners for checkboxes
     $$('#results input[type="checkbox"]').forEach(cb=>{
       cb.addEventListener('change', e=>{
         const id = e.target.getAttribute('data-id');
@@ -436,154 +481,19 @@
 
     $('#btnIcsAll').disabled = false;
     $('#btnIcsSel').disabled = state.selected.size===0;
+
+    // show load more
+    $('#moreWrap').style.display = 'block';
   }
 
-  function startOfMonth(d){ return new Date(d.getFullYear(), d.getMonth(), 1); }
-  function endOfMonth(d){ return new Date(d.getFullYear(), d.getMonth()+1, 0); }
-
-  function renderCalendar(){
-    const box = $('#results');
-    if(!state.events.length) return renderEmpty();
-
-    // determine range
-    const first = startOfMonth(state.events[0].date);
-    const last = endOfMonth(state.events[state.events.length-1].date);
-    let current = new Date(first.getFullYear(), first.getMonth(), 1);
-
-    const container = document.createElement('div');
-    container.className = 'cal-wrap';
-
-    function drawMonth(root, monthDate){
-      const y = monthDate.getFullYear();
-      const m = monthDate.getMonth();
-      const start = startOfMonth(monthDate);
-      const end = endOfMonth(monthDate);
-      const startWeekday = (start.getDay()+6)%7; // make Monday=0
-      const days = end.getDate();
-
-      const head = document.createElement('div'); head.className='cal-head';
-      head.innerHTML = `
-        <div class="row" style="gap:6px">
-          <button class="btn secondary" id="prev">◀︎</button>
-          <button class="btn secondary" id="next">▶︎</button>
-        </div>
-        <strong>${new Intl.DateTimeFormat(undefined,{month:'long', year:'numeric'}).format(monthDate)}</strong>
-        <span></span>`;
-
-      const grid = document.createElement('div');
-      grid.className = 'cal';
-      const dows = ['Mo','Di','Mi','Do','Fr','Sa','So'];
-      for(const d of dows){ const el = document.createElement('div'); el.className='dow'; el.textContent=d; grid.appendChild(el); }
-
-      // blanks
-      for(let i=0;i<startWeekday;i++){ const el = document.createElement('div'); el.className='day'; grid.appendChild(el); }
-      // days
-      for(let day=1; day<=days; day++){
-        const cell = document.createElement('div'); cell.className='day';
-        const num = document.createElement('div'); num.className='num'; num.textContent=String(day);
-        cell.appendChild(num);
-        const thisDate = new Date(y, m, day);
-        const es = state.events.filter(ev=>ev.date.getFullYear()===y && ev.date.getMonth()===m && ev.date.getDate()===day);
-        for(const ev of es){
-          const pill = document.createElement('div'); pill.className='pill';
-          pill.title = `${ev.title} — ${fmt.format(ev.date)}`;
-          pill.textContent = ev.shortTitle;
-          cell.appendChild(pill);
-        }
-        grid.appendChild(cell);
-      }
-
-      root.innerHTML='';
-      root.appendChild(head);
-      root.appendChild(grid);
-      head.querySelector('#prev').onclick = ()=>{ current = new Date(y, m-1, 1); drawMonth(root, current); };
-      head.querySelector('#next').onclick = ()=>{ current = new Date(y, m+1, 1); drawMonth(root, current); };
-    }
-
-    drawMonth(container, current);
-    box.innerHTML='';
-    box.appendChild(container);
-
-    $('#btnIcsAll').disabled = false;
-    $('#btnIcsSel').disabled = state.selected.size===0;
-  }
-
-  function render(){
-    if(state.view==='list') renderList(); else renderCalendar();
-  }
-
-  // ---------- Core Logic ----------
-  function diffHuman(from, to){
-    const ms = to - from;
-    const s = Math.floor(ms/1000);
-    const m = Math.floor(s/60);
-    const h = Math.floor(m/60);
-    const d = Math.floor(h/24);
-    const w = Math.floor(d/7);
-    const y = Math.floor(d/365.2425);
-    if(y>0) return `${y} ${y===1?'Jahr':'Jahre'}`;
-    if(w>=8) return `${Math.floor(d/30)} Monate`;
-    if(w>0) return `${w} Wochen`;
-    if(d>0) return `${d} Tage`;
-    if(h>0) return `${h} Stunden`;
-    if(m>0) return `${m} Minuten`;
-    return `${s} Sekunden`;
-  }
-
-  function compute(start, opts){
-    const now = new Date();
-    const end = horizonEnd(now, opts.horizon);
-
-    const units = opts.units; // array
-    const patterns = opts.patterns; // flags
-
-    const events = [];
-    function pushEvent(date, n, unit){
-      if(date < now || date > end) return;
-      const unitLabel = unit.charAt(0).toUpperCase() + unit.slice(1);
-      const title = `${fmtNum.format(n)} ${plural(n, unit)} seit ${opts.label||'Start'}`;
-      const shortTitle = `${fmtNum.format(n)} ${plural(n, unit).replace(/e$/,'')}`;
-      events.push({
-        id: `${unit}-${n}-${date.getTime()}`,
-        unit, unitLabel, n, date,
-        title, shortTitle,
-        inHuman: diffHuman(now, date),
-        desc: `${opts.label?opts.label+': ':''}${fmt.format(start)} → ${fmt.format(date)}\n${fmtNum.format(n)} ${plural(n, unit)} seit dem Startzeitpunkt.`
-      });
-    }
-
-    for(const unit of units){
-      const adder = unitAdder(unit);
-      if(unit==='years' || unit==='months'){
-        // Estimate maximum n needed based on end date
-        const maxN = unit==='years'
-          ? Math.max(1, end.getFullYear() - start.getFullYear() + 150) // generous upper bound
-          : Math.max(1, (end.getFullYear()-start.getFullYear())*12 + (end.getMonth()-start.getMonth()) + 240);
-        const cand = buildCandidates(maxN, patterns);
-        for(const n of cand){
-          const d = adder(start, n);
-          pushEvent(d, n, unit);
-        }
-      }else{
-        const msPer = unitMs(unit);
-        const maxN = Math.floor((end - start)/msPer) + 1;
-        const cand = buildCandidates(maxN, patterns);
-        for(const n of cand){
-          const d = adder(start, n);
-          pushEvent(d, n, unit);
-        }
-      }
-    }
-
-    events.sort((a,b)=> a.date - b.date || a.n - b.n);
-    return events;
-  }
+  function render(){ renderList(); }
 
   // ---------- Wire‑up ----------
+  function toLocalDateInputValue(d){ const z = new Date(d.getTime()-d.getTimezoneOffset()*60000); return z.toISOString().slice(0,10); }
+
   function getOpts(){
     const label = $('#label').value.trim();
-    const dateStr = $('#date').value;
-    if(!dateStr) return null;
+    const dateStr = $('#date').value; if(!dateStr) return null;
     const timeStr = $('#time').value || '12:00:00';
     const [hh, mm, ss='00'] = timeStr.split(':');
     const [y,m,d] = dateStr.split('-').map(Number);
@@ -596,54 +506,61 @@
       repdigit: $('input[name="pattern"][value="repdigit"]').checked,
       repdigitPow10: $('input[name="pattern"][value="repdigitPow10"]').checked,
     };
-    const horizon = $('#horizon').value;
-    const limit = Number($('#limit').value);
 
-    return { label, start, units, patterns, horizon, limit };
+    return { start, label, units, patterns };
   }
 
-  function onGenerate(e){
-    e && e.preventDefault();
-    const o = getOpts();
-    if(!o) return;
-    state.listLimit = o.limit;
-    state.selected.clear();
-    state.events = compute(o.start, o);
-    if(!state.events.length) renderEmpty(); else render();
+  function recomputeInitial(){
+    const o = getOpts(); if(!o) return;
+    state.start = o.start; state.label = o.label; state.units = o.units; state.patterns = o.patterns;
+    state.loadedBlocks = 1; state.selected.clear();
+    const now = new Date();
+    const end = addYears(now, state.blockYears * state.loadedBlocks);
+    const events = computeRange(state.start, {label:state.label, units:state.units, patterns:state.patterns}, end);
+    state.events = events;
+    render();
   }
 
-  // Controls
-  $('#form').addEventListener('submit', onGenerate);
-  $('#btnExample').addEventListener('click', ()=>{
-    $('#label').value = 'Hochzeit';
-    const d = new Date(2020,0,1,12,0,0);
-    $('#date').value = toLocalDateInputValue(d);
-    $('#time').value = '12:00:00';
-    onGenerate();
-  });
-  $('#btnReset').addEventListener('click', ()=>{
-    $('#label').value=''; $('#date').value=''; $('#time').value=''; state.events=[]; state.selected.clear(); renderEmpty();
-  });
+  function loadMore(){
+    if(!state.start) return;
+    const now = new Date();
+    const prevBlocks = state.loadedBlocks;
+    state.loadedBlocks += 1;
+    const oldEnd = addYears(now, state.blockYears * prevBlocks);
+    const newEnd = addYears(now, state.blockYears * state.loadedBlocks);
+    const more = computeRange(state.start, {label:state.label, units:state.units, patterns:state.patterns}, newEnd)
+      .filter(ev => ev.date > oldEnd);
+    // merge
+    const ids = new Set(state.events.map(e=>e.id));
+    for(const ev of more){ if(!ids.has(ev.id)) state.events.push(ev); }
+    state.events.sort((a,b)=> a.date - b.date || a.n - b.n);
+    render();
+  }
 
-  $('#tabList').addEventListener('click', ()=>{ state.view='list'; $('#tabList').classList.add('active'); $('#tabCal').classList.remove('active'); render(); });
-  $('#tabCal').addEventListener('click', ()=>{ state.view='cal'; $('#tabCal').classList.add('active'); $('#tabList').classList.remove('active'); render(); });
+  $('#form').addEventListener('submit', e=>{ e.preventDefault(); recomputeInitial(); });
+  $('#btnReset').addEventListener('click', ()=>{ $('#label').value=''; $('#date').value=''; $('#time').value=''; state.events=[]; state.selected.clear(); renderEmpty(); });
+  $('#btnMore').addEventListener('click', loadMore);
 
+  // ICS buttons
   $('#btnIcsAll').addEventListener('click', ()=>{
     if(!state.events.length) return;
-    const ics = buildICS(state.events, {}, false);
-    const label = $('#label').value.trim() || 'Jubilaeum';
-    download(`${label.toLowerCase().replace(/\s+/g,'_')}_alle.ics`, ics);
+    const ics = buildICS(state.events);
+    const label = (state.label || 'Jubilaeum').toLowerCase().replace(/\s+/g,'_');
+    download(`${label}_alle.ics`, ics);
   });
   $('#btnIcsSel').addEventListener('click', ()=>{
     if(!state.selected.size) return;
     const subset = state.events.filter(ev=>state.selected.has(ev.id));
-    const ics = buildICS(subset, {}, false);
-    const label = $('#label').value.trim() || 'Jubilaeum';
-    download(`${label.toLowerCase().replace(/\s+/g,'_')}_auswahl.ics`, ics);
+    const ics = buildICS(subset);
+    const label = (state.label || 'Jubilaeum').toLowerCase().replace(/\s+/g,'_');
+    download(`${label}_auswahl.ics`, ics);
   });
 
-  // Pre‑fill date to today for convenience
+  // Prefill today
   $('#date').value = toLocalDateInputValue(new Date());
+
+  // After first render, ensure "Load more" visibility reflects state
+  renderEmpty();
   </script>
 </body>
 </html>
