@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Jubiläums-Finder v8</title>
+  <title>Jubiläums-Finder v9</title>
   <meta name="description" content="Berechne besondere Meilensteine wie 10 Jahre, 500 Wochen oder 333.333 Sekunden und exportiere sie als Kalender" />
   <style>
     /* ========= Tokens ========= */
@@ -47,7 +47,7 @@
 
     form .field{display:grid;gap:8px;margin-bottom:14px}
     label{font-size:13px;color:var(--muted)}
-    input[type="text"],input[type="date"],input[type="time"]{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:12px;font-size:14px;width:100%}
+    input[type="text"],input[type="date"],input[type="time"],input[type="number"]{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:12px;font-size:14px;width:100%}
     input[type="checkbox"]{width:16px;height:16px}
     .row{display:flex;gap:10px}
     .row>*{flex:1}
@@ -79,6 +79,17 @@
     .seg button{border:none;background:transparent;padding:8px 12px;cursor:pointer;font-size:13px;color:var(--muted)}
     .seg button[aria-pressed="true"]{background:var(--panel);color:var(--text);font-weight:700}
 
+    /* Results layout with sticky year nav */
+    .resultsWrap{display:flex;gap:16px;align-items:flex-start}
+    .yearNav{width:120px;flex:0 0 120px;position:sticky;top:12px;max-height:80vh;overflow:auto;border-left:1px dashed var(--border);padding-left:12px}
+    .yearNav a{display:block;text-decoration:none;color:var(--muted);font-size:12px;padding:2px 0}
+    .yearNav a.active{color:var(--text);font-weight:800}
+    @media (max-width:980px){
+      .resultsWrap{flex-direction:column}
+      .yearNav{order:2;width:auto;max-height:none;border-left:none;border-top:1px dashed var(--border);padding-left:0;padding-top:10px;display:flex;flex-wrap:wrap;gap:8px}
+      .yearNav a{padding:6px 8px;border:1px solid var(--border);border-radius:999px}
+    }
+
     /* Results list */
     .list{display:grid;gap:10px}
     .year-sep{margin-top:8px;padding:6px 0;color:var(--muted);font-weight:700;font-size:12px;display:flex;align-items:center;gap:10px}
@@ -96,26 +107,7 @@
     .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
     .toolbar .push-right{margin-left:auto}
 
-    /* Filters */
-    /* Container der Filter bekommt eigene .bd, die komplett ein/ausgeblendet wird */
-    #filtersWrap{display:none}
-    #filtersWrap.show{display:block}
-    .filters{display:grid}
-    @media (min-width:760px){
-      .filters{grid-template-columns:1fr 1fr 1fr;gap:14px}
-    }
-    @media (max-width:759.98px){
-      .filters{grid-template-columns:1fr;gap:12px}
-    }
-    .filters .group{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px}
-    .filters .label{font-size:12px;color:var(--muted);display:block;margin-bottom:8px}
-    .filters .group .chips{gap:8px}
-
     .empty{padding:18px;background:var(--card);border:1px solid var(--border);border-radius:12px;text-align:center;color:var(--muted)}
-
-    /* Load more buttons alignment */
-    #morePastWrap,#moreWrap{display:flex;justify-content:center}
-    #morePastWrap{margin-top:4px;margin-bottom:10px}
   </style>
 </head>
 <body data-theme="light" data-theme-mode="system">
@@ -150,7 +142,7 @@
 
             <div class="row">
               <div class="field">
-                <label for="date">Startdatum</label>
+                <label for="date">Datum</label>
                 <input id="date" type="date" required />
               </div>
               <div class="field">
@@ -180,8 +172,15 @@
               </div>
             </div>
 
-            <div class="row" style="margin-top:8px">
-              <button class="btn primary" id="btnGenerate" type="submit">Jubiläen ausrechnen</button>
+            <div class="row">
+              <div class="field">
+                <label for="yearFrom">Jahre von</label>
+                <input id="yearFrom" type="number" inputmode="numeric" />
+              </div>
+              <div class="field">
+                <label for="yearTo">Jahre bis</label>
+                <input id="yearTo" type="number" inputmode="numeric" />
+              </div>
             </div>
           </form>
         </div>
@@ -191,56 +190,19 @@
         <div class="hd">
           <strong>📊 Ergebnisse</strong>
           <div class="toolbar" style="width:100%">
-            <button class="btn secondary" id="btnToggleFilters" title="Filter anzeigen/ausblenden">🔎 Filter anzeigen</button>
             <button class="btn secondary" id="btnSelectAll"  title="Alle sichtbaren Einträge auswählen">✅ Alle auswählen</button>
             <button class="btn secondary" id="btnSelectNone" title="Auswahl sichtbarer Einträge aufheben">🚫 Alle abwählen</button>
-            <button class="btn primary push-right" id="btnIcsSel" title="Ausgewählte sichtbare Einträge als Kalenderdatei herunterladen" disabled>📥 Kalenderdatei (.ics) herunterladen</button>
+            <button class="btn primary push-right" id="btnIcsSel" title="Keine ausgewählten sichtbaren Einträge" disabled>📥 Kalenderdatei (.ics) herunterladen</button>
           </div>
         </div>
 
-        <!-- Filter-Bereich: eigene .bd, komplett ein-/ausblendbar -->
-        <div class="bd" id="filtersWrap">
-          <div id="resultFilters" class="filters">
-            <div class="group">
-              <span class="label">🔎 Einheiten</span>
-              <div class="chips">
-                <label class="chip unit seconds"><input type="checkbox" data-filter-unit="seconds" checked /><span>Sekunden</span></label>
-                <label class="chip unit minutes"><input type="checkbox" data-filter-unit="minutes" checked /><span>Minuten</span></label>
-                <label class="chip unit hours"><input type="checkbox" data-filter-unit="hours" checked /><span>Stunden</span></label>
-                <label class="chip unit days"><input type="checkbox" data-filter-unit="days" checked /><span>Tage</span></label>
-                <label class="chip unit weeks"><input type="checkbox" data-filter-unit="weeks" checked /><span>Wochen</span></label>
-                <label class="chip unit months"><input type="checkbox" data-filter-unit="months" checked /><span>Monate</span></label>
-                <label class="chip unit years"><input type="checkbox" data-filter-unit="years" checked /><span>Jahre</span></label>
-              </div>
+        <div class="bd">
+          <div class="resultsWrap">
+            <div id="results" style="flex:1 1 auto">
+              <div class="empty">Noch nichts berechnet. Wähle ein Datum.</div>
             </div>
-            <div class="group">
-              <span class="label">🧩 Muster</span>
-              <div class="chips">
-                <label class="chip"><input type="checkbox" data-filter-pattern="rounded" checked /><span>Runde Vielfache</span></label>
-                <label class="chip"><input type="checkbox" data-filter-pattern="repdigit" checked /><span>Schnapszahlen</span></label>
-              </div>
-            </div>
-            <div class="group">
-              <span class="label">⏳ Zeitrichtung</span>
-              <div class="chips">
-                <label class="chip"><input type="checkbox" data-filter-time="past" checked /><span>Vergangenheit</span></label>
-                <label class="chip"><input type="checkbox" data-filter-time="future" checked /><span>Zukunft</span></label>
-              </div>
-            </div>
+            <nav class="yearNav" id="yearNav" aria-label="Jahr-Navigation"></nav>
           </div>
-        </div>
-
-        <!-- Past loader above the list -->
-        <div class="bd" id="morePastWrap" style="display:none">
-          <button class="btn secondary" id="btnMorePast">Vorherige 10 Jahre laden</button>
-        </div>
-
-        <div class="bd" id="results">
-          <div class="empty">Noch nichts berechnet. Wähle ein Datum und klicke auf <em>Jubiläen ausrechnen</em>.</div>
-        </div>
-
-        <div class="bd" id="moreWrap" style="display:none">
-          <button class="btn secondary" id="btnMore">Weitere 10 Jahre laden</button>
         </div>
       </section>
     </div>
@@ -267,6 +229,7 @@
 
     // Intl
     const fmtFull=new Intl.DateTimeFormat('de-DE',{dateStyle:'full',timeStyle:'short'});
+    const fmtShort=new Intl.DateTimeFormat('de-DE',{dateStyle:'long'});
     const fmtNum=new Intl.NumberFormat('de-DE');
 
     // Durations
@@ -392,14 +355,8 @@
       start:null,label:'',
       units:['years','months','weeks','days','hours','minutes','seconds'],
       patterns:{rounded:true,repdigit:true},
-      blockYears:10,loadedBlocksFwd:0,loadedBlocksPast:0,
       eventsAll:[],eventsView:[],selected:new Set(),
-      filters:{
-        units:new Set(['years','months','weeks','days','hours','minutes','seconds']),
-        patterns:new Set(['rounded','repdigit']),
-        time:new Set(['past','future']),
-        open:false
-      }
+      yearFrom:null, yearTo:null, // absolute calendar years
     };
 
     // ---------- URL persistence ----------
@@ -409,10 +366,11 @@
       if(state.start){
         params.set('d',$('#date').value);
         params.set('t',$('#time').value||'');
+        params.set('yf',String(state.yearFrom));
+        params.set('yt',String(state.yearTo));
       }
-      params.set('u',Array.from(state.filters.units).join(','));
-      params.set('p',Array.from(state.filters.patterns).join(','));
-      params.set('tf',Array.from(state.filters.time).join(','));
+      params.set('u',state.units.join(','));
+      params.set('p',Object.entries(state.patterns).filter(([,v])=>v).map(([k])=>k).join(','));
       const mode=localStorage.getItem('themeMode'); if(mode) params.set('theme',mode);
       history.replaceState(null,'','?'+params.toString());
     }
@@ -424,51 +382,76 @@
       if(q.get('t')) $('#time').value=q.get('t');
       const u=q.get('u'); if(u){ const set=new Set(u.split(',').filter(Boolean)); $$('#form input[name="unit"]').forEach(i=>i.checked=set.has(i.value)); }
       const p=q.get('p'); if(p){ const set=new Set(p.split(',').filter(Boolean)); $$('#form input[name="pattern"]').forEach(i=>i.checked=set.has(i.value)); }
-      const tf=q.get('tf'); if(tf){ state.filters.time=new Set(tf.split(',').filter(Boolean)); }
+      if(q.get('d')) {
+        const [y,m,d]=q.get('d').split('-').map(Number);
+        const t=q.get('t')||'12:00:00'; const [hh,mm,ss='00']=t.split(':').map(Number);
+        state.start=new Date(y,m-1,d,hh,mm,ss||0);
+        const sy=state.start.getFullYear();
+        const min=sy-300, max=sy+300;
+        const yf=q.get('yf')?Number(q.get('yf')):sy;
+        const yt=q.get('yt')?Number(q.get('yt')):sy+10;
+        state.yearFrom=Math.max(min, Math.min(max, yf));
+        state.yearTo  =Math.max(min, Math.min(max, yt));
+        $('#yearFrom').value=state.yearFrom; $('#yearTo').value=state.yearTo;
+        $('#yearFrom').min=min; $('#yearFrom').max=max; $('#yearTo').min=min; $('#yearTo').max=max;
+      }
       const theme=q.get('theme'); if(theme){ applyTheme(theme); }
-      if(q.get('d')) recomputeInitial();
     }
 
-    function applyViewFilters(){
-      const now=new Date();
-      state.eventsView=state.eventsAll.filter(e=>{
-        if(!state.filters.units.has(e.unit)) return false;
-        if(state.filters.patterns.size>0){
-          let ok=false; for(const p of state.filters.patterns){ if(e.patterns[p]) {ok=true; break;} }
-          if(!ok) return false;
-        }
-        const isFuture=e.date>=now, isPast=e.date<now;
-        if(isFuture && !state.filters.time.has('future')) return false;
-        if(isPast && !state.filters.time.has('past')) return false;
-        return true;
-      });
+    // ---------- Compute & Render ----------
+    const fmtFullDE=new Intl.DateTimeFormat('de-DE',{dateStyle:'long', timeStyle:'short'});
+
+    function getOptsFromForm(){
+      const label=$('#label').value.trim();
+      const dateStr=$('#date').value; if(!dateStr) return null;
+      const timeStr=$('#time').value||'12:00:00';
+      const [hh,mm,ss='00']=timeStr.split(':');
+      const [y,m,d]=dateStr.split('-').map(Number);
+      const start=new Date(y,m-1,d,Number(hh),Number(mm),Number(ss));
+      const units=$$('input[name="unit"]:checked').map(x=>x.value);
+      const patterns={
+        rounded:$('input[name="pattern"][value="rounded"]').checked,
+        repdigit:$('input[name="pattern"][value="repdigit"]').checked,
+      };
+      return {start,label,units,patterns};
     }
 
-    function renderEmpty(){
-      $('#results').innerHTML='<div class="empty">Keine Einträge im Zeitraum. Prüfe Einheiten/Muster oder lade weitere Jahre.</div>';
-      $('#btnIcsSel').disabled=true;
-      $('#filtersWrap').classList.remove('show');
-      $('#moreWrap').style.display='none';
-      $('#morePastWrap').style.display='none';
-      $('#btnToggleFilters').textContent='🔎 Filter anzeigen';
-      updateDownloadTooltip();
+    function clampYearRangeAroundStart(){
+      const sy=state.start.getFullYear();
+      const min=sy-300, max=sy+300;
+      let yf=Number($('#yearFrom').value||sy);
+      let yt=Number($('#yearTo').value||(sy+10));
+      yf=Math.max(min,Math.min(max,yf));
+      yt=Math.max(min,Math.min(max,yt));
+      if(yt<yf) yt=yf; // ensure order
+      state.yearFrom=yf; state.yearTo=yt;
+      $('#yearFrom').value=yf; $('#yearTo').value=yt;
+      $('#yearFrom').min=min; $('#yearFrom').max=max; $('#yearTo').min=min; $('#yearTo').max=max;
     }
 
-    function updateLoadButtonsVisibility(){
-      $('#moreWrap').style.display = state.start ? 'flex':'none';
-      if(!state.start){ $('#morePastWrap').style.display='none'; return; }
-      const now=new Date();
-      const lowerBoundCandidate = addYears(now, -(state.loadedBlocksPast+1)*state.blockYears);
-      const windowFrom = new Date(Math.max(state.start.getTime(), lowerBoundCandidate.getTime()));
-      const windowTo   = addYears(now, -state.loadedBlocksPast*state.blockYears);
-      if(windowFrom >= windowTo){ $('#morePastWrap').style.display='none'; return; }
-      const probe = computeRangeWindow(state.start,{label:state.label,units:state.units,patterns:state.patterns}, windowFrom, windowTo);
-      $('#morePastWrap').style.display = probe.length ? 'flex' : 'none';
+    function recompute(){
+      const o=getOptsFromForm(); if(!o) return;
+      state.start=o.start; state.label=o.label; state.units=o.units; state.patterns=o.patterns;
+      clampYearRangeAroundStart();
+
+      // Build absolute window from year range
+      const from=new Date(state.yearFrom,0,1,0,0,0);
+      const to  =new Date(state.yearTo,11,31,23,59,59);
+
+      state.eventsAll=computeRangeWindow(state.start,{label:state.label,units:state.units,patterns:state.patterns}, from, to);
+      state.eventsView=state.eventsAll;
+      encodeStateToURL();
+      render();
     }
 
-    function renderList(){
-      applyViewFilters();
-      if(!state.eventsView.length) return renderEmpty();
+    function render(){
+      if(!state.eventsView.length){
+        $('#results').innerHTML='<div class="empty">Keine Einträge im Zeitraum. Passe Einheiten/Muster oder den Jahresbereich an.</div>';
+        $('#yearNav').innerHTML='';
+        $('#btnIcsSel').disabled=true;
+        updateDownloadTooltip();
+        return;
+      }
       let html='<div class="list">', year=null;
       const now=new Date();
       for(const ev of state.eventsView){
@@ -476,7 +459,7 @@
         if(y!==year){
           year=y;
           html+=`
-            <div class="year-sep" data-year="${y}">
+            <div class="year-sep" id="y-${y}" data-year="${y}">
               <span class="y">${y}</span>
               <div class="controls">
                 <button class="btn small secondary" data-year="${y}" data-act="all">✅ Alle auswählen</button>
@@ -486,7 +469,7 @@
         }
         const checked=state.selected.has(ev.id)?'checked':'';
         const unitLabel={years:'Jahre',months:'Monate',weeks:'Wochen',days:'Tage',hours:'Stunden',minutes:'Minuten',seconds:'Sekunden'}[ev.unit];
-        const whenText = `<span class="ttl-num">${ev.baseTitle}</span> <span class="since"> ${ev.since}</span>`;
+        const whenText = `<span class="ttl-num">${ev.baseTitle}</span> <span class="since"> seit ${state.label||'Start'}</span>`;
         const rel=humanDiff(now, ev.date);
         html+=`
           <div class="item" data-year="${y}">
@@ -498,7 +481,12 @@
             <span class="tag ${ev.unit}">${unitLabel}</span>
           </div>`;
       }
-      html+='</div>'; $('#results').innerHTML=html;
+      html+='</div>';
+      $('#results').innerHTML=html;
+
+      // Build sticky year nav
+      const years=[...new Set(state.eventsView.map(e=>e.date.getFullYear()))];
+      $('#yearNav').innerHTML = years.map(y=>`<a href="#y-${y}" data-y="${y}">${y}</a>`).join('');
 
       // Checkbox toggle
       $$('#results input[type="checkbox"]').forEach(cb=>{
@@ -510,22 +498,33 @@
         });
       });
 
-      // Year-block controls (event delegation)
+      // Year-block controls (event delegation per render)
       $('#results').addEventListener('click',e=>{
         const btn=e.target.closest('button[data-act]'); if(!btn) return;
         const year=btn.getAttribute('data-year'); const act=btn.getAttribute('data-act');
         const idsInYear = state.eventsView.filter(ev=>ev.date.getFullYear()==year).map(ev=>ev.id);
         if(act==='all'){ idsInYear.forEach(id=>state.selected.add(id)); }
         if(act==='none'){ idsInYear.forEach(id=>state.selected.delete(id)); }
-        render(); // re-render to sync checkboxes & selection state
-      }, {once:true}); // reattach on each render
+        render(); // sync
+      }, {once:true});
+
+      // Highlight active year link on scroll
+      const navLinks=$$('#yearNav a');
+      const sections=years.map(y=>$('#y-'+y)).filter(Boolean);
+      function onScroll(){
+        let activeY=null;
+        for(const sec of sections){
+          const rect=sec.getBoundingClientRect();
+          if(rect.top<=120) activeY=sec.dataset.year;
+        }
+        navLinks.forEach(a=>a.classList.toggle('active', a.dataset.y===String(activeY)));
+      }
+      document.addEventListener('scroll',onScroll,{passive:true});
+      onScroll();
 
       $('#btnIcsSel').disabled=visibleSelected().length===0;
-      updateLoadButtonsVisibility();
-      encodeStateToURL();
       updateDownloadTooltip();
     }
-    const render=()=>{ renderList(); };
 
     // Only selected & visible
     function visibleSelected(){
@@ -543,92 +542,49 @@
         : 'Keine ausgewählten sichtbaren Einträge';
     }
 
-    // ---------- Form / Actions ----------
+    // ---------- Actions ----------
     function toLocalDateInputValue(d){const z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10);}
     $('#date').value=toLocalDateInputValue(new Date());
 
-    function getOpts(){
-      const label=$('#label').value.trim();
-      const dateStr=$('#date').value; if(!dateStr) return null;
-      const timeStr=$('#time').value||'12:00:00';
-      const [hh,mm,ss='00']=timeStr.split(':');
-      const [y,m,d]=dateStr.split('-').map(Number);
-      const start=new Date(y,m-1,d,Number(hh),Number(mm),Number(ss));
-      const units=$$('input[name="unit"]:checked').map(x=>x.value);
-      const patterns={
-        rounded:$('input[name="pattern"][value="rounded"]').checked,
-        repdigit:$('input[name="pattern"][value="repdigit"]').checked,
-      };
-      return {start,label,units,patterns};
-    }
+    // Debounce for snappy UX
+    let tmr=null;
+    const schedule=()=>{ clearTimeout(tmr); tmr=setTimeout(recompute,120); };
 
-    function recomputeInitial(){
-      const o=getOpts(); if(!o) return;
-      state.start=o.start; state.label=o.label; state.units=o.units; state.patterns=o.patterns;
-      state.loadedBlocksFwd=1; state.loadedBlocksPast=0; state.selected.clear();
-      state.filters.units=new Set(state.units);
-      state.filters.patterns=new Set(Object.entries(state.patterns).filter(([,v])=>v).map(([k])=>k));
-      state.filters.time=new Set(['past','future']);
-      const now=new Date();
-      const futureEnd=addYears(now,state.blockYears*state.loadedBlocksFwd);
-      // Initial view = future decade only
-      state.eventsAll=computeRangeWindow(state.start,{label:state.label,units:state.units,patterns:state.patterns}, now, futureEnd);
-      render(); syncResultFiltersUI();
-    }
+    // Reactivity: any change triggers recompute
+    $('#label').addEventListener('input', schedule);
+    $('#date').addEventListener('change', ()=>{
+      // when date changes, if year fields empty, set default; else keep but clamp to ±300
+      const hasVals = $('#yearFrom').value || $('#yearTo').value;
+      if(!hasVals){
+        const sy=new Date($('#date').value).getFullYear();
+        $('#yearFrom').value=sy; $('#yearTo').value=sy+10;
+      }
+      schedule();
+    });
+    $('#time').addEventListener('change', schedule);
+    $$('#form input[name="unit"]').forEach(i=>i.addEventListener('change', schedule));
+    $$('#form input[name="pattern"]').forEach(i=>i.addEventListener('change', schedule));
+    $('#yearFrom').addEventListener('input', schedule);
+    $('#yearTo').addEventListener('input', schedule);
 
-    // Load future decade
-    function loadMoreFuture(){
-      if(!state.start) return;
-      const now=new Date();
-      const prev=state.loadedBlocksFwd; state.loadedBlocksFwd+=1;
-      const oldEnd=addYears(now,state.blockYears*prev);
-      const newEnd=addYears(now,state.blockYears*state.loadedBlocksFwd);
-      const more=computeRangeWindow(state.start,{label:state.label,units:state.units,patterns:state.patterns}, oldEnd, newEnd);
-      const ids=new Set(state.eventsAll.map(e=>e.id)); for(const ev of more){ if(!ids.has(ev.id)) state.eventsAll.push(ev); }
-      state.eventsAll.sort((a,b)=>a.date-b.date||a.n-b.n); render();
-    }
-
-    // Load past decade (not before start)
-    function loadMorePast(){
-      if(!state.start) return;
-      const now=new Date();
-      const prev=state.loadedBlocksPast; state.loadedBlocksPast+=1;
-      const upperTo = addYears(now, -prev*state.blockYears); // previous upper bound (exclusive)
-      const lowerCandidate = addYears(now, -(prev+1)*state.blockYears);
-      const lowerFrom = new Date(Math.max(state.start.getTime(), lowerCandidate.getTime()));
-      if(lowerFrom >= upperTo){ updateLoadButtonsVisibility(); return; }
-      const more=computeRangeWindow(state.start,{label:state.label,units:state.units,patterns:state.patterns}, lowerFrom, upperTo);
-      const ids=new Set(state.eventsAll.map(e=>e.id)); for(const ev of more){ if(!ids.has(ev.id)) state.eventsAll.push(ev); }
-      state.eventsAll.sort((a,b)=>a.date-b.date||a.n-b.n); render();
-    }
-
-    $('#form').addEventListener('submit',e=>{e.preventDefault();recomputeInitial();});
-    $('#btnReset').addEventListener('click',()=>{ $('#label').value=''; $('#date').value=''; $('#time').value=''; state.eventsAll=[]; state.eventsView=[]; state.selected.clear(); history.replaceState(null,'',location.pathname); renderEmpty();});
-    $('#btnMore').addEventListener('click',loadMoreFuture);
-    $('#btnMorePast').addEventListener('click',loadMorePast);
+    $('#btnReset').addEventListener('click',()=>{
+      $('#label').value='';
+      $('#time').value='';
+      const today=new Date();
+      $('#date').value=toLocalDateInputValue(today);
+      const sy=today.getFullYear();
+      $('#yearFrom').value=sy; $('#yearTo').value=sy+10;
+      $$('#form input[name="unit"]').forEach(i=>i.checked=true);
+      $('input[name="pattern"][value="rounded"]').checked=true;
+      $('input[name="pattern"][value="repdigit"]').checked=true;
+      state.selected.clear();
+      history.replaceState(null,'',location.pathname);
+      recompute();
+    });
 
     // Selection (toolbar acts only on visible)
     $('#btnSelectAll').addEventListener('click',()=>{ for(const ev of state.eventsView) state.selected.add(ev.id); render(); });
     $('#btnSelectNone').addEventListener('click',()=>{ for(const ev of state.eventsView) state.selected.delete(ev.id); render(); });
-
-    // Filters collapse
-    $('#btnToggleFilters').addEventListener('click',()=>{
-      state.filters.open=!state.filters.open;
-      const wrap=$('#filtersWrap');
-      if(state.filters.open){wrap.classList.add('show'); $('#btnToggleFilters').textContent='🔎 Filter ausblenden';}
-      else {wrap.classList.remove('show'); $('#btnToggleFilters').textContent='🔎 Filter anzeigen';}
-    });
-    function syncResultFiltersUI(){
-      $$('#resultFilters input[data-filter-unit]').forEach(inp=>{ const u=inp.dataset.filterUnit; inp.checked=state.filters.units.has(u); });
-      $$('#resultFilters input[data-filter-pattern]').forEach(inp=>{ const p=inp.dataset.filterPattern; inp.checked=state.filters.patterns.has(p); });
-      $$('#resultFilters input[data-filter-time]').forEach(inp=>{ const t=inp.dataset.filterTime; inp.checked=state.filters.time.has(t); });
-    }
-    $('#resultFilters').addEventListener('change',e=>{
-      const t=e.target;
-      if(t.matches('input[data-filter-unit]')){ const u=t.dataset.filterUnit; if(t.checked) state.filters.units.add(u); else state.filters.units.delete(u); render(); }
-      if(t.matches('input[data-filter-pattern]')){ const p=t.dataset.filterPattern; if(t.checked) state.filters.patterns.add(p); else state.filters.patterns.delete(p); render(); }
-      if(t.matches('input[data-filter-time]')){ const k=t.dataset.filterTime; if(t.checked) state.filters.time.add(k); else state.filters.time.delete(k); render(); }
-    });
 
     // ICS export (only selected & visible)
     $('#btnIcsSel').addEventListener('click',()=>{
@@ -639,8 +595,17 @@
       download(`${label}_auswahl.ics`,ics);
     });
 
-    // Bootstrap from URL (if present), else show default empty
-    (function init(){ loadStateFromURL(); if(!location.search) { $('#results').innerHTML='<div class="empty">Noch nichts berechnet. Wähle ein Datum und klicke auf <em>Jubiläen ausrechnen</em>.</div>'; }})();
+    // Bootstrap
+    function initDefaults(){
+      $('#time').value='';
+      const d=new Date(); $('#date').value=toLocalDateInputValue(d);
+      const sy=d.getFullYear(); $('#yearFrom').value=sy; $('#yearTo').value=sy+10;
+    }
+    (function init(){
+      initDefaults();
+      loadStateFromURL(); // may override defaults
+      recompute();
+    })();
   </script>
 </body>
 </html>
