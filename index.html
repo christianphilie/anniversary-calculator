@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Jubiläums-Finder v6</title>
+  <title>Jubiläums-Finder v7</title>
   <meta name="description" content="Berechne besondere Meilensteine wie 10 Jahre, 500 Wochen oder 333.333 Sekunden und exportiere sie als Kalender" />
   <style>
     /* ========= Tokens ========= */
@@ -66,11 +66,11 @@
     .chip.unit.years{color:var(--c-years)}
     .chip input:checked + span{font-weight:700}
 
-    /* Buttons */
-    .btn{appearance:none;cursor:pointer;font-weight:700;border-radius:12px;padding:12px 14px;letter-spacing:.2px}
+    /* Buttons (no letter-spacing) */
+    .btn{appearance:none;cursor:pointer;font-weight:700;border-radius:12px;padding:12px 14px}
     .btn.primary{background:var(--btn-bg);color:var(--btn-fg);border:1px solid var(--btn-border)}
     .btn.secondary{background:transparent;color:var(--text);border:1px solid var(--border)}
-    .btn.ghost{background:transparent;color:var(--muted);border:none}
+    .btn.ghost{background:transparent;color:var(--muted);border:none;padding:0}
     .btn:disabled{opacity:.6;cursor:not-allowed}
 
     /* Segmented 3-way theme switch */
@@ -80,9 +80,10 @@
 
     /* Results list */
     .list{display:grid;gap:10px}
-    .year-sep{margin-top:8px;padding:6px 0;color:var(--muted);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+    .year-sep{margin-top:8px;padding:6px 0;color:var(--muted);font-weight:700;font-size:12px}
     .item{display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--border);padding:12px;border-radius:14px}
     .when{font-weight:700}
+    .when .since{font-weight:400;color:var(--muted)}
     .sub{font-size:12px;color:var(--muted)}
     .grow{flex:1;min-width:0}
     .tag{font-size:12px;color:#fff;padding:3px 8px;border-radius:999px;font-weight:800;margin-left:auto;white-space:nowrap}
@@ -93,24 +94,24 @@
     .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
     .spacer{flex:1}
 
-    /* Responsive filters (improved) */
-    .filters{display:none;gap:10px;margin:10px 0 0}
+    /* Responsive filters (reworked) */
+    .filters{display:none;margin:10px 0 0}
     .filters.show{display:grid}
-    .filters{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
-    .filters .group{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .filters .label{font-size:12px;color:var(--muted);flex:0 0 100%}
+    @media (min-width:760px){
+      .filters{grid-template-columns:1fr 1fr 1fr;gap:14px}
+    }
+    @media (max-width:759.98px){
+      .filters{grid-template-columns:1fr;gap:12px}
+    }
+    .filters .group{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px}
+    .filters .label{font-size:12px;color:var(--muted);display:block;margin-bottom:8px}
+    .filters .group .chips{gap:8px}
 
     .empty{padding:18px;background:var(--card);border:1px solid var(--border);border-radius:12px;text-align:center;color:var(--muted)}
 
     /* Load more buttons alignment */
     #morePastWrap,#moreWrap{display:flex;justify-content:center}
     #morePastWrap{margin-top:4px;margin-bottom:10px}
-
-    /* Tooltip */
-    .hint{position:relative;display:inline-flex;align-items:center;gap:6px}
-    .hint .tip{display:inline-block;width:18px;height:18px;border-radius:999px;background:transparent;border:1px solid var(--border);color:var(--muted);font-weight:700;text-align:center;line-height:18px;cursor:default}
-    .hint .bubble{position:absolute;top:calc(100% + 8px);right:0;max-width:320px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--muted);display:none;z-index:10}
-    .hint:hover .bubble{display:block}
   </style>
 </head>
 <body data-theme="light" data-theme-mode="system">
@@ -190,11 +191,7 @@
             <button class="btn secondary" id="btnSelectAll"  title="Alle Einträge auswählen">Alle auswählen</button>
             <button class="btn secondary" id="btnSelectNone" title="Auswahl aufheben">Alle abwählen</button>
             <div class="spacer"></div>
-            <div class="hint">
-              <button class="btn primary" id="btnIcsSel" title="Ausgewählte Einträge als Kalenderdatei herunterladen" disabled>📥 Kalenderdatei (.ics) herunterladen</button>
-              <span class="tip" aria-hidden="true">i</span>
-              <div class="bubble" role="tooltip">Kurzzeitige Einheiten (Sek., Min., Std.) werden als einstündige Termine exportiert. Längere Einheiten (Tage, Wochen, Monate, Jahre) als Ganztags-Events.</div>
-            </div>
+            <button class="btn primary" id="btnIcsSel" title="Ausgewählte Einträge als Kalenderdatei herunterladen" disabled>📥 Kalenderdatei (.ics) herunterladen</button>
           </div>
         </div>
 
@@ -202,29 +199,35 @@
           <!-- collapsible filters (hidden by default) -->
           <div id="resultFilters" class="filters">
             <div class="group">
-              <span class="label">🔎 Einheiten:</span>
-              <label class="chip unit seconds"><input type="checkbox" data-filter-unit="seconds" checked /><span>Sekunden</span></label>
-              <label class="chip unit minutes"><input type="checkbox" data-filter-unit="minutes" checked /><span>Minuten</span></label>
-              <label class="chip unit hours"><input type="checkbox" data-filter-unit="hours" checked /><span>Stunden</span></label>
-              <label class="chip unit days"><input type="checkbox" data-filter-unit="days" checked /><span>Tage</span></label>
-              <label class="chip unit weeks"><input type="checkbox" data-filter-unit="weeks" checked /><span>Wochen</span></label>
-              <label class="chip unit months"><input type="checkbox" data-filter-unit="months" checked /><span>Monate</span></label>
-              <label class="chip unit years"><input type="checkbox" data-filter-unit="years" checked /><span>Jahre</span></label>
+              <span class="label">🔎 Einheiten</span>
+              <div class="chips">
+                <label class="chip unit seconds"><input type="checkbox" data-filter-unit="seconds" checked /><span>Sekunden</span></label>
+                <label class="chip unit minutes"><input type="checkbox" data-filter-unit="minutes" checked /><span>Minuten</span></label>
+                <label class="chip unit hours"><input type="checkbox" data-filter-unit="hours" checked /><span>Stunden</span></label>
+                <label class="chip unit days"><input type="checkbox" data-filter-unit="days" checked /><span>Tage</span></label>
+                <label class="chip unit weeks"><input type="checkbox" data-filter-unit="weeks" checked /><span>Wochen</span></label>
+                <label class="chip unit months"><input type="checkbox" data-filter-unit="months" checked /><span>Monate</span></label>
+                <label class="chip unit years"><input type="checkbox" data-filter-unit="years" checked /><span>Jahre</span></label>
+              </div>
             </div>
             <div class="group">
-              <span class="label">🧩 Muster:</span>
-              <label class="chip"><input type="checkbox" data-filter-pattern="rounded" checked /><span>Runde Vielfache</span></label>
-              <label class="chip"><input type="checkbox" data-filter-pattern="repdigit" checked /><span>Schnaps</span></label>
+              <span class="label">🧩 Muster</span>
+              <div class="chips">
+                <label class="chip"><input type="checkbox" data-filter-pattern="rounded" checked /><span>Runde Vielfache</span></label>
+                <label class="chip"><input type="checkbox" data-filter-pattern="repdigit" checked /><span>Schnaps</span></label>
+              </div>
             </div>
             <div class="group">
-              <span class="label">⏳ Zeitrichtung:</span>
-              <label class="chip"><input type="checkbox" data-filter-time="past" checked /><span>Vergangenheit</span></label>
-              <label class="chip"><input type="checkbox" data-filter-time="future" checked /><span>Zukunft</span></label>
+              <span class="label">⏳ Zeitrichtung</span>
+              <div class="chips">
+                <label class="chip"><input type="checkbox" data-filter-time="past" checked /><span>Vergangenheit</span></label>
+                <label class="chip"><input type="checkbox" data-filter-time="future" checked /><span>Zukunft</span></label>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- NEW: past loader above the list -->
+        <!-- Past loader above the list -->
         <div class="bd" id="morePastWrap" style="display:none">
           <button class="btn secondary" id="btnMorePast">Vorherige 10 Jahre laden</button>
         </div>
@@ -296,21 +299,23 @@
 
     function classifyPatterns(n){ return { rounded:isRounded(n), repdigit:isRepdigit(n) }; }
 
-    // Grammar (Dativ)
+    // Grammar (Dativ) with future/past
     const unitDE={years:['Jahr','Jahre','Jahren'],months:['Monat','Monate','Monaten'],weeks:['Woche','Wochen','Wochen'],days:['Tag','Tage','Tagen'],hours:['Stunde','Stunden','Stunden'],minutes:['Minute','Minuten','Minuten'],seconds:['Sekunde','Sekunden','Sekunden']};
     const labelDE=(u,n)=> (n===1?unitDE[u][0]:unitDE[u][1]);
     const dativeDE=(u,n)=> (n===1?unitDE[u][0]:unitDE[u][2]);
 
-    function inHuman(from,to){
-      const ms=to-from, s=Math.floor(ms/1000), m=Math.floor(s/60), h=Math.floor(m/60), d=Math.floor(h/24), mo=Math.floor(d/30.44), y=Math.floor(d/365.2425);
-      if(y>0) return `in ${y} ${dativeDE('years',y)}`;
-      if(mo>0) return `in ${mo} ${dativeDE('months',mo)}`;
+    function humanDiff(from,to){
+      const future = to>=from;
+      let ms=Math.abs(to-from), s=Math.floor(ms/1000), m=Math.floor(s/60), h=Math.floor(m/60), d=Math.floor(h/24), mo=Math.floor(d/30.44), y=Math.floor(d/365.2425);
+      const prefix = future ? 'in ' : 'vor ';
+      if(y>0) return `${prefix}${y} ${dativeDE('years',y)}`;
+      if(mo>0) return `${prefix}${mo} ${dativeDE('months',mo)}`;
       const w=Math.floor(d/7);
-      if(w>0) return `in ${w} ${dativeDE('weeks',w)}`;
-      if(d>0) return `in ${d} ${dativeDE('days',d)}`;
-      if(h>0) return `in ${h} ${dativeDE('hours',h)}`;
-      if(m>0) return `in ${m} ${dativeDE('minutes',m)}`;
-      return `in ${s} ${dativeDE('seconds',s)}`;
+      if(w>0) return `${prefix}${w} ${dativeDE('weeks',w)}`;
+      if(d>0) return `${prefix}${d} ${dativeDE('days',d)}`;
+      if(h>0) return `${prefix}${h} ${dativeDE('hours',h)}`;
+      if(m>0) return `${prefix}${m} ${dativeDE('minutes',m)}`;
+      return `${prefix}${s} ${dativeDE('seconds',s)}`;
     }
 
     // ICS helpers (mixed all-day/timed)
@@ -322,6 +327,7 @@
       String(d.getUTCSeconds()).padStart(2,'0')+'Z';
     const ymdUTC=d=>d.getUTCFullYear().toString()+String(d.getUTCMonth()+1).padStart(2,'0')+String(d.getUTCDate());
     const esc=s=>s.replace(/\\/g,"\\\\").replace(/\n/g,"\\n").replace(/,/g,"\\,").replace(/;/g,"\\;");
+
     function buildICS(events){
       const now=new Date(); const out=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//JubilaeumsFinder//DE','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
       for(const ev of events){
@@ -339,11 +345,14 @@
     }
     function download(name,content){ const blob=new Blob([content],{type:'text/calendar;charset=utf-8'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(url),2000); }
 
-    // Core compute (windowed)
+    // Core compute (windowed) with per-unit minimal N near the start moment
     const unitAdder=u=>({years:addYears,months:addMonths,weeks:addWeeks,days:addDays,hours:addHours,minutes:addMinutes,seconds:addSeconds})[u];
     const unitMs=u=>({weeks:MS.week,days:MS.day,hours:MS.hour,minutes:MS.minute,seconds:MS.second})[u]||null;
     const diffMonths=(a,b)=>(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth());
     const yearsBetween=(a,b)=>Math.floor((b-a)/MS.day/365.2425);
+
+    // Sensible minimum milestones to avoid noise close to start
+    const MIN_N={ seconds:1_000_000, minutes:100_000, hours:5_000, days:100, weeks:20, months:12, years:1 };
 
     /**
      * Compute events within [from, to] window (inclusive).
@@ -352,10 +361,13 @@
       const evs=[];
       function push(date,n,unit){
         if(date<from || date>to) return;
-        const title=`${fmtNum.format(n)} ${labelDE(unit,n)} seit ${opts.label||'Start'}`;
+        if(n < MIN_N[unit]) return;
+        const baseTitle=`${fmtNum.format(n)} ${labelDE(unit,n)}`;
+        const since=`seit ${opts.label||'Start'}`;
+        const title=`${baseTitle} ${since}`;
         const startText=new Intl.DateTimeFormat('de-DE',{dateStyle:'long',timeStyle:'short'}).format(start)+' Uhr';
         const desc=`${fmtNum.format(n)} ${labelDE(unit,n)} seit ${startText}`;
-        evs.push({id:`${unit}-${n}-${date.getTime()}`,unit,n,date,title,inHuman:inHuman(new Date(),date),desc,patterns:classifyPatterns(n)});
+        evs.push({id:`${unit}-${n}-${date.getTime()}`,unit,n,date,title,since,baseTitle,inHuman:humanDiff(new Date(),date),desc,patterns:classifyPatterns(n)});
       }
       for(const unit of opts.units){
         const add=unitAdder(unit);
@@ -388,16 +400,42 @@
       }
     };
 
+    // ---------- URL persistence ----------
+    function encodeStateToURL(){
+      const params=new URLSearchParams();
+      if(state.label) params.set('l',state.label);
+      if(state.start){
+        params.set('d',$('#date').value);
+        params.set('t',$('#time').value||'');
+      }
+      params.set('u',Array.from(state.filters.units).join(','));
+      params.set('p',Array.from(state.filters.patterns).join(','));
+      params.set('tf',Array.from(state.filters.time).join(','));
+      const mode=localStorage.getItem('themeMode'); if(mode) params.set('theme',mode);
+      history.replaceState(null,'','?'+params.toString());
+    }
+
+    function loadStateFromURL(){
+      const q=new URLSearchParams(location.search);
+      if(q.get('l')) $('#label').value=q.get('l');
+      if(q.get('d')) $('#date').value=q.get('d');
+      if(q.get('t')) $('#time').value=q.get('t');
+      const u=q.get('u'); if(u){ const set=new Set(u.split(',').filter(Boolean)); $$('#form input[name="unit"]').forEach(i=>i.checked=set.has(i.value)); }
+      const p=q.get('p'); if(p){ const set=new Set(p.split(',').filter(Boolean)); $$('#form input[name="pattern"]').forEach(i=>i.checked=set.has(i.value)); }
+      const tf=q.get('tf'); if(tf){ state.filters.time=new Set(tf.split(',').filter(Boolean)); }
+      const theme=q.get('theme'); if(theme){ applyTheme(theme); }
+      // If we have date, auto compute
+      if(q.get('d')) recomputeInitial();
+    }
+
     function applyViewFilters(){
       const now=new Date();
       state.eventsView=state.eventsAll.filter(e=>{
         if(!state.filters.units.has(e.unit)) return false;
-        // pattern filter
         if(state.filters.patterns.size>0){
           let ok=false; for(const p of state.filters.patterns){ if(e.patterns[p]) {ok=true; break;} }
           if(!ok) return false;
         }
-        // time filter
         const isFuture=e.date>=now, isPast=e.date<now;
         if(isFuture && !state.filters.time.has('future')) return false;
         if(isPast && !state.filters.time.has('past')) return false;
@@ -415,10 +453,7 @@
     }
 
     function updateLoadButtonsVisibility(){
-      // Forward button always shown if there might be more future events (optimistic)
       $('#moreWrap').style.display = state.start ? 'flex':'none';
-
-      // Past button only if there are possible items after start and before already-loaded lower bound
       if(!state.start){ $('#morePastWrap').style.display='none'; return; }
       const now=new Date();
       const lowerBoundCandidate = addYears(now, -(state.loadedBlocksPast+1)*state.blockYears);
@@ -433,17 +468,20 @@
       applyViewFilters();
       if(!state.eventsView.length) return renderEmpty();
       let html='<div class="list">', year=null;
+      const now=new Date();
       for(const ev of state.eventsView){
         const y=ev.date.getFullYear();
         if(y!==year){ year=y; html+=`<div class="year-sep">${y}</div>`; }
         const checked=state.selected.has(ev.id)?'checked':'';
         const unitLabel={years:'Jahre',months:'Monate',weeks:'Wochen',days:'Tage',hours:'Stunden',minutes:'Minuten',seconds:'Sekunden'}[ev.unit];
+        const whenText = `<span class="ttl-num">${ev.baseTitle}</span> <span class="since since-inline">${ev.since}</span>`;
+        const rel=humanDiff(now, ev.date);
         html+=`
           <div class="item">
             <input type="checkbox" aria-label="auswählen" data-id="${ev.id}" ${checked} />
             <div class="grow">
-              <div class="when">${ev.title}</div>
-              <div class="sub">${fmtFull.format(ev.date)} • ${ev.inHuman}</div>
+              <div class="when">${whenText}</div>
+              <div class="sub">${fmtFull.format(ev.date)} • ${rel}</div>
             </div>
             <span class="tag ${ev.unit}">${unitLabel}</span>
           </div>`;
@@ -461,7 +499,7 @@
       $('#btnIcsSel').disabled=state.selected.size===0;
       updateLoadButtonsVisibility();
     }
-    const render=()=>renderList();
+    const render=()=>{ renderList(); encodeStateToURL(); };
 
     // ---------- Form / Actions ----------
     function toLocalDateInputValue(d){const z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10);}
@@ -488,12 +526,12 @@
       state.loadedBlocksFwd=1; state.loadedBlocksPast=0; state.selected.clear();
       state.filters.units=new Set(state.units);
       state.filters.patterns=new Set(Object.entries(state.patterns).filter(([,v])=>v).map(([k])=>k));
-      state.filters.time=new Set(['past','future']); // default both
+      state.filters.time=new Set(['past','future']);
       const now=new Date();
       const futureEnd=addYears(now,state.blockYears*state.loadedBlocksFwd);
       // Initial view = future decade only
       state.eventsAll=computeRangeWindow(state.start,{label:state.label,units:state.units,patterns:state.patterns}, now, futureEnd);
-      render(); syncResultFiltersUI();
+      render(); syncResultFiltersUI(); encodeStateToURL();
     }
 
     // Load future decade
@@ -523,7 +561,7 @@
     }
 
     $('#form').addEventListener('submit',e=>{e.preventDefault();recomputeInitial();});
-    $('#btnReset').addEventListener('click',()=>{ $('#label').value=''; $('#date').value=''; $('#time').value=''; state.eventsAll=[]; state.eventsView=[]; state.selected.clear(); renderEmpty();});
+    $('#btnReset').addEventListener('click',()=>{ $('#label').value=''; $('#date').value=''; $('#time').value=''; state.eventsAll=[]; state.eventsView=[]; state.selected.clear(); history.replaceState(null,'',location.pathname); renderEmpty();});
     $('#btnMore').addEventListener('click',loadMoreFuture);
     $('#btnMorePast').addEventListener('click',loadMorePast);
 
@@ -558,8 +596,8 @@
       download(`${label}_auswahl.ics`,ics);
     });
 
-    // Start with empty view
-    (function initEmpty(){ $('#results').innerHTML='<div class="empty">Noch nichts berechnet. Wähle ein Datum und klicke auf <em>Jubiläen ausrechnen</em>.</div>'; })();
+    // Bootstrap from URL (if present), else show default empty
+    (function init(){ loadStateFromURL(); if(!location.search) { $('#results').innerHTML='<div class="empty">Noch nichts berechnet. Wähle ein Datum und klicke auf <em>Jubiläen ausrechnen</em>.</div>'; }})();
   </script>
 </body>
 </html>
