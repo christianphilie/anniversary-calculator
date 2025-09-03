@@ -3,27 +3,30 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Jubiläums‑Finder v2</title>
-  <meta name="description" content="Berechne besondere Jubiläen (z. B. 1000 Tage, 100 Wochen, 333 000 Sekunden) ab einem Startdatum und exportiere sie als .ics‑Kalender. Hell/Dunkel/System, 10‑Jahres‑Blöcke." />
+  <title>Jubiläums-Finder v3.1</title>
+  <meta name="description" content="Berechne besondere Jubiläen (1000 Tage, 100 Wochen, 333 000 Sekunden …), filtere sie und exportiere als .ics. Mit Hell/Dunkel/System, 10-Jahres-Blöcken, Jahres-Trennern, farbcodierten Einheiten & K×10^k." />
   <style>
-    /* =====================
-       THEME TOKENS
-       ===================== */
+    /* ========== THEME TOKENS ========== */
     :root{
-      /* Light (default) */
       --bg: #ffffff;
-      --panel: #f7f7fb;
+      --panel: #f6f7fb;
       --muted: #555;
       --text: #111;
       --brand: #0ea5e9; /* cyan */
       --accent: #8b5cf6; /* violet */
-      --ok: #10b981;     /* green */
-      --warn: #f59e0b;   /* amber */
-      --danger: #ef4444; /* red */
       --card: #fff;
       --border: #e5e7eb;
       --shadow: 0 2px 8px rgba(0,0,0,.08);
       --radius: 12px;
+
+      /* Unit scale (seconds→years) */
+      --c-seconds: #f59e0b;
+      --c-minutes: #f97316;
+      --c-hours:   #ef4444;
+      --c-days:    #10b981;
+      --c-weeks:   #22c55e;
+      --c-months:  #06b6d4;
+      --c-years:   #3b82f6;
     }
     [data-theme="dark"]{
       --bg: #0b0c0f;
@@ -32,21 +35,24 @@
       --text: #e9eef5;
       --brand: #7dd3fc;
       --accent: #a78bfa;
-      --ok: #34d399;
-      --warn: #fbbf24;
-      --danger: #f87171;
       --card: #141821;
       --border: #1f2530;
-      --shadow: 0 12px 30px rgba(0,0,0,.35);
-      --radius: 16px;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+
+      --c-seconds: #f59e0b;
+      --c-minutes: #fb923c;
+      --c-hours:   #f87171;
+      --c-days:    #34d399;
+      --c-weeks:   #4ade80;
+      --c-months:  #22d3ee;
+      --c-years:   #60a5fa;
     }
 
-    /* =====================
-       LAYOUT & BASICS
-       ===================== */
+    /* ========== LAYOUT & BASICS ========== */
+    *, *::before, *::after { box-sizing: border-box; } /* Fix: Inputs ragen nicht mehr */
     html,body{height:100%}
     body{
-      margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial;
       color:var(--text); background:var(--bg);
       transition: background .25s ease, color .25s ease;
     }
@@ -62,7 +68,7 @@
     .theme-toggle button{padding:6px 10px; border-radius:10px; border:1px solid var(--border); background:var(--card); cursor:pointer; font-size:13px}
     .theme-toggle button[aria-pressed="true"]{outline:2px solid var(--brand)}
 
-    .grid{display:grid; grid-template-columns: 360px 1fr; gap:20px}
+    .grid{display:grid; grid-template-columns: 320px 1fr; gap:20px} /* Fix: linke Spalte schmaler */
     @media (max-width: 980px){ .grid{grid-template-columns: 1fr} }
 
     .panel{background:var(--panel); border:1px solid var(--border); border-radius: var(--radius); box-shadow:var(--shadow)}
@@ -80,7 +86,31 @@
     .row > * { flex:1 }
 
     .chips{display:flex; flex-wrap:wrap; gap:10px}
-    .chip{display:inline-flex; align-items:center; gap:8px; background:var(--card); border:1px solid var(--border); padding:8px 10px; border-radius:999px; font-size:13px}
+    .chip{
+      display:inline-flex; align-items:center; gap:8px;
+      background:var(--card); border:1px solid var(--border); padding:8px 10px;
+      border-radius:999px; font-size:13px; user-select:none
+    }
+    .chip input{accent-color: currentColor}
+
+    /* unit colors for chips + tags */
+    .chip.unit.seconds{ color: var(--c-seconds); border-color: color-mix(in oklab, var(--c-seconds), #000 20%) }
+    .chip.unit.minutes{ color: var(--c-minutes); border-color: color-mix(in oklab, var(--c-minutes), #000 20%) }
+    .chip.unit.hours{   color: var(--c-hours);   border-color: color-mix(in oklab, var(--c-hours), #000 20%) }
+    .chip.unit.days{    color: var(--c-days);    border-color: color-mix(in oklab, var(--c-days), #000 20%) }
+    .chip.unit.weeks{   color: var(--c-weeks);   border-color: color-mix(in oklab, var(--c-weeks), #000 20%) }
+    .chip.unit.months{  color: var(--c-months);  border-color: color-mix(in oklab, var(--c-months), #000 20%) }
+    .chip.unit.years{   color: var(--c-years);   border-color: color-mix(in oklab, var(--c-years), #000 20%) }
+
+    .chip input:checked + span { font-weight:700 }
+    .swatch{display:inline-block; width:10px; height:10px; border-radius:999px; opacity:.7}
+    .swatch.seconds{ background: var(--c-seconds) }
+    .swatch.minutes{ background: var(--c-minutes) }
+    .swatch.hours{   background: var(--c-hours) }
+    .swatch.days{    background: var(--c-days) }
+    .swatch.weeks{   background: var(--c-weeks) }
+    .swatch.months{  background: var(--c-months) }
+    .swatch.years{   background: var(--c-years) }
 
     .btn{appearance:none; cursor:pointer; background:linear-gradient(135deg, var(--brand), var(--accent)); color:#fff; font-weight:700; border:none; padding:12px 14px; border-radius:12px; box-shadow:var(--shadow)}
     .btn.secondary{background:transparent; color:var(--text); border:1px solid var(--border)}
@@ -89,27 +119,33 @@
 
     /* LIST */
     .list{display:grid; gap:10px}
+    .year-sep{margin-top:8px; padding:4px 0; color:var(--muted); font-weight:700} /* ohne linken Strich */
     .item{display:flex; gap:14px; align-items:center; background:var(--card); border:1px solid var(--border); padding:12px; border-radius:14px}
     .when{font-weight:700}
     .sub{font-size:12px; color:var(--muted)}
     .grow{flex:1}
     .tag{font-size:12px; color:#fff; padding:3px 8px; border-radius:999px; font-weight:800; margin-left:auto}
-    .tag.years{background:var(--brand)}
-    .tag.months{background:var(--accent)}
-    .tag.weeks{background:var(--ok)}
-    .tag.days{background:var(--warn)}
-    .tag.hours{background:var(--danger)}
-    .tag.minutes{background:#16a34a}
-    .tag.seconds{background:#d97706}
+    .tag.years{ background: var(--c-years) }
+    .tag.months{ background: var(--c-months) }
+    .tag.weeks{ background: var(--c-weeks) }
+    .tag.days{ background: var(--c-days) }
+    .tag.hours{ background: var(--c-hours) }
+    .tag.minutes{ background: var(--c-minutes) }
+    .tag.seconds{ background: var(--c-seconds) }
 
     .toolbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
     .spacer{flex:1}
+
+    .filters{display:none; flex-wrap:wrap; gap:8px; margin:10px 0 0}
+    .filters.show{display:flex}
+    .filters .group{display:flex; gap:8px; align-items:center}
+    .filters .label{font-size:12px; color:var(--muted)}
 
     .empty{padding:18px; background:var(--card); border:1px solid var(--border); border-radius:12px; text-align:center; color:var(--muted)}
 
     footer{margin-top:26px; color:var(--muted); font-size:12px}
     a { color: var(--brand) }
-    .kbd{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; background:#eef2ff; border:1px solid #c7d2fe; padding:2px 6px; border-radius:6px; font-size:12px}
+    .kbd{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace; background:#eef2ff; border:1px solid #c7d2fe; padding:2px 6px; border-radius:6px; font-size:12px}
     [data-theme="dark"] .kbd{background:#0f172a; border:1px solid #1f2937}
   </style>
 </head>
@@ -119,7 +155,7 @@
       <div class="title">
         <div class="logo"><span>🎉</span></div>
         <div>
-          <h1>Jubiläums‑Finder</h1>
+          <h1>Jubiläums-Finder</h1>
           <div class="muted">Berechne besondere Meilensteine & exportiere sie als Kalender (.ics)</div>
         </div>
       </div>
@@ -136,7 +172,7 @@
         <div class="bd">
           <form id="form">
             <div class="field">
-              <label for="label">Titel / Anlass (optional, z. B. „Hochzeit“)</label>
+              <label for="label">Titel / Anlass (optional, z. B. „Hochzeit“)</label>
               <input id="label" type="text" placeholder="Hochzeit, erstes Date, neuer Job…" />
             </div>
 
@@ -146,6 +182,7 @@
                 <input id="date" type="date" required />
               </div>
               <div class="field">
+                <label for="time">Uhrzeit (optional)</label>
                 <input id="time" type="time" step="1" />
               </div>
             </div>
@@ -153,23 +190,23 @@
             <div class="field">
               <label>Einheiten</label>
               <div class="chips">
-                <label class="chip"><input type="checkbox" name="unit" value="years" checked/> Jahre</label>
-                <label class="chip"><input type="checkbox" name="unit" value="months" checked/> Monate</label>
-                <label class="chip"><input type="checkbox" name="unit" value="weeks" checked/> Wochen</label>
-                <label class="chip"><input type="checkbox" name="unit" value="days" checked/> Tage</label>
-                <label class="chip"><input type="checkbox" name="unit" value="hours" checked/> Stunden</label>
-                <label class="chip"><input type="checkbox" name="unit" value="minutes" checked/> Minuten</label>
-                <label class="chip"><input type="checkbox" name="unit" value="seconds" checked/> Sekunden</label>
+                <label class="chip unit years"><input type="checkbox" name="unit" value="years" checked /><span>Jahre</span><span class="swatch years"></span></label>
+                <label class="chip unit months"><input type="checkbox" name="unit" value="months" checked /><span>Monate</span><span class="swatch months"></span></label>
+                <label class="chip unit weeks"><input type="checkbox" name="unit" value="weeks" checked /><span>Wochen</span><span class="swatch weeks"></span></label>
+                <label class="chip unit days"><input type="checkbox" name="unit" value="days" checked /><span>Tage</span><span class="swatch days"></span></label>
+                <label class="chip unit hours"><input type="checkbox" name="unit" value="hours" checked /><span>Stunden</span><span class="swatch hours"></span></label>
+                <label class="chip unit minutes"><input type="checkbox" name="unit" value="minutes" checked /><span>Minuten</span><span class="swatch minutes"></span></label>
+                <label class="chip unit seconds"><input type="checkbox" name="unit" value="seconds" checked /><span>Sekunden</span><span class="swatch seconds"></span></label>
               </div>
             </div>
 
             <div class="field">
               <label>Besondere Muster</label>
               <div class="chips">
-                <label class="chip"><input type="checkbox" name="pattern" value="pow10" checked/> 10^k (100, 1000, …)</label>
-                <label class="chip"><input type="checkbox" name="pattern" value="fivePow10" checked/> 5×10^k (5, 50, 500, …)</label>
-                <label class="chip"><input type="checkbox" name="pattern" value="repdigit" checked/> Schnapszahlen (11, 222, 3333, …)</label>
-                <label class="chip"><input type="checkbox" name="pattern" value="repdigitPow10"/> Schnaps×10^k (z. B. 333 000)</label>
+                <label class="chip"><input type="checkbox" name="pattern" value="pow10" checked /><span>10^k (100, 1000, …)</span></label>
+                <label class="chip"><input type="checkbox" name="pattern" value="kTimesPow10" checked /><span>K×10^k (K∈{2,3,4,6,7,8,9})</span></label>
+                <label class="chip"><input type="checkbox" name="pattern" value="repdigit" checked /><span>Schnapszahlen (11, 222, 3333, …)</span></label>
+                <!-- Schnaps×10^k entfernt -->
               </div>
             </div>
 
@@ -184,14 +221,40 @@
         <div class="hd">
           <strong>📊 Ergebnisse</strong>
           <div class="toolbar">
+            <button class="btn secondary" id="btnToggleFilters" title="Filter anzeigen/ausblenden">Filter anzeigen</button>
+            <button class="btn secondary" id="btnSelectAll" title="Alle Einträge auswählen">Alle auswählen</button>
+            <button class="btn secondary" id="btnSelectNone" title="Auswahl aufheben">Keine auswählen</button>
             <div class="spacer"></div>
-            <button class="btn secondary" id="btnIcsSel" title="Gewählte Einträge exportieren" disabled>.ics ausgewählt</button>
-            <button class="btn" id="btnIcsAll" title="Alle angezeigten Einträge exportieren" disabled>.ics alle</button>
+            <button class="btn" id="btnIcsSel" title="Ausgewählte Einträge als Kalenderdatei herunterladen" disabled>📥 Kalenderdatei (.ics) herunterladen</button>
           </div>
         </div>
+
+        <div class="bd">
+          <!-- collapsible filters (hidden by default) -->
+          <div id="resultFilters" class="filters">
+            <div class="group">
+              <span class="label">🔎 Einheiten:</span>
+              <label class="chip unit seconds"><input type="checkbox" data-filter-unit="seconds" checked /><span>Sekunden</span><span class="swatch seconds"></span></label>
+              <label class="chip unit minutes"><input type="checkbox" data-filter-unit="minutes" checked /><span>Minuten</span><span class="swatch minutes"></span></label>
+              <label class="chip unit hours"><input type="checkbox" data-filter-unit="hours" checked /><span>Stunden</span><span class="swatch hours"></span></label>
+              <label class="chip unit days"><input type="checkbox" data-filter-unit="days" checked /><span>Tage</span><span class="swatch days"></span></label>
+              <label class="chip unit weeks"><input type="checkbox" data-filter-unit="weeks" checked /><span>Wochen</span><span class="swatch weeks"></span></label>
+              <label class="chip unit months"><input type="checkbox" data-filter-unit="months" checked /><span>Monate</span><span class="swatch months"></span></label>
+              <label class="chip unit years"><input type="checkbox" data-filter-unit="years" checked /><span>Jahre</span><span class="swatch years"></span></label>
+            </div>
+            <div class="group">
+              <span class="label">🧩 Muster:</span>
+              <label class="chip"><input type="checkbox" data-filter-pattern="pow10" checked /><span>10^k</span></label>
+              <label class="chip"><input type="checkbox" data-filter-pattern="kTimesPow10" checked /><span>K×10^k</span></label>
+              <label class="chip"><input type="checkbox" data-filter-pattern="repdigit" checked /><span>Schnaps</span></label>
+            </div>
+          </div>
+        </div>
+
         <div class="bd" id="results">
           <div class="empty">Noch nichts berechnet. Wähle oben ein Datum und klicke <span class="kbd">Jubiläen ausrechnen</span>.</div>
         </div>
+
         <div class="bd" id="moreWrap" style="display:none">
           <button class="btn secondary" id="btnMore">Weitere 10 Jahre laden</button>
         </div>
@@ -199,7 +262,7 @@
     </div>
 
     <footer>
-      <p>💡 Tipp: Du kannst nach dem Export die .ics in jeden Kalender importieren (Apple, Google, Outlook, …). Ereignisse sind einstündig (UTC). </p>
+      <p>💡 Kurzzeitige Einheiten (Sek., Min., Std.) sind einstündige Termine; längere Einheiten (Tage, Wochen, Monate, Jahre) werden als Ganztags-Event exportiert.</p>
     </footer>
   </div>
 
@@ -208,7 +271,7 @@
   const $ = (sel, el=document) => el.querySelector(sel);
   const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
 
-  // Theme handling (light/dark/system) with persistence
+  // Theme handling
   const body = document.body;
   const mm = window.matchMedia('(prefers-color-scheme: dark)');
   function applyTheme(mode){
@@ -219,57 +282,58 @@
       body.setAttribute('data-theme', mode);
       body.dataset.themeMode = mode;
     }
-    // UI state
     $$('.theme-toggle button').forEach(b=>b.setAttribute('aria-pressed','false'));
     const btn = $(`.theme-toggle button[data-mode="${mode}"]`);
     if(btn) btn.setAttribute('aria-pressed','true');
-    // persist
     localStorage.setItem('themeMode', mode);
   }
-  $$('.theme-toggle button').forEach(btn=>{
-    btn.addEventListener('click', ()=> applyTheme(btn.getAttribute('data-mode')));
-  });
+  $$('.theme-toggle button').forEach(btn=>btn.addEventListener('click', ()=>applyTheme(btn.getAttribute('data-mode'))));
   mm.addEventListener?.('change', ()=>{ if((localStorage.getItem('themeMode')||'system')==='system') applyTheme('system'); });
   applyTheme(localStorage.getItem('themeMode')||'system');
 
-  // Intl formatters
+  // Intl
   const fmtFull = new Intl.DateTimeFormat('de-DE', { dateStyle: 'full', timeStyle: 'short' });
-  const fmtDate = new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium' });
   const fmtNum = new Intl.NumberFormat('de-DE');
 
   // Durations
   const MS = { second: 1000, minute: 60_000, hour: 3_600_000, day: 86_400_000, week: 7*86_400_000 };
 
-  // Robust adders with month/day clamping
+  // Calendar-safe adds
   function daysInMonth(y, m){ return new Date(y, m+1, 0).getDate(); }
-  function addYears(d, n){
-    const dt = new Date(d.getTime());
-    const y = dt.getFullYear() + n;
-    const m = dt.getMonth();
-    const day = dt.getDate();
-    const dim = daysInMonth(y, m);
-    dt.setFullYear(y, m, Math.min(day, dim));
-    return dt;
-  }
-  function addMonths(d, n){
-    const dt = new Date(d.getTime());
-    const y = dt.getFullYear();
-    const m = dt.getMonth();
-    const day = dt.getDate();
-    const targetM = m + n;
-    const ny = y + Math.floor(targetM / 12);
-    const nm = ((targetM % 12) + 12) % 12;
-    const dim = daysInMonth(ny, nm);
-    dt.setFullYear(ny, nm, Math.min(day, dim));
-    return dt;
-  }
-  function addWeeks(d, n){ return new Date(d.getTime() + n*MS.week); }
-  function addDays(d, n){ return new Date(d.getTime() + n*MS.day); }
-  function addHours(d, n){ return new Date(d.getTime() + n*MS.hour); }
-  function addMinutes(d, n){ return new Date(d.getTime() + n*MS.minute); }
-  function addSeconds(d, n){ return new Date(d.getTime() + n*MS.second); }
+  function addYears(d, n){ const dt=new Date(d.getTime()); const y=dt.getFullYear()+n, m=dt.getMonth(), day=dt.getDate(); dt.setFullYear(y, m, Math.min(day, daysInMonth(y,m))); return dt; }
+  function addMonths(d, n){ const dt=new Date(d.getTime()); const y=dt.getFullYear(), m=dt.getMonth(); const target=m+n; const ny=y+Math.floor(target/12); const nm=((target%12)+12)%12; dt.setFullYear(ny, nm, Math.min(dt.getDate(), daysInMonth(ny,nm))); return dt; }
+  function addWeeks(d, n){ return new Date(d.getTime()+n*MS.week); }
+  function addDays(d, n){ return new Date(d.getTime()+n*MS.day); }
+  function addHours(d, n){ return new Date(d.getTime()+n*MS.hour); }
+  function addMinutes(d, n){ return new Date(d.getTime()+n*MS.minute); }
+  function addSeconds(d, n){ return new Date(d.getTime()+n*MS.second); }
 
   // Patterns
+  function isPowerOf10(n){ if(n<10) return false; while(n%10===0) n/=10; return n===1; }
+  function isRepdigit(n){ const s=String(n); return s.length>1 && /^([1-9])\1+$/.test(s); }
+
+  // New: K×10^k (K in {2,3,4,6,7,8,9})
+  const K_SET = [2,3,4,6,7,8,9];
+  function isKTimesPow10(n){
+    for(const K of K_SET){
+      let m = n;
+      while(m%10===0){ m/=10; }
+      if(m===K) return true;
+    }
+    return false;
+  }
+  function makeKTimesPow10(max){
+    const set = new Set();
+    for(const K of K_SET){
+      for(let k=0; ; k++){
+        const val = K * 10**k;
+        if(val>max) break;
+        if(val>=K) set.add(val);
+      }
+    }
+    return set;
+  }
+
   function makeRepdigits(max){
     const set = new Set();
     for(let len=2; len<=12; len++){
@@ -280,31 +344,26 @@
     }
     return set;
   }
-  function makeRepdigitsTimesPow10(max){
-    const set = new Set();
-    for(let len=2; len<=12; len++){
-      for(let d=1; d<=9; d++){
-        for(let k=1; k<=12; k++){
-          const val = Number(String(d).repeat(len)) * 10**k;
-          if(val<=max) set.add(val);
-        }
-      }
-    }
-    return set;
-  }
-  function makePowersOf10(max){ const set=new Set(); for(let k=1; 10**k<=max; k++) set.add(10**k); return set; }
-  function makeFiveTimesPow10(max){ const set=new Set(); for(let k=0; 5*10**k<=max; k++) set.add(5*10**k); return set; }
+  function makePowersOf10(max){ const set=new Set(); for(let k=1;10**k<=max;k++) set.add(10**k); return set; }
 
   function buildCandidates(maxN, patterns){
     let s=new Set();
     if(patterns.pow10) for(const v of makePowersOf10(maxN)) s.add(v);
-    if(patterns.fivePow10) for(const v of makeFiveTimesPow10(maxN)) s.add(v);
+    if(patterns.kTimesPow10) for(const v of makeKTimesPow10(maxN)) s.add(v);
     if(patterns.repdigit) for(const v of makeRepdigits(maxN)) s.add(v);
-    if(patterns.repdigitPow10) for(const v of makeRepdigitsTimesPow10(maxN)) s.add(v);
     return Array.from(s).sort((a,b)=>a-b);
   }
 
-  // Grammar helpers (Dativ in Zeitangaben: in X Monaten, in X Jahren, …)
+  // classify which patterns n matches (for filtering)
+  function classifyPatterns(n){
+    return {
+      pow10: isPowerOf10(n),
+      kTimesPow10: isKTimesPow10(n),
+      repdigit: isRepdigit(n),
+    };
+  }
+
+  // Grammar (Dativ in Zeitangaben)
   const unitDE = {
     years: ['Jahr','Jahre','Jahren'],
     months:['Monat','Monate','Monaten'],
@@ -335,21 +394,22 @@
     return `in ${s} ${dativeDE('seconds', s)}`;
   }
 
-  // ICS helpers
+  // ICS helpers (mix all-day & timed)
   function isoDateTimeUTC(d){
     const pad = (n)=> String(n).padStart(2,'0');
-    return (
-      d.getUTCFullYear().toString()+
+    return d.getUTCFullYear().toString()+
       pad(d.getUTCMonth()+1)+
       pad(d.getUTCDate())+'T'+
       pad(d.getUTCHours())+
       pad(d.getUTCMinutes())+
-      pad(d.getUTCSeconds())+'Z'
-    );
+      pad(d.getUTCSeconds())+'Z';
   }
-  function escapeICS(text){
-    return text.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/,/g, "\\,").replace(/;/g, "\\;");
+  function dateUTC_Ymd(d){
+    const pad = (n)=> String(n).padStart(2,'0');
+    return d.getUTCFullYear().toString()+pad(d.getUTCMonth()+1)+pad(d.getUTCDate());
   }
+  function escapeICS(text){ return text.replace(/\\/g,"\\\\").replace(/\n/g,"\\n").replace(/,/g,"\\,").replace(/;/g,"\\;"); }
+
   function buildICS(events){
     const now = new Date();
     let ics = [
@@ -366,13 +426,24 @@
       ics.push(`DTSTAMP:${isoDateTimeUTC(now)}`);
       ics.push(`SUMMARY:${escapeICS(ev.title)}`);
       ics.push(`DESCRIPTION:${escapeICS(ev.desc)}`);
-      ics.push(`DTSTART:${isoDateTimeUTC(ev.date)}`);
-      ics.push(`DTEND:${isoDateTimeUTC(new Date(ev.date.getTime()+60*60*1000))}`);
+
+      if(['days','weeks','months','years'].includes(ev.unit)){
+        const start = new Date(ev.date);
+        const end = new Date(start.getTime() + MS.day);
+        ics.push(`DTSTART;VALUE=DATE:${dateUTC_Ymd(start)}`);
+        ics.push(`DTEND;VALUE=DATE:${dateUTC_Ymd(end)}`); // exclusive
+      }else{
+        const start = new Date(ev.date);
+        const end = new Date(start.getTime() + MS.hour);
+        ics.push(`DTSTART:${isoDateTimeUTC(start)}`);
+        ics.push(`DTEND:${isoDateTimeUTC(end)}`);
+      }
       ics.push('END:VEVENT');
     }
     ics.push('END:VCALENDAR');
     return ics.join('\r\n');
   }
+
   function download(filename, content){
     const blob = new Blob([content], {type:'text/calendar;charset=utf-8'});
     const url = URL.createObjectURL(blob);
@@ -394,15 +465,16 @@
     function pushEvent(date, n, unit){
       if(date < now || date > end) return;
       const title = `${fmtNum.format(n)} ${labelDE(unit,n)} seit ${opts.label||'Start'}`;
-      const short = `${fmtNum.format(n)} ${labelDE(unit,n)}`;
       const startText = new Intl.DateTimeFormat('de-DE',{ dateStyle:'long', timeStyle:'short' }).format(start) + ' Uhr';
       const desc = `${fmtNum.format(n)} ${labelDE(unit,n)} seit ${startText}`;
+      const pat = classifyPatterns(n);
       events.push({
         id: `${unit}-${n}-${date.getTime()}`,
-        unit, n, date, title, short,
+        unit, n, date, title,
         inHuman: inHuman(now, date),
         tag: unit,
         desc,
+        patterns: pat,
       });
     }
 
@@ -412,21 +484,15 @@
     for(const unit of units){
       const add = unitAdder(unit);
       if(unit==='years'){
-        const maxN = yearsBetween(start, end) + 2; // a bit generous
-        for(const n of buildCandidates(maxN, patterns)){
-          pushEvent(add(start, n), n, unit);
-        }
+        const maxN = yearsBetween(start, end) + 2;
+        for(const n of buildCandidates(maxN, patterns)) pushEvent(add(start, n), n, unit);
       }else if(unit==='months'){
         const maxN = diffMonths(start, end) + 2;
-        for(const n of buildCandidates(maxN, patterns)){
-          pushEvent(add(start, n), n, unit);
-        }
+        for(const n of buildCandidates(maxN, patterns)) pushEvent(add(start, n), n, unit);
       }else{
         const per = unitMs(unit);
         const maxN = Math.floor((end - start)/per) + 1;
-        for(const n of buildCandidates(maxN, patterns)){
-          pushEvent(add(start, n), n, unit);
-        }
+        for(const n of buildCandidates(maxN, patterns)) pushEvent(add(start, n), n, unit);
       }
     }
 
@@ -439,38 +505,65 @@
     start: null,
     label: '',
     units: ['years','months','weeks','days','hours','minutes','seconds'],
-    patterns: { pow10:true, fivePow10:true, repdigit:true, repdigitPow10:true },
+    patterns: { pow10:true, kTimesPow10:true, repdigit:true }, // Schnaps×10^k entfernt
     blockYears: 10,
-    loadedBlocks: 0, // how many 10y blocks loaded
-    events: [],
+    loadedBlocks: 0,
+    eventsAll: [],
+    eventsView: [],
     selected: new Set(),
+    filters: {
+      units: new Set(['years','months','weeks','days','hours','minutes','seconds']),
+      patterns: new Set(['pow10','kTimesPow10','repdigit']),
+      open: false
+    }
   };
 
   function renderEmpty(){
     $('#results').innerHTML = '<div class="empty">Keine Einträge im Zeitraum. Prüfe Einheiten/Muster oder lade weitere Jahre.</div>';
-    $('#btnIcsAll').disabled = true;
     $('#btnIcsSel').disabled = true;
+    $('#resultFilters').classList.remove('show');
     $('#moreWrap').style.display = 'none';
+    $('#btnToggleFilters').textContent = 'Filter anzeigen';
+  }
+
+  function applyViewFilters(){
+    state.eventsView = state.eventsAll.filter(ev=>{
+      if(!state.filters.units.has(ev.unit)) return false;
+      if(state.filters.patterns.size===0) return true;
+      for(const p of state.filters.patterns){ if(ev.patterns[p]) return true; }
+      return false;
+    });
   }
 
   function renderList(){
-    if(!state.events.length) return renderEmpty();
-    const rows = state.events.map(ev=>{
+    applyViewFilters();
+    if(!state.eventsView.length) return renderEmpty();
+
+    let html = '<div class="list">';
+    let currentYear = null;
+
+    for(const ev of state.eventsView){
+      const y = ev.date.getFullYear();
+      if(y !== currentYear){
+        currentYear = y;
+        html += `<div class="year-sep">${y}</div>`;
+      }
       const checked = state.selected.has(ev.id) ? 'checked' : '';
-      const tagText = ({years:'Jahre', months:'Monate', weeks:'Wochen', days:'Tage', hours:'Stunden', minutes:'Minuten', seconds:'Sekunden'})[ev.tag];
-      return `
+      const unitLabel = ({years:'Jahre', months:'Monate', weeks:'Wochen', days:'Tage', hours:'Stunden', minutes:'Minuten', seconds:'Sekunden'})[ev.unit];
+      html += `
         <div class="item">
           <input type="checkbox" aria-label="auswählen" data-id="${ev.id}" ${checked} />
           <div class="grow">
             <div class="when">${ev.title}</div>
             <div class="sub">${fmtFull.format(ev.date)} • ${ev.inHuman}</div>
           </div>
-          <span class="tag ${ev.tag}">${tagText}</span>
+          <span class="tag ${ev.unit}">${unitLabel}</span>
         </div>`;
-    }).join('');
-    $('#results').innerHTML = `<div class="list">${rows}</div>`;
+    }
 
-    // listeners for checkboxes
+    html += '</div>';
+    $('#results').innerHTML = html;
+
     $$('#results input[type="checkbox"]').forEach(cb=>{
       cb.addEventListener('change', e=>{
         const id = e.target.getAttribute('data-id');
@@ -479,16 +572,14 @@
       });
     });
 
-    $('#btnIcsAll').disabled = false;
     $('#btnIcsSel').disabled = state.selected.size===0;
-
-    // show load more
     $('#moreWrap').style.display = 'block';
+    // Filters remain collapsed by default; button controls visibility
   }
 
   function render(){ renderList(); }
 
-  // ---------- Wire‑up ----------
+  // ---------- Wire-up ----------
   function toLocalDateInputValue(d){ const z = new Date(d.getTime()-d.getTimezoneOffset()*60000); return z.toISOString().slice(0,10); }
 
   function getOpts(){
@@ -499,12 +590,11 @@
     const [y,m,d] = dateStr.split('-').map(Number);
     const start = new Date(y, m-1, d, Number(hh), Number(mm), Number(ss));
 
-    const units = $$('input[name="unit"]:checked').map(x=>x.value);
+    const units = $$( 'input[name="unit"]:checked').map(x=>x.value);
     const patterns = {
       pow10: $('input[name="pattern"][value="pow10"]').checked,
-      fivePow10: $('input[name="pattern"][value="fivePow10"]').checked,
+      kTimesPow10: $('input[name="pattern"][value="kTimesPow10"]').checked,
       repdigit: $('input[name="pattern"][value="repdigit"]').checked,
-      repdigitPow10: $('input[name="pattern"][value="repdigitPow10"]').checked,
     };
 
     return { start, label, units, patterns };
@@ -514,11 +604,16 @@
     const o = getOpts(); if(!o) return;
     state.start = o.start; state.label = o.label; state.units = o.units; state.patterns = o.patterns;
     state.loadedBlocks = 1; state.selected.clear();
+    // initialize result filters to current unit/pattern choices
+    state.filters.units = new Set(state.units);
+    const enabledPats = Object.entries(state.patterns).filter(([,v])=>v).map(([k])=>k);
+    state.filters.patterns = new Set(enabledPats);
+
     const now = new Date();
     const end = addYears(now, state.blockYears * state.loadedBlocks);
-    const events = computeRange(state.start, {label:state.label, units:state.units, patterns:state.patterns}, end);
-    state.events = events;
+    state.eventsAll = computeRange(state.start, {label:state.label, units:state.units, patterns:state.patterns}, end);
     render();
+    syncResultFiltersUI();
   }
 
   function loadMore(){
@@ -530,36 +625,78 @@
     const newEnd = addYears(now, state.blockYears * state.loadedBlocks);
     const more = computeRange(state.start, {label:state.label, units:state.units, patterns:state.patterns}, newEnd)
       .filter(ev => ev.date > oldEnd);
-    // merge
-    const ids = new Set(state.events.map(e=>e.id));
-    for(const ev of more){ if(!ids.has(ev.id)) state.events.push(ev); }
-    state.events.sort((a,b)=> a.date - b.date || a.n - b.n);
+    const ids = new Set(state.eventsAll.map(e=>e.id));
+    for(const ev of more){ if(!ids.has(ev.id)) state.eventsAll.push(ev); }
+    state.eventsAll.sort((a,b)=> a.date - b.date || a.n - b.n);
     render();
   }
 
   $('#form').addEventListener('submit', e=>{ e.preventDefault(); recomputeInitial(); });
-  $('#btnReset').addEventListener('click', ()=>{ $('#label').value=''; $('#date').value=''; $('#time').value=''; state.events=[]; state.selected.clear(); renderEmpty(); });
+  $('#btnReset').addEventListener('click', ()=>{
+    $('#label').value=''; $('#date').value=''; $('#time').value='';
+    state.eventsAll=[]; state.eventsView=[]; state.selected.clear();
+    renderEmpty();
+  });
   $('#btnMore').addEventListener('click', loadMore);
 
-  // ICS buttons
-  $('#btnIcsAll').addEventListener('click', ()=>{
-    if(!state.events.length) return;
-    const ics = buildICS(state.events);
-    const label = (state.label || 'Jubilaeum').toLowerCase().replace(/\s+/g,'_');
-    download(`${label}_alle.ics`, ics);
+  // Select all / none
+  $('#btnSelectAll').addEventListener('click', ()=>{
+    for(const ev of state.eventsView) state.selected.add(ev.id);
+    render();
   });
+  $('#btnSelectNone').addEventListener('click', ()=>{
+    state.selected.clear();
+    render();
+  });
+
+  // Toggle filters (collapsed by default)
+  $('#btnToggleFilters').addEventListener('click', ()=>{
+    state.filters.open = !state.filters.open;
+    const el = $('#resultFilters');
+    if(state.filters.open){ el.classList.add('show'); $('#btnToggleFilters').textContent = 'Filter ausblenden'; }
+    else { el.classList.remove('show'); $('#btnToggleFilters').textContent = 'Filter anzeigen'; }
+  });
+
+  function syncResultFiltersUI(){
+    // Units
+    $$('#resultFilters input[data-filter-unit]').forEach(inp=>{
+      const u = inp.getAttribute('data-filter-unit');
+      inp.checked = state.filters.units.has(u);
+    });
+    // Patterns
+    $$('#resultFilters input[data-filter-pattern]').forEach(inp=>{
+      const p = inp.getAttribute('data-filter-pattern');
+      inp.checked = state.filters.patterns.has(p);
+    });
+  }
+  $('#resultFilters').addEventListener('change', (e)=>{
+    const t = e.target;
+    if(t.matches('input[data-filter-unit]')){
+      const u = t.getAttribute('data-filter-unit');
+      if(t.checked) state.filters.units.add(u); else state.filters.units.delete(u);
+      render();
+    }
+    if(t.matches('input[data-filter-pattern]')){
+      const p = t.getAttribute('data-filter-pattern');
+      if(t.checked) state.filters.patterns.add(p); else state.filters.patterns.delete(p);
+      render();
+    }
+  });
+
+  // ICS button (selected only)
   $('#btnIcsSel').addEventListener('click', ()=>{
     if(!state.selected.size) return;
-    const subset = state.events.filter(ev=>state.selected.has(ev.id));
+    const subset = state.eventsAll.filter(ev=>state.selected.has(ev.id));
     const ics = buildICS(subset);
     const label = (state.label || 'Jubilaeum').toLowerCase().replace(/\s+/g,'_');
     download(`${label}_auswahl.ics`, ics);
   });
 
   // Prefill today
+  function toLocalDateInputValue(d){ const z = new Date(d.getTime()-d.getTimezoneOffset()*60000); return z.toISOString().slice(0,10); }
   $('#date').value = toLocalDateInputValue(new Date());
 
-  // After first render, ensure "Load more" visibility reflects state
+  // Initial
   renderEmpty();
   </script>
 </body>
