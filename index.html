@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Jubiläums-Finder v7</title>
+  <title>Jubiläums-Finder v8</title>
   <meta name="description" content="Berechne besondere Meilensteine wie 10 Jahre, 500 Wochen oder 333.333 Sekunden und exportiere sie als Kalender" />
   <style>
     /* ========= Tokens ========= */
@@ -27,11 +27,11 @@
       --btn-bg:#fff; --btn-fg:#111; --btn-border:transparent;
     }
 
-    /* ========= Base/Layout (no shadows; flatter 2025 look) ========= */
+    /* ========= Base/Layout ========= */
     *,*::before,*::after{box-sizing:border-box}
     html,body{height:100%}
     body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;color:var(--text);background:var(--bg);transition:background .25s,color .25s}
-    .wrap{max-width:1100px;margin:0 auto;padding:28px}
+    .wrap{max-width:1200px;margin:0 auto;padding:28px}
     header{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:20px}
     .title{display:flex;gap:12px;align-items:center}
     .logo{font-size:28px;line-height:1}
@@ -66,11 +66,12 @@
     .chip.unit.years{color:var(--c-years)}
     .chip input:checked + span{font-weight:700}
 
-    /* Buttons (no letter-spacing) */
+    /* Buttons */
     .btn{appearance:none;cursor:pointer;font-weight:700;border-radius:12px;padding:12px 14px}
     .btn.primary{background:var(--btn-bg);color:var(--btn-fg);border:1px solid var(--btn-border)}
     .btn.secondary{background:transparent;color:var(--text);border:1px solid var(--border)}
     .btn.ghost{background:transparent;color:var(--muted);border:none;padding:0}
+    .btn.small{padding:6px 10px;font-weight:600;font-size:12px;border-radius:999px}
     .btn:disabled{opacity:.6;cursor:not-allowed}
 
     /* Segmented 3-way theme switch */
@@ -80,7 +81,8 @@
 
     /* Results list */
     .list{display:grid;gap:10px}
-    .year-sep{margin-top:8px;padding:6px 0;color:var(--muted);font-weight:700;font-size:12px}
+    .year-sep{margin-top:8px;padding:6px 0;color:var(--muted);font-weight:700;font-size:12px;display:flex;align-items:center;gap:10px}
+    .year-sep .y{flex:1}
     .item{display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--border);padding:12px;border-radius:14px}
     .when{font-weight:700}
     .when .since{font-weight:400;color:var(--muted)}
@@ -92,11 +94,13 @@
     .tag.hours{background:var(--c-hours)} .tag.minutes{background:var(--c-minutes)} .tag.seconds{background:var(--c-seconds)}
 
     .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .spacer{flex:1}
+    .toolbar .push-right{margin-left:auto}
 
-    /* Responsive filters (reworked) */
-    .filters{display:none;margin:10px 0 0}
-    .filters.show{display:grid}
+    /* Filters */
+    /* Container der Filter bekommt eigene .bd, die komplett ein/ausgeblendet wird */
+    #filtersWrap{display:none}
+    #filtersWrap.show{display:block}
+    .filters{display:grid}
     @media (min-width:760px){
       .filters{grid-template-columns:1fr 1fr 1fr;gap:14px}
     }
@@ -135,7 +139,7 @@
       <section class="panel">
         <div class="hd">
           <strong>🎯 Eingaben</strong>
-          <button id="btnReset" class="btn ghost" title="Eingaben zurücksetzen">Zurücksetzen</button>
+          <button id="btnReset" class="btn ghost" title="Eingaben zurücksetzen" style="margin-left:auto">Zurücksetzen</button>
         </div>
         <div class="bd">
           <form id="form">
@@ -186,17 +190,16 @@
       <section class="panel">
         <div class="hd">
           <strong>📊 Ergebnisse</strong>
-          <div class="toolbar">
-            <button class="btn secondary" id="btnToggleFilters" title="Filter anzeigen/ausblenden">Filter anzeigen</button>
-            <button class="btn secondary" id="btnSelectAll"  title="Alle Einträge auswählen">Alle auswählen</button>
-            <button class="btn secondary" id="btnSelectNone" title="Auswahl aufheben">Alle abwählen</button>
-            <div class="spacer"></div>
-            <button class="btn primary" id="btnIcsSel" title="Ausgewählte Einträge als Kalenderdatei herunterladen" disabled>📥 Kalenderdatei (.ics) herunterladen</button>
+          <div class="toolbar" style="width:100%">
+            <button class="btn secondary" id="btnToggleFilters" title="Filter anzeigen/ausblenden">🔎 Filter anzeigen</button>
+            <button class="btn secondary" id="btnSelectAll"  title="Alle sichtbaren Einträge auswählen">✅ Alle auswählen</button>
+            <button class="btn secondary" id="btnSelectNone" title="Auswahl sichtbarer Einträge aufheben">🚫 Alle abwählen</button>
+            <button class="btn primary push-right" id="btnIcsSel" title="Ausgewählte sichtbare Einträge als Kalenderdatei herunterladen" disabled>📥 Kalenderdatei (.ics) herunterladen</button>
           </div>
         </div>
 
-        <div class="bd">
-          <!-- collapsible filters (hidden by default) -->
+        <!-- Filter-Bereich: eigene .bd, komplett ein-/ausblendbar -->
+        <div class="bd" id="filtersWrap">
           <div id="resultFilters" class="filters">
             <div class="group">
               <span class="label">🔎 Einheiten</span>
@@ -214,7 +217,7 @@
               <span class="label">🧩 Muster</span>
               <div class="chips">
                 <label class="chip"><input type="checkbox" data-filter-pattern="rounded" checked /><span>Runde Vielfache</span></label>
-                <label class="chip"><input type="checkbox" data-filter-pattern="repdigit" checked /><span>Schnaps</span></label>
+                <label class="chip"><input type="checkbox" data-filter-pattern="repdigit" checked /><span>Schnapszahlen</span></label>
               </div>
             </div>
             <div class="group">
@@ -331,7 +334,7 @@
     function buildICS(events){
       const now=new Date(); const out=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//JubilaeumsFinder//DE','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
       for(const ev of events){
-        out.push('BEGIN:VEVENT',`UID:${ev.id}@jubilaeum`,`DTSTAMP:${isoUTC(now)}`,`SUMMARY:${esc(ev.title)}`,`DESCRIPTION:${esc(ev.desc)}`);
+        out.push('BEGIN:VEVENT',`UID:${ev.id}@jubilaeum`,`DTSTAMP:${isoUTC(now)}`,`SUMMARY:${esc(ev.baseTitle)} — ${esc(ev.since)}`,`DESCRIPTION:${esc(ev.desc)}`);
         if(['days','weeks','months','years'].includes(ev.unit)){
           const start=new Date(ev.date); const end=new Date(start.getTime()+MS.day);
           out.push(`DTSTART;VALUE=DATE:${ymdUTC(start)}`,`DTEND;VALUE=DATE:${ymdUTC(end)}`);
@@ -352,7 +355,7 @@
     const yearsBetween=(a,b)=>Math.floor((b-a)/MS.day/365.2425);
 
     // Sensible minimum milestones to avoid noise close to start
-    const MIN_N={ seconds:1_000_000, minutes:100_000, hours:5_000, days:100, weeks:20, months:12, years:1 };
+    const MIN_N={ seconds:10_000_000, minutes:100_000, hours:1_000, days:100, weeks:10, months:10, years:1 };
 
     /**
      * Compute events within [from, to] window (inclusive).
@@ -364,10 +367,9 @@
         if(n < MIN_N[unit]) return;
         const baseTitle=`${fmtNum.format(n)} ${labelDE(unit,n)}`;
         const since=`seit ${opts.label||'Start'}`;
-        const title=`${baseTitle} ${since}`;
         const startText=new Intl.DateTimeFormat('de-DE',{dateStyle:'long',timeStyle:'short'}).format(start)+' Uhr';
         const desc=`${fmtNum.format(n)} ${labelDE(unit,n)} seit ${startText}`;
-        evs.push({id:`${unit}-${n}-${date.getTime()}`,unit,n,date,title,since,baseTitle,inHuman:humanDiff(new Date(),date),desc,patterns:classifyPatterns(n)});
+        evs.push({id:`${unit}-${n}-${date.getTime()}`,unit,n,date,baseTitle,since,inHuman:humanDiff(new Date(),date),desc,patterns:classifyPatterns(n)});
       }
       for(const unit of opts.units){
         const add=unitAdder(unit);
@@ -424,7 +426,6 @@
       const p=q.get('p'); if(p){ const set=new Set(p.split(',').filter(Boolean)); $$('#form input[name="pattern"]').forEach(i=>i.checked=set.has(i.value)); }
       const tf=q.get('tf'); if(tf){ state.filters.time=new Set(tf.split(',').filter(Boolean)); }
       const theme=q.get('theme'); if(theme){ applyTheme(theme); }
-      // If we have date, auto compute
       if(q.get('d')) recomputeInitial();
     }
 
@@ -446,10 +447,11 @@
     function renderEmpty(){
       $('#results').innerHTML='<div class="empty">Keine Einträge im Zeitraum. Prüfe Einheiten/Muster oder lade weitere Jahre.</div>';
       $('#btnIcsSel').disabled=true;
-      $('#resultFilters').classList.remove('show');
+      $('#filtersWrap').classList.remove('show');
       $('#moreWrap').style.display='none';
       $('#morePastWrap').style.display='none';
-      $('#btnToggleFilters').textContent='Filter anzeigen';
+      $('#btnToggleFilters').textContent='🔎 Filter anzeigen';
+      updateDownloadTooltip();
     }
 
     function updateLoadButtonsVisibility(){
@@ -471,13 +473,23 @@
       const now=new Date();
       for(const ev of state.eventsView){
         const y=ev.date.getFullYear();
-        if(y!==year){ year=y; html+=`<div class="year-sep">${y}</div>`; }
+        if(y!==year){
+          year=y;
+          html+=`
+            <div class="year-sep" data-year="${y}">
+              <span class="y">${y}</span>
+              <div class="controls">
+                <button class="btn small secondary" data-year="${y}" data-act="all">✅ Alle auswählen</button>
+                <button class="btn small secondary" data-year="${y}" data-act="none">🚫 Alle abwählen</button>
+              </div>
+            </div>`;
+        }
         const checked=state.selected.has(ev.id)?'checked':'';
         const unitLabel={years:'Jahre',months:'Monate',weeks:'Wochen',days:'Tage',hours:'Stunden',minutes:'Minuten',seconds:'Sekunden'}[ev.unit];
-        const whenText = `<span class="ttl-num">${ev.baseTitle}</span> <span class="since since-inline">${ev.since}</span>`;
+        const whenText = `<span class="ttl-num">${ev.baseTitle}</span> <span class="since"> ${ev.since}</span>`;
         const rel=humanDiff(now, ev.date);
         html+=`
-          <div class="item">
+          <div class="item" data-year="${y}">
             <input type="checkbox" aria-label="auswählen" data-id="${ev.id}" ${checked} />
             <div class="grow">
               <div class="when">${whenText}</div>
@@ -488,18 +500,48 @@
       }
       html+='</div>'; $('#results').innerHTML=html;
 
+      // Checkbox toggle
       $$('#results input[type="checkbox"]').forEach(cb=>{
         cb.addEventListener('change',e=>{
           const id=e.target.getAttribute('data-id');
           if(e.target.checked) state.selected.add(id); else state.selected.delete(id);
-          $('#btnIcsSel').disabled=state.selected.size===0;
+          $('#btnIcsSel').disabled=visibleSelected().length===0;
+          updateDownloadTooltip();
         });
       });
 
-      $('#btnIcsSel').disabled=state.selected.size===0;
+      // Year-block controls (event delegation)
+      $('#results').addEventListener('click',e=>{
+        const btn=e.target.closest('button[data-act]'); if(!btn) return;
+        const year=btn.getAttribute('data-year'); const act=btn.getAttribute('data-act');
+        const idsInYear = state.eventsView.filter(ev=>ev.date.getFullYear()==year).map(ev=>ev.id);
+        if(act==='all'){ idsInYear.forEach(id=>state.selected.add(id)); }
+        if(act==='none'){ idsInYear.forEach(id=>state.selected.delete(id)); }
+        render(); // re-render to sync checkboxes & selection state
+      }, {once:true}); // reattach on each render
+
+      $('#btnIcsSel').disabled=visibleSelected().length===0;
       updateLoadButtonsVisibility();
+      encodeStateToURL();
+      updateDownloadTooltip();
     }
-    const render=()=>{ renderList(); encodeStateToURL(); };
+    const render=()=>{ renderList(); };
+
+    // Only selected & visible
+    function visibleSelected(){
+      const visSet=new Set(state.eventsView.map(ev=>ev.id));
+      return state.eventsAll.filter(ev=>visSet.has(ev.id) && state.selected.has(ev.id));
+    }
+
+    // --- Download-Tooltip aktualisieren ---
+    function updateDownloadTooltip(){
+      const btn = $('#btnIcsSel');
+      if(!btn) return;
+      const n = visibleSelected().length;
+      btn.title = n
+        ? `Kalenderdatei für ${n} Ereignis${n===1?'':'se'} herunterladen`
+        : 'Keine ausgewählten sichtbaren Einträge';
+    }
 
     // ---------- Form / Actions ----------
     function toLocalDateInputValue(d){const z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10);}
@@ -531,7 +573,7 @@
       const futureEnd=addYears(now,state.blockYears*state.loadedBlocksFwd);
       // Initial view = future decade only
       state.eventsAll=computeRangeWindow(state.start,{label:state.label,units:state.units,patterns:state.patterns}, now, futureEnd);
-      render(); syncResultFiltersUI(); encodeStateToURL();
+      render(); syncResultFiltersUI();
     }
 
     // Load future decade
@@ -565,15 +607,16 @@
     $('#btnMore').addEventListener('click',loadMoreFuture);
     $('#btnMorePast').addEventListener('click',loadMorePast);
 
-    // Selection
+    // Selection (toolbar acts only on visible)
     $('#btnSelectAll').addEventListener('click',()=>{ for(const ev of state.eventsView) state.selected.add(ev.id); render(); });
-    $('#btnSelectNone').addEventListener('click',()=>{ state.selected.clear(); render(); });
+    $('#btnSelectNone').addEventListener('click',()=>{ for(const ev of state.eventsView) state.selected.delete(ev.id); render(); });
 
     // Filters collapse
     $('#btnToggleFilters').addEventListener('click',()=>{
       state.filters.open=!state.filters.open;
-      const el=$('#resultFilters'); if(state.filters.open){el.classList.add('show'); $('#btnToggleFilters').textContent='Filter ausblenden';}
-      else {el.classList.remove('show'); $('#btnToggleFilters').textContent='Filter anzeigen';}
+      const wrap=$('#filtersWrap');
+      if(state.filters.open){wrap.classList.add('show'); $('#btnToggleFilters').textContent='🔎 Filter ausblenden';}
+      else {wrap.classList.remove('show'); $('#btnToggleFilters').textContent='🔎 Filter anzeigen';}
     });
     function syncResultFiltersUI(){
       $$('#resultFilters input[data-filter-unit]').forEach(inp=>{ const u=inp.dataset.filterUnit; inp.checked=state.filters.units.has(u); });
@@ -587,10 +630,10 @@
       if(t.matches('input[data-filter-time]')){ const k=t.dataset.filterTime; if(t.checked) state.filters.time.add(k); else state.filters.time.delete(k); render(); }
     });
 
-    // ICS export (selected only)
+    // ICS export (only selected & visible)
     $('#btnIcsSel').addEventListener('click',()=>{
-      if(!state.selected.size) return;
-      const subset=state.eventsAll.filter(ev=>state.selected.has(ev.id));
+      const subset=visibleSelected();
+      if(!subset.length) return;
       const ics=buildICS(subset);
       const label=(state.label||'Jubilaeum').toLowerCase().replace(/\s+/g,'_');
       download(`${label}_auswahl.ics`,ics);
