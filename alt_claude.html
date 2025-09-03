@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jubiläums-Rechner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .input-section {
+            margin-bottom: 40px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .input-group {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input[type="date"], input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="date"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 600;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .view-switcher {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .view-btn {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            color: #666;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .view-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .timeline-view {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #f9f9f9;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+            animation: slideIn 0.5s ease-out;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .timeline-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 4px solid #667eea;
+            border-radius: 50%;
+        }
+
+        .timeline-date {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .timeline-title {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .timeline-detail {
+            font-size: 0.9rem;
+            color: #999;
+        }
+
+        .calendar-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .month-card {
+            background: #f9f9f9;
+            border-radius: 12px;
+            padding: 20px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .month-header {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .calendar-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .calendar-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .calendar-day {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .export-section {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #e0e0e0;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .export-btn {
+            background: linear-gradient(135deg, #48c774, #3ec46d);
+        }
+
+        .export-btn:hover {
+            box-shadow: 0 5px 20px rgba(72, 199, 116, 0.4);
+        }
+
+        .schnapszahl {
+            background: linear-gradient(135deg, #ffd93d, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: bold;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .input-section {
+                flex-direction: column;
+            }
+            
+            .timeline-view {
+                padding-left: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎉 Jubiläums-Rechner</h1>
+        
+        <div class="input-section">
+            <div class="input-group">
+                <label for="eventDate">Ereignisdatum:</label>
+                <input type="date" id="eventDate" required>
+            </div>
+            <div class="input-group">
+                <label for="eventName">Ereignisname (optional):</label>
+                <input type="text" id="eventName" placeholder="z.B. Hochzeit, Geburtstag...">
+            </div>
+            <button onclick="calculateAnniversaries()">Jubiläen berechnen</button>
+        </div>
+
+        <div id="resultsContainer" style="display: none;">
+            <div class="view-switcher">
+                <button class="view-btn active" onclick="switchView('timeline')">📅 Timeline</button>
+                <button class="view-btn" onclick="switchView('calendar')">📆 Kalender</button>
+            </div>
+
+            <div id="timelineView" class="results timeline-view active"></div>
+            <div id="calendarView" class="results calendar-view"></div>
+
+            <div class="export-section">
+                <button class="export-btn" onclick="exportSingleEvent()">📥 Nächstes Event exportieren</button>
+                <button class="export-btn" onclick="exportAllEvents()">📥 Alle Events exportieren (1 Jahr)</button>
+                <button class="export-btn" onclick="exportAllEventsExtended()">📥 Alle Events exportieren (2 Jahre)</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let anniversaries = [];
+        let eventStartDate = null;
+        let eventTitle = '';
+
+        function calculateAnniversaries() {
+            const dateInput = document.getElementById('eventDate').value;
+            const nameInput = document.getElementById('eventName').value;
+            
+            if (!dateInput) {
+                alert('Bitte ein Datum eingeben!');
+                return;
+            }
+
+            eventStartDate = new Date(dateInput);
+            eventTitle = nameInput || 'Ereignis';
+            const today = new Date();
+            
+            anniversaries = [];
+
+            // Zeiteinheiten für Berechnungen
+            const units = [
+                { name: 'Sekunden', ms: 1000, values: [100000, 250000, 500000, 750000, 1000000, 2500000, 5000000, 7500000, 10000000, 25000000, 50000000, 75000000, 100000000] },
+                { name: 'Minuten', ms: 60000, values: [1000, 2500, 5000, 7500, 10000, 25000, 50000, 75000, 100000] },
+                { name: 'Stunden', ms: 3600000, values: [100, 250, 500, 750, 1000, 2500, 5000, 7500, 10000, 25000] },
+                { name: 'Tage', ms: 86400000, values: [10, 25, 50, 75, 100, 250, 365, 500, 750, 1000, 1500, 2000, 2500, 3000, 3650, 4000, 5000, 7500, 10000] },
+                { name: 'Wochen', ms: 604800000, values: [10, 25, 50, 52, 75, 100, 150, 200, 250, 300, 365, 400, 500, 520, 750, 1000] },
+                { name: 'Monate', ms: 2592000000, values: [6, 12, 24, 36, 48, 60, 72, 84, 96, 100, 108, 120, 150, 200, 250, 300, 360, 400, 500] },
+                { name: 'Jahre', ms: 31536000000, values: [1, 2, 3, 5, 7, 10, 12, 15, 20, 25, 30, 40, 50, 60, 75, 100] }
+            ];
+
+            // Schnapszahlen
+            const schnapszahlen = [111, 222, 333, 444, 555, 666, 777, 888, 999, 1111, 2222, 3333, 4444, 5555, 6666, 7777, 8888, 9999];
+
+            // Berechne normale Jubiläen
+            units.forEach(unit => {
+                unit.values.forEach(value => {
+                    const date = new Date(eventStartDate.getTime() + (value * unit.ms));
+                    if (date > today && date < new Date(today.getTime() + (730 * 86400000))) { // Nächste 2 Jahre
+                        anniversaries.push({
+                            date: date,
+                            value: value,
+                            unit: unit.name,
+                            isSchnapszahl: false
+                        });
+                    }
+                });
+
+                // Schnapszahlen für diese Einheit
+                schnapszahlen.forEach(sz => {
+                    const date = new Date(eventStartDate.getTime() + (sz * unit.ms));
+                    if (date > today && date < new Date(today.getTime() + (730 * 86400000))) {
+                        anniversaries.push({
+                            date: date,
+                            value: sz,
+                            unit: unit.name,
+                            isSchnapszahl: true
+                        });
+                    }
+                });
+            });
+
+            // Sortiere nach Datum
+            anniversaries.sort((a, b) => a.date - b.date);
+
+            // Zeige Ergebnisse
+            displayResults();
+            document.getElementById('resultsContainer').style.display = 'block';
+        }
+
+        function displayResults() {
+            displayTimeline();
+            displayCalendar();
+        }
+
+        function displayTimeline() {
+            const container = document.getElementById('timelineView');
+            
+            if (anniversaries.length === 0) {
+                container.innerHTML = '<div class="no-results">Keine Jubiläen in den nächsten 2 Jahren gefunden.</div>';
+                return;
+            }
+
+            let html = '';
+            anniversaries.slice(0, 50).forEach(ann => { // Zeige max. 50 Events
+                const dateStr = ann.date.toLocaleDateString('de-DE', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+                
+                const daysUntil = Math.ceil((ann.date - new Date()) / 86400000);
+                const schnapszahlClass = ann.isSchnapszahl ? ' class="schnapszahl"' : '';
+                
+                html += `
+                    <div class="timeline-item">
+                        <div class="timeline-date">${dateStr}</div>
+                        <div class="timeline-title"${schnapszahlClass}>
+                            ${ann.value} ${ann.unit} ${ann.isSchnapszahl ? '(Schnapszahl!)' : ''}
+                        </div>
+                        <div class="timeline-detail">
+                            In ${daysUntil} ${daysUntil === 1 ? 'Tag' : 'Tagen'}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function displayCalendar() {
+            const container = document.getElementById('calendarView');
+            
+            if (anniversaries.length === 0) {
+                container.innerHTML = '<div class="no-results">Keine Jubiläen in den nächsten 2 Jahren gefunden.</div>';
+                return;
+            }
+
+            // Gruppiere nach Monat
+            const monthGroups = {};
+            anniversaries.forEach(ann => {
+                const monthKey = `${ann.date.getFullYear()}-${String(ann.date.getMonth() + 1).padStart(2, '0')}`;
+                const monthName = ann.date.toLocaleDateString('de-DE', { year: 'numeric', month: 'long' });
+                
+                if (!monthGroups[monthKey]) {
+                    monthGroups[monthKey] = {
+                        name: monthName,
+                        events: []
+                    };
+                }
+                
+                monthGroups[monthKey].events.push(ann);
+            });
+
+            let html = '';
+            Object.keys(monthGroups).sort().forEach(key => {
+                const group = monthGroups[key];
+                html += `<div class="month-card">
+                    <div class="month-header">${group.name}</div>`;
+                
+                group.events.forEach(ann => {
+                    const schnapszahlClass = ann.isSchnapszahl ? ' schnapszahl' : '';
+                    html += `
+                        <div class="calendar-item">
+                            <span class="calendar-day">${ann.date.getDate()}.</span>
+                            <span class="${schnapszahlClass}">${ann.value} ${ann.unit}</span>
+                            ${ann.isSchnapszahl ? ' 🎉' : ''}
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function switchView(view) {
+            document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.results').forEach(res => res.classList.remove('active'));
+            
+            if (view === 'timeline') {
+                document.querySelector('.view-btn:nth-child(1)').classList.add('active');
+                document.getElementById('timelineView').classList.add('active');
+            } else {
+                document.querySelector('.view-btn:nth-child(2)').classList.add('active');
+                document.getElementById('calendarView').classList.add('active');
+            }
+        }
+
+        function createICSContent(events) {
+            let ics = 'BEGIN:VCALENDAR\r\n';
+            ics += 'VERSION:2.0\r\n';
+            ics += 'PRODID:-//Jubiläums-Rechner//DE\r\n';
+            ics += 'CALSCALE:GREGORIAN\r\n';
+            ics += 'METHOD:PUBLISH\r\n';
+
+            events.forEach(ann => {
+                const dateStr = ann.date.toISOString().replace(/[-:]/g, '').split('T')[0];
+                const uid = `${dateStr}-${ann.value}-${ann.unit}@jubilaeum.local`;
+                const summary = `${eventTitle}: ${ann.value} ${ann.unit}${ann.isSchnapszahl ? ' (Schnapszahl!)' : ''}`;
+                
+                ics += 'BEGIN:VEVENT\r\n';
+                ics += `UID:${uid}\r\n`;
+                ics += `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}\r\n`;
+                ics += `DTSTART;VALUE=DATE:${dateStr}\r\n`;
+                ics += `SUMMARY:${summary}\r\n`;
+                ics += `DESCRIPTION:Jubiläum: ${ann.value} ${ann.unit} seit ${eventStartDate.toLocaleDateString('de-DE')}\r\n`;
+                ics += 'END:VEVENT\r\n';
+            });
+
+            ics += 'END:VCALENDAR\r\n';
+            return ics;
+        }
+
+        function downloadICS(content, filename) {
+            const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportSingleEvent() {
+            if (anniversaries.length === 0) {
+                alert('Keine Jubiläen zum Exportieren vorhanden!');
+                return;
+            }
+            
+            const icsContent = createICSContent([anniversaries[0]]);
+            downloadICS(icsContent, `jubilaeum-${eventTitle.toLowerCase().replace(/\s+/g, '-')}-naechstes.ics`);
+        }
+
+        function exportAllEvents() {
+            if (anniversaries.length === 0) {
+                alert('Keine Jubiläen zum Exportieren vorhanden!');
+                return;
+            }
+            
+            const oneYearFromNow = new Date();
+            oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+            
+            const eventsOneYear = anniversaries.filter(ann => ann.date <= oneYearFromNow);
+            const icsContent = createICSContent(eventsOneYear);
+            downloadICS(icsContent, `jubilaeen-${eventTitle.toLowerCase().replace(/\s+/g, '-')}-1jahr.ics`);
+        }
+
+        function exportAllEventsExtended() {
+            if (anniversaries.length === 0) {
+                alert('Keine Jubiläen zum Exportieren vorhanden!');
+                return;
+            }
+            
+            const icsContent = createICSContent(anniversaries);
+            downloadICS(icsContent, `jubilaeen-${eventTitle.toLowerCase().replace(/\s+/g, '-')}-2jahre.ics`);
+        }
+
+        // Setze heutiges Datum als Beispiel
+        window.addEventListener('DOMContentLoaded', () => {
+            const today = new Date();
+            today.setFullYear(today.getFullYear() - 1);
+            document.getElementById('eventDate').value = today.toISOString().split('T')[0];
+        });
+    </script>
+</body>
+</html>
