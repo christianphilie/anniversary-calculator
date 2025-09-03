@@ -3,45 +3,45 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Jubiläums-Finder v5</title>
+  <title>Jubiläums-Finder v6</title>
   <meta name="description" content="Berechne besondere Meilensteine wie 10 Jahre, 500 Wochen oder 333.333 Sekunden und exportiere sie als Kalender" />
   <style>
     /* ========= Tokens ========= */
     :root{
       --bg:#fff; --panel:#f6f7fb; --card:#fff; --text:#111; --muted:#555;
-      --border:#e5e7eb; --shadow:0 2px 8px rgba(0,0,0,.08); --radius:12px;
+      --border:#e5e7eb; --radius:14px;
       --brand:#0ea5e9; --accent:#8b5cf6;
-      /* Unit scale (seconds→years) */
-      --c-seconds:#f59e0b; --c-minutes:#f97316; --c-hours:#ef4444;
-      --c-days:#10b981; --c-weeks:#22c55e; --c-months:#06b6d4; --c-years:#3b82f6;
+      /* Unit scale (seconds→years) — new scheme */
+      --c-seconds:#3b82f6; --c-minutes:#06b6d4; --c-hours:#10b981;
+      --c-days:#82c55e; --c-weeks:#f59e0b; --c-months:#f97316; --c-years:#ef4444;
       /* Buttons: black in light */
       --btn-bg:#111; --btn-fg:#fff; --btn-border:transparent;
     }
     [data-theme="dark"]{
-      --bg:#0b0c0f; --panel:#111318; --card:#141821; --text:#e9eef5; --muted:#a3adba;
-      --border:#1f2530; --shadow:0 10px 30px rgba(0,0,0,.35); --radius:16px;
+      --bg:#0b0c0f; --panel:#101319; --card:#141821; --text:#e9eef5; --muted:#a3adba;
+      --border:#1f2530; --radius:16px;
       --brand:#7dd3fc; --accent:#a78bfa;
-      --c-seconds:#f59e0b; --c-minutes:#fb923c; --c-hours:#f87171;
-      --c-days:#34d399; --c-weeks:#4ade80; --c-months:#22d3ee; --c-years:#60a5fa;
+      --c-seconds:#60a5fa; --c-minutes:#22d3ee; --c-hours:#34d399;
+      --c-days:#8ade80; --c-weeks:#f5ae0b; --c-months:#fb823c; --c-years:#f87171;
       /* Buttons: white in dark */
       --btn-bg:#fff; --btn-fg:#111; --btn-border:transparent;
     }
 
-    /* ========= Base/Layout ========= */
+    /* ========= Base/Layout (no shadows; flatter 2025 look) ========= */
     *,*::before,*::after{box-sizing:border-box}
     html,body{height:100%}
     body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;color:var(--text);background:var(--bg);transition:background .25s,color .25s}
     .wrap{max-width:1100px;margin:0 auto;padding:28px}
     header{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:20px}
     .title{display:flex;gap:12px;align-items:center}
-    .logo{font-size:28px;line-height:1} /* ohne Kachel-Hintergrund */
+    .logo{font-size:28px;line-height:1}
     h1{font-size:20px;margin:0}
     .muted{color:var(--muted)}
 
     .grid{display:grid;grid-template-columns: minmax(260px,320px) minmax(0,1fr);gap:20px}
     @media (max-width:980px){.grid{grid-template-columns:1fr}}
 
-    .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius)}
     .panel .hd{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
     .panel .bd{padding:18px}
 
@@ -67,7 +67,7 @@
     .chip input:checked + span{font-weight:700}
 
     /* Buttons */
-    .btn{appearance:none;cursor:pointer;font-weight:700;border-radius:12px;padding:12px 14px}
+    .btn{appearance:none;cursor:pointer;font-weight:700;border-radius:12px;padding:12px 14px;letter-spacing:.2px}
     .btn.primary{background:var(--btn-bg);color:var(--btn-fg);border:1px solid var(--btn-border)}
     .btn.secondary{background:transparent;color:var(--text);border:1px solid var(--border)}
     .btn.ghost{background:transparent;color:var(--muted);border:none}
@@ -80,7 +80,7 @@
 
     /* Results list */
     .list{display:grid;gap:10px}
-    .year-sep{margin-top:8px;padding:4px 0;color:var(--muted);font-weight:700}
+    .year-sep{margin-top:8px;padding:6px 0;color:var(--muted);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.08em}
     .item{display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--border);padding:12px;border-radius:14px}
     .when{font-weight:700}
     .sub{font-size:12px;color:var(--muted)}
@@ -92,20 +92,24 @@
 
     .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
     .spacer{flex:1}
-    .filters{display:none;flex-wrap:wrap;gap:8px;margin:10px 0 0}
-    .filters.show{display:flex}
-    .filters .group{display:flex;gap:8px;align-items:center}
-    .filters .label{font-size:12px;color:var(--muted)}
+
+    /* Responsive filters (improved) */
+    .filters{display:none;gap:10px;margin:10px 0 0}
+    .filters.show{display:grid}
+    .filters{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+    .filters .group{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .filters .label{font-size:12px;color:var(--muted);flex:0 0 100%}
 
     .empty{padding:18px;background:var(--card);border:1px solid var(--border);border-radius:12px;text-align:center;color:var(--muted)}
 
-    /* Center the "load more" */
-    #moreWrap{display:flex;justify-content:center}
+    /* Load more buttons alignment */
+    #morePastWrap,#moreWrap{display:flex;justify-content:center}
+    #morePastWrap{margin-top:4px;margin-bottom:10px}
 
     /* Tooltip */
     .hint{position:relative;display:inline-flex;align-items:center;gap:6px}
     .hint .tip{display:inline-block;width:18px;height:18px;border-radius:999px;background:transparent;border:1px solid var(--border);color:var(--muted);font-weight:700;text-align:center;line-height:18px;cursor:default}
-    .hint .bubble{position:absolute;top:calc(100% + 8px);right:0;max-width:320px;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow);padding:10px 12px;font-size:12px;color:var(--muted);display:none;z-index:10}
+    .hint .bubble{position:absolute;top:calc(100% + 8px);right:0;max-width:320px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--muted);display:none;z-index:10}
     .hint:hover .bubble{display:block}
   </style>
 </head>
@@ -212,7 +216,17 @@
               <label class="chip"><input type="checkbox" data-filter-pattern="rounded" checked /><span>Runde Vielfache</span></label>
               <label class="chip"><input type="checkbox" data-filter-pattern="repdigit" checked /><span>Schnaps</span></label>
             </div>
+            <div class="group">
+              <span class="label">⏳ Zeitrichtung:</span>
+              <label class="chip"><input type="checkbox" data-filter-time="past" checked /><span>Vergangenheit</span></label>
+              <label class="chip"><input type="checkbox" data-filter-time="future" checked /><span>Zukunft</span></label>
+            </div>
           </div>
+        </div>
+
+        <!-- NEW: past loader above the list -->
+        <div class="bd" id="morePastWrap" style="display:none">
+          <button class="btn secondary" id="btnMorePast">Vorherige 10 Jahre laden</button>
         </div>
 
         <div class="bd" id="results">
@@ -306,7 +320,7 @@
       String(d.getUTCHours()).padStart(2,'0')+
       String(d.getUTCMinutes()).padStart(2,'0')+
       String(d.getUTCSeconds()).padStart(2,'0')+'Z';
-    const ymdUTC=d=>d.getUTCFullYear().toString()+String(d.getUTCMonth()+1).padStart(2,'0')+String(d.getUTCDate()).padStart(2,'0');
+    const ymdUTC=d=>d.getUTCFullYear().toString()+String(d.getUTCMonth()+1).padStart(2,'0')+String(d.getUTCDate());
     const esc=s=>s.replace(/\\/g,"\\\\").replace(/\n/g,"\\n").replace(/,/g,"\\,").replace(/;/g,"\\;");
     function buildICS(events){
       const now=new Date(); const out=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//JubilaeumsFinder//DE','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
@@ -325,31 +339,34 @@
     }
     function download(name,content){ const blob=new Blob([content],{type:'text/calendar;charset=utf-8'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(url),2000); }
 
-    // Core compute
+    // Core compute (windowed)
     const unitAdder=u=>({years:addYears,months:addMonths,weeks:addWeeks,days:addDays,hours:addHours,minutes:addMinutes,seconds:addSeconds})[u];
     const unitMs=u=>({weeks:MS.week,days:MS.day,hours:MS.hour,minutes:MS.minute,seconds:MS.second})[u]||null;
     const diffMonths=(a,b)=>(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth());
     const yearsBetween=(a,b)=>Math.floor((b-a)/MS.day/365.2425);
 
-    function computeRange(start, opts, end){
-      const now=new Date(); const evs=[];
+    /**
+     * Compute events within [from, to] window (inclusive).
+     */
+    function computeRangeWindow(start, opts, from, to){
+      const evs=[];
       function push(date,n,unit){
-        if(date<now || date>end) return;
+        if(date<from || date>to) return;
         const title=`${fmtNum.format(n)} ${labelDE(unit,n)} seit ${opts.label||'Start'}`;
         const startText=new Intl.DateTimeFormat('de-DE',{dateStyle:'long',timeStyle:'short'}).format(start)+' Uhr';
         const desc=`${fmtNum.format(n)} ${labelDE(unit,n)} seit ${startText}`;
-        evs.push({id:`${unit}-${n}-${date.getTime()}`,unit,n,date,title,inHuman:inHuman(now,date),desc,patterns:classifyPatterns(n)});
+        evs.push({id:`${unit}-${n}-${date.getTime()}`,unit,n,date,title,inHuman:inHuman(new Date(),date),desc,patterns:classifyPatterns(n)});
       }
       for(const unit of opts.units){
         const add=unitAdder(unit);
         if(unit==='years'){
-          const maxN=yearsBetween(start,end)+2;
+          const maxN=yearsBetween(start,to)+2;
           for(const n of buildCandidates(maxN,opts.patterns)) push(add(start,n),n,unit);
         }else if(unit==='months'){
-          const maxN=diffMonths(start,end)+2;
+          const maxN=diffMonths(start,to)+2;
           for(const n of buildCandidates(maxN,opts.patterns)) push(add(start,n),n,unit);
         }else{
-          const per=unitMs(unit), maxN=Math.floor((end-start)/per)+1;
+          const per=unitMs(unit), maxN=Math.floor((to-start)/per)+1;
           for(const n of buildCandidates(maxN,opts.patterns)) push(add(start,n),n,unit);
         }
       }
@@ -361,24 +378,55 @@
       start:null,label:'',
       units:['years','months','weeks','days','hours','minutes','seconds'],
       patterns:{rounded:true,repdigit:true},
-      blockYears:10,loadedBlocks:0,
+      blockYears:10,loadedBlocksFwd:0,loadedBlocksPast:0,
       eventsAll:[],eventsView:[],selected:new Set(),
-      filters:{units:new Set(['years','months','weeks','days','hours','minutes','seconds']),patterns:new Set(['rounded','repdigit']),open:false}
+      filters:{
+        units:new Set(['years','months','weeks','days','hours','minutes','seconds']),
+        patterns:new Set(['rounded','repdigit']),
+        time:new Set(['past','future']),
+        open:false
+      }
     };
 
     function applyViewFilters(){
+      const now=new Date();
       state.eventsView=state.eventsAll.filter(e=>{
         if(!state.filters.units.has(e.unit)) return false;
-        if(state.filters.patterns.size===0) return true;
-        for(const p of state.filters.patterns){ if(e.patterns[p]) return true; }
-        return false;
+        // pattern filter
+        if(state.filters.patterns.size>0){
+          let ok=false; for(const p of state.filters.patterns){ if(e.patterns[p]) {ok=true; break;} }
+          if(!ok) return false;
+        }
+        // time filter
+        const isFuture=e.date>=now, isPast=e.date<now;
+        if(isFuture && !state.filters.time.has('future')) return false;
+        if(isPast && !state.filters.time.has('past')) return false;
+        return true;
       });
     }
 
     function renderEmpty(){
       $('#results').innerHTML='<div class="empty">Keine Einträge im Zeitraum. Prüfe Einheiten/Muster oder lade weitere Jahre.</div>';
-      $('#btnIcsSel').disabled=true; $('#resultFilters').classList.remove('show'); $('#moreWrap').style.display='none';
+      $('#btnIcsSel').disabled=true;
+      $('#resultFilters').classList.remove('show');
+      $('#moreWrap').style.display='none';
+      $('#morePastWrap').style.display='none';
       $('#btnToggleFilters').textContent='Filter anzeigen';
+    }
+
+    function updateLoadButtonsVisibility(){
+      // Forward button always shown if there might be more future events (optimistic)
+      $('#moreWrap').style.display = state.start ? 'flex':'none';
+
+      // Past button only if there are possible items after start and before already-loaded lower bound
+      if(!state.start){ $('#morePastWrap').style.display='none'; return; }
+      const now=new Date();
+      const lowerBoundCandidate = addYears(now, -(state.loadedBlocksPast+1)*state.blockYears);
+      const windowFrom = new Date(Math.max(state.start.getTime(), lowerBoundCandidate.getTime()));
+      const windowTo   = addYears(now, -state.loadedBlocksPast*state.blockYears);
+      if(windowFrom >= windowTo){ $('#morePastWrap').style.display='none'; return; }
+      const probe = computeRangeWindow(state.start,{label:state.label,units:state.units,patterns:state.patterns}, windowFrom, windowTo);
+      $('#morePastWrap').style.display = probe.length ? 'flex' : 'none';
     }
 
     function renderList(){
@@ -411,7 +459,7 @@
       });
 
       $('#btnIcsSel').disabled=state.selected.size===0;
-      $('#moreWrap').style.display='flex';
+      updateLoadButtonsVisibility();
     }
     const render=()=>renderList();
 
@@ -437,26 +485,47 @@
     function recomputeInitial(){
       const o=getOpts(); if(!o) return;
       state.start=o.start; state.label=o.label; state.units=o.units; state.patterns=o.patterns;
-      state.loadedBlocks=1; state.selected.clear();
+      state.loadedBlocksFwd=1; state.loadedBlocksPast=0; state.selected.clear();
       state.filters.units=new Set(state.units);
       state.filters.patterns=new Set(Object.entries(state.patterns).filter(([,v])=>v).map(([k])=>k));
-      const now=new Date(); const end=addYears(now,state.blockYears*state.loadedBlocks);
-      state.eventsAll=computeRange(state.start,{label:state.label,units:state.units,patterns:state.patterns},end);
+      state.filters.time=new Set(['past','future']); // default both
+      const now=new Date();
+      const futureEnd=addYears(now,state.blockYears*state.loadedBlocksFwd);
+      // Initial view = future decade only
+      state.eventsAll=computeRangeWindow(state.start,{label:state.label,units:state.units,patterns:state.patterns}, now, futureEnd);
       render(); syncResultFiltersUI();
     }
 
-    function loadMore(){
+    // Load future decade
+    function loadMoreFuture(){
       if(!state.start) return;
-      const now=new Date(); const prev=state.loadedBlocks; state.loadedBlocks+=1;
-      const oldEnd=addYears(now,state.blockYears*prev); const newEnd=addYears(now,state.blockYears*state.loadedBlocks);
-      const more=computeRange(state.start,{label:state.label,units:state.units,patterns:state.patterns},newEnd).filter(e=>e.date>oldEnd);
+      const now=new Date();
+      const prev=state.loadedBlocksFwd; state.loadedBlocksFwd+=1;
+      const oldEnd=addYears(now,state.blockYears*prev);
+      const newEnd=addYears(now,state.blockYears*state.loadedBlocksFwd);
+      const more=computeRangeWindow(state.start,{label:state.label,units:state.units,patterns:state.patterns}, oldEnd, newEnd);
+      const ids=new Set(state.eventsAll.map(e=>e.id)); for(const ev of more){ if(!ids.has(ev.id)) state.eventsAll.push(ev); }
+      state.eventsAll.sort((a,b)=>a.date-b.date||a.n-b.n); render();
+    }
+
+    // Load past decade (not before start)
+    function loadMorePast(){
+      if(!state.start) return;
+      const now=new Date();
+      const prev=state.loadedBlocksPast; state.loadedBlocksPast+=1;
+      const upperTo = addYears(now, -prev*state.blockYears); // previous upper bound (exclusive)
+      const lowerCandidate = addYears(now, -(prev+1)*state.blockYears);
+      const lowerFrom = new Date(Math.max(state.start.getTime(), lowerCandidate.getTime()));
+      if(lowerFrom >= upperTo){ updateLoadButtonsVisibility(); return; }
+      const more=computeRangeWindow(state.start,{label:state.label,units:state.units,patterns:state.patterns}, lowerFrom, upperTo);
       const ids=new Set(state.eventsAll.map(e=>e.id)); for(const ev of more){ if(!ids.has(ev.id)) state.eventsAll.push(ev); }
       state.eventsAll.sort((a,b)=>a.date-b.date||a.n-b.n); render();
     }
 
     $('#form').addEventListener('submit',e=>{e.preventDefault();recomputeInitial();});
     $('#btnReset').addEventListener('click',()=>{ $('#label').value=''; $('#date').value=''; $('#time').value=''; state.eventsAll=[]; state.eventsView=[]; state.selected.clear(); renderEmpty();});
-    $('#btnMore').addEventListener('click',loadMore);
+    $('#btnMore').addEventListener('click',loadMoreFuture);
+    $('#btnMorePast').addEventListener('click',loadMorePast);
 
     // Selection
     $('#btnSelectAll').addEventListener('click',()=>{ for(const ev of state.eventsView) state.selected.add(ev.id); render(); });
@@ -471,11 +540,13 @@
     function syncResultFiltersUI(){
       $$('#resultFilters input[data-filter-unit]').forEach(inp=>{ const u=inp.dataset.filterUnit; inp.checked=state.filters.units.has(u); });
       $$('#resultFilters input[data-filter-pattern]').forEach(inp=>{ const p=inp.dataset.filterPattern; inp.checked=state.filters.patterns.has(p); });
+      $$('#resultFilters input[data-filter-time]').forEach(inp=>{ const t=inp.dataset.filterTime; inp.checked=state.filters.time.has(t); });
     }
     $('#resultFilters').addEventListener('change',e=>{
       const t=e.target;
       if(t.matches('input[data-filter-unit]')){ const u=t.dataset.filterUnit; if(t.checked) state.filters.units.add(u); else state.filters.units.delete(u); render(); }
       if(t.matches('input[data-filter-pattern]')){ const p=t.dataset.filterPattern; if(t.checked) state.filters.patterns.add(p); else state.filters.patterns.delete(p); render(); }
+      if(t.matches('input[data-filter-time]')){ const k=t.dataset.filterTime; if(t.checked) state.filters.time.add(k); else state.filters.time.delete(k); render(); }
     });
 
     // ICS export (selected only)
