@@ -11,10 +11,14 @@
 
 <script setup lang="ts">
 import { provideError } from './composables/useError'
+import { provideAppState } from './composables/useAppState'
 import AppHeader from './components/AppHeader.vue'
 import InputPanel from './components/InputPanel.vue'
 import ResultsPanel from './components/ResultsPanel.vue'
 
 // Provide error state to all components
 provideError()
+
+// Provide app state to all components (shared state)
+provideAppState()
 </script>

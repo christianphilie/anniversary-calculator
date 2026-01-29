@@ -1,10 +1,24 @@
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, provide, inject } from 'vue'
 import type { Ref, ComputedRef } from 'vue'
 import type { AppState, Unit, Patterns, MilestoneEvent } from '../types'
 import { computeRangeWindow } from '../utils/compute'
 import { useError } from './useError'
 
-export function useAppState() {
+const APP_STATE_KEY = Symbol('appState')
+
+interface AppStateComposable {
+  state: Ref<AppState>
+  isLoading: Ref<boolean>
+  visibleSelected: ComputedRef<MilestoneEvent[]>
+  recompute: (start: Date, label: string, units: Unit[], patterns: Patterns, yearFrom: number, yearTo: number) => Promise<void>
+  selectAll: () => void
+  selectNone: () => void
+  toggleSelection: (id: string) => void
+  selectYear: (year: number, select: boolean) => void
+  reset: () => void
+}
+
+function createAppState(): AppStateComposable {
   const { handleError } = useError()
   
   const state: Ref<AppState> = ref({
@@ -137,4 +151,21 @@ export function useAppState() {
     selectYear,
     reset
   }
+}
+
+export function useAppState(): AppStateComposable {
+  // Try to inject first (if provided by parent)
+  const injected = inject<AppStateComposable | undefined>(APP_STATE_KEY)
+  if (injected) {
+    return injected
+  }
+
+  // Otherwise create new instance (fallback for testing)
+  return createAppState()
+}
+
+export function provideAppState(): AppStateComposable {
+  const appState = createAppState()
+  provide(APP_STATE_KEY, appState)
+  return appState
 }
