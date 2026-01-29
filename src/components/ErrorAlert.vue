@@ -23,11 +23,12 @@ const { error, clearError } = useError()
 <style scoped>
 .error-alert {
   background: var(--card);
-  border: 2px solid #ef4444;
-  border-radius: var(--radius);
-  padding: 12px 16px;
-  margin-bottom: 16px;
-  animation: slideIn 0.3s ease-out;
+  border: 1px solid #ef4444;
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  animation: slideIn 0.2s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: 0 1px 3px 0 rgba(239,68,68,0.1),0 1px 2px 0 rgba(239,68,68,0.06);
 }
 
 .error-content {
@@ -55,18 +56,20 @@ const { error, clearError } = useError()
   cursor: pointer;
   font-size: 18px;
   padding: 0;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
-  transition: background 0.2s;
+  border-radius: var(--radius);
+  transition: all 0.15s cubic-bezier(0.4,0,0.2,1);
+  flex-shrink: 0;
 }
 
 .error-close:hover {
   background: var(--panel);
   color: var(--text);
+  transform: scale(1.1);
 }
 
 .error-close:focus-visible {

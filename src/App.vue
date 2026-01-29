@@ -6,6 +6,7 @@
       <InputPanel />
       <ResultsPanel />
     </main>
+    <Toast />
   </div>
 </template>
 
@@ -15,6 +16,7 @@ import { provideAppState } from './composables/useAppState'
 import AppHeader from './components/AppHeader.vue'
 import InputPanel from './components/InputPanel.vue'
 import ResultsPanel from './components/ResultsPanel.vue'
+import Toast from './components/Toast.vue'
 
 // Provide error state to all components
 provideError()

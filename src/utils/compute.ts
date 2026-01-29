@@ -31,7 +31,23 @@ export interface ComputeOptions {
 }
 
 /**
- * Compute events within [from, to] window (inclusive).
+ * Computes milestone events within a given date range window (inclusive)
+ * 
+ * @param start - The starting date for milestone calculations
+ * @param opts - Options including label, units, and patterns to match
+ * @param from - The start of the date range window (inclusive)
+ * @param to - The end of the date range window (inclusive)
+ * @returns Array of milestone events sorted by date and then by number
+ * 
+ * @example
+ * ```ts
+ * const events = computeRangeWindow(
+ *   new Date('2020-01-01'),
+ *   { label: 'Birthday', units: ['years'], patterns: { rounded: true, repdigit: false } },
+ *   new Date('2020-01-01'),
+ *   new Date('2030-01-01')
+ * )
+ * ```
  */
 export function computeRangeWindow(
   start: Date,

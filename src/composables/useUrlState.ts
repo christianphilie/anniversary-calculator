@@ -1,6 +1,7 @@
 import type { AppState } from '../types'
 import { toLocalDateInputValue } from '../utils/date'
 import { sanitizeUrlParam, sanitizeLabel } from '../utils/sanitize'
+import { parseShareUrl } from '../utils/share'
 
 export function useUrlState(state: { value: AppState }) {
   function encodeStateToURL(): void {
@@ -47,6 +48,7 @@ export function useUrlState(state: { value: AppState }) {
     theme?: string
     yearFrom?: number
     yearTo?: number
+    milestoneIds?: string[]
   } {
     const q = new URLSearchParams(location.search)
     const result: ReturnType<typeof loadStateFromURL> = {}
@@ -110,6 +112,12 @@ export function useUrlState(state: { value: AppState }) {
       if (!isNaN(yearTo) && yearTo >= 1900 && yearTo <= 2200) {
         result.yearTo = yearTo
       }
+    }
+
+    // Parse milestone IDs from share URL
+    const milestoneIds = parseShareUrl()
+    if (milestoneIds.length > 0) {
+      result.milestoneIds = milestoneIds
     }
 
     return result

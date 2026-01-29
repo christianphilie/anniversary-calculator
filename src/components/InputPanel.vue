@@ -352,5 +352,17 @@ onMounted(() => {
   }
 
   compute()
+
+  // Select milestones from share URL after computation
+  if (urlState.milestoneIds && urlState.milestoneIds.length > 0) {
+    // Wait for next tick to ensure events are computed
+    setTimeout(() => {
+      urlState.milestoneIds!.forEach(id => {
+        if (state.value.eventsAll.some(ev => ev.id === id)) {
+          state.value.selected.add(id)
+        }
+      })
+    }, 100)
+  }
 })
 </script>

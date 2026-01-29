@@ -19,7 +19,26 @@ export function dativeDE(unit: Unit, n: number): string {
   return n === 1 ? unitDE[unit][0] : unitDE[unit][2]
 }
 
-export function humanDiff(from: Date, to: Date): string {
+// English unit labels
+const unitEN: Record<Unit, [string, string]> = {
+  years: ['Year', 'Years'],
+  months: ['Month', 'Months'],
+  weeks: ['Week', 'Weeks'],
+  days: ['Day', 'Days'],
+  hours: ['Hour', 'Hours'],
+  minutes: ['Minute', 'Minutes'],
+  seconds: ['Second', 'Seconds']
+}
+
+export function labelEN(unit: Unit, n: number): string {
+  return n === 1 ? unitEN[unit][0] : unitEN[unit][1]
+}
+
+export function getUnitLabel(unit: Unit, n: number, locale: 'de' | 'en' = 'de'): string {
+  return locale === 'en' ? labelEN(unit, n) : labelDE(unit, n)
+}
+
+export function humanDiff(from: Date, to: Date, locale: 'de' | 'en' = 'de'): string {
   const future = to >= from
   const ms = Math.abs(to.getTime() - from.getTime())
   const s = Math.floor(ms / 1000)
@@ -29,6 +48,21 @@ export function humanDiff(from: Date, to: Date): string {
   const mo = Math.floor(d / 30.44)
   const y = Math.floor(d / 365.2425)
 
+  if (locale === 'en') {
+    const prefix = future ? 'in ' : ''
+    const suffix = future ? '' : ' ago'
+    
+    if (y > 0) return `${prefix}${y} ${labelEN('years', y)}${suffix}`
+    if (mo > 0) return `${prefix}${mo} ${labelEN('months', mo)}${suffix}`
+    const w = Math.floor(d / 7)
+    if (w > 0) return `${prefix}${w} ${labelEN('weeks', w)}${suffix}`
+    if (d > 0) return `${prefix}${d} ${labelEN('days', d)}${suffix}`
+    if (h > 0) return `${prefix}${h} ${labelEN('hours', h)}${suffix}`
+    if (m > 0) return `${prefix}${m} ${labelEN('minutes', m)}${suffix}`
+    return `${prefix}${s} ${labelEN('seconds', s)}${suffix}`
+  }
+
+  // German
   const prefix = future ? 'in ' : 'vor '
 
   if (y > 0) return `${prefix}${y} ${dativeDE('years', y)}`
@@ -41,10 +75,26 @@ export function humanDiff(from: Date, to: Date): string {
   return `${prefix}${s} ${dativeDE('seconds', s)}`
 }
 
-// Formatters
-export const fmtFull = new Intl.DateTimeFormat('de-DE', {
-  dateStyle: 'full',
-  timeStyle: 'short'
-})
+// Formatters - reactive to locale
+export function getDateFormatter(locale: 'de' | 'en' = 'de'): Intl.DateTimeFormat {
+  return new Intl.DateTimeFormat(locale === 'en' ? 'en-US' : 'de-DE', {
+    dateStyle: 'full',
+    timeStyle: 'short'
+  })
+}
 
-export const fmtNum = new Intl.NumberFormat('de-DE')
+export function getNumberFormatter(locale: 'de' | 'en' = 'de'): Intl.NumberFormat {
+  return new Intl.NumberFormat(locale === 'en' ? 'en-US' : 'de-DE')
+}
+
+// Legacy exports for backward compatibility (will use current locale)
+let fmtFull: Intl.DateTimeFormat = getDateFormatter('de')
+let fmtNum: Intl.NumberFormat = getNumberFormatter('de')
+
+// Update formatters when locale changes
+export function updateFormatters(locale: 'de' | 'en'): void {
+  fmtFull = getDateFormatter(locale)
+  fmtNum = getNumberFormatter(locale)
+}
+
+export { fmtFull, fmtNum }
