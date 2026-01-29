@@ -1,0 +1,50 @@
+import type { Unit } from '../types'
+
+// German unit labels
+const unitDE: Record<Unit, [string, string, string]> = {
+  years: ['Jahr', 'Jahre', 'Jahren'],
+  months: ['Monat', 'Monate', 'Monaten'],
+  weeks: ['Woche', 'Wochen', 'Wochen'],
+  days: ['Tag', 'Tage', 'Tagen'],
+  hours: ['Stunde', 'Stunden', 'Stunden'],
+  minutes: ['Minute', 'Minuten', 'Minuten'],
+  seconds: ['Sekunde', 'Sekunden', 'Sekunden']
+}
+
+export function labelDE(unit: Unit, n: number): string {
+  return n === 1 ? unitDE[unit][0] : unitDE[unit][1]
+}
+
+export function dativeDE(unit: Unit, n: number): string {
+  return n === 1 ? unitDE[unit][0] : unitDE[unit][2]
+}
+
+export function humanDiff(from: Date, to: Date): string {
+  const future = to >= from
+  const ms = Math.abs(to.getTime() - from.getTime())
+  const s = Math.floor(ms / 1000)
+  const m = Math.floor(s / 60)
+  const h = Math.floor(m / 60)
+  const d = Math.floor(h / 24)
+  const mo = Math.floor(d / 30.44)
+  const y = Math.floor(d / 365.2425)
+
+  const prefix = future ? 'in ' : 'vor '
+
+  if (y > 0) return `${prefix}${y} ${dativeDE('years', y)}`
+  if (mo > 0) return `${prefix}${mo} ${dativeDE('months', mo)}`
+  const w = Math.floor(d / 7)
+  if (w > 0) return `${prefix}${w} ${dativeDE('weeks', w)}`
+  if (d > 0) return `${prefix}${d} ${dativeDE('days', d)}`
+  if (h > 0) return `${prefix}${h} ${dativeDE('hours', h)}`
+  if (m > 0) return `${prefix}${m} ${dativeDE('minutes', m)}`
+  return `${prefix}${s} ${dativeDE('seconds', s)}`
+}
+
+// Formatters
+export const fmtFull = new Intl.DateTimeFormat('de-DE', {
+  dateStyle: 'full',
+  timeStyle: 'short'
+})
+
+export const fmtNum = new Intl.NumberFormat('de-DE')
