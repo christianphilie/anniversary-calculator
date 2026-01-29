@@ -1,0 +1,31 @@
+/* ========= Design Tokens (Vercel-inspired) ========= */
+:root{
+  --bg:#ffffff; --panel:#fafafa; --card:#ffffff; --text:#171717; --muted:#737373;
+  --border:#e5e5e5; --radius:8px; --radius-lg:12px;
+  --brand:#000000; --accent:#8b5cf6;
+  --shadow-sm:0 1px 2px 0 rgba(0,0,0,0.05);
+  --shadow-md:0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06);
+  --shadow-lg:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.05);
+  /* Unit scale (seconds→years) — modern colors */
+  --c-seconds:#3b82f6; --c-minutes:#06b6d4; --c-hours:#10b981;
+  --c-days:#82c55e; --c-weeks:#f59e0b; --c-months:#f97316; --c-years:#ef4444;
+  /* Buttons: black in light */
+  --btn-bg:#000000; --btn-fg:#ffffff; --btn-border:transparent;
+  --btn-hover-bg:#171717;
+  --focus: 0 0 0 3px rgba(0,0,0,0.1);
+  --transition:all 0.15s cubic-bezier(0.4,0,0.2,1);
+}
+[data-theme="dark"]{
+  --bg:#0a0a0a; --panel:#171717; --card:#262626; --text:#fafafa; --muted:#a3a3a3;
+  --border:#404040; --radius:8px; --radius-lg:12px;
+  --brand:#ffffff; --accent:#a78bfa;
+  --shadow-sm:0 1px 2px 0 rgba(0,0,0,0.3);
+  --shadow-md:0 4px 6px -1px rgba(0,0,0,0.4),0 2px 4px -1px rgba(0,0,0,0.3);
+  --shadow-lg:0 10px 15px -3px rgba(0,0,0,0.5),0 4px 6px -2px rgba(0,0,0,0.4);
+  --c-seconds:#60a5fa; --c-minutes:#22d3ee; --c-hours:#34d399;
+  --c-days:#8ade80; --c-weeks:#f5ae0b; --c-months:#fb823c; --c-years:#f87171;
+  /* Buttons: white in dark */
+  --btn-bg:#ffffff; --btn-fg:#000000; --btn-border:transparent;
+  --btn-hover-bg:#e5e5e5;
+  --focus: 0 0 0 3px rgba(255,255,255,0.2);
+}

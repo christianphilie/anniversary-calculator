@@ -1,0 +1,48 @@
+/* ========= Panel Components ========= */
+
+/* Panel Component */
+.panel{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-sm);
+  transition:var(--transition);
+  overflow:hidden;
+}
+.panel:hover{
+  box-shadow:var(--shadow-md);
+}
+.panel .hd{
+  padding:20px 24px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+  background:var(--panel);
+}
+.panel .hd strong{
+  font-size:16px;
+  font-weight:600;
+  letter-spacing:-0.01em;
+}
+.panel .bd{
+  padding:24px;
+}
+@media (max-width:768px){
+  .panel .hd{padding:16px 20px}
+  .panel .bd{padding:20px}
+}
+
+/* Empty State */
+.empty{
+  padding:48px 24px;
+  background:var(--panel);
+  border:1px dashed var(--border);
+  border-radius:var(--radius-lg);
+  text-align:center;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.6;
+}
