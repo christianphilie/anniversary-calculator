@@ -8,8 +8,7 @@
     />
     <div class="grow">
       <div class="when">
-        <span class="ttl-num">{{ event.baseTitle }}</span>
-        <span class="since"> {{ event.since }}</span>
+        <span class="ttl-num">{{ event.baseTitle }}</span> <span class="since">{{ event.since }}</span>
       </div>
       <div class="sub">{{ formatDate(event.date) }} • {{ event.inHuman }}</div>
     </div>
@@ -17,7 +16,7 @@
       <button
         class="btn-icon"
         :aria-label="`${event.baseTitle} kopieren`"
-        title="Kopieren"
+        title="Kopieren (Strg/Cmd + C)"
         @click="handleCopy"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

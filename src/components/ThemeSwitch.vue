@@ -6,7 +6,7 @@
       :data-mode="mode.value"
       :aria-pressed="themeMode === mode.value"
       :aria-label="`Theme: ${mode.label}`"
-      :title="mode.title"
+      :title="mode.title + (mode.value === themeMode ? ' (Strg/Cmd + K zum Wechseln)' : '')"
       @click="applyTheme(mode.value)"
       @keydown.arrow-left="handleArrowLeft(mode.value)"
       @keydown.arrow-right="handleArrowRight(mode.value)"

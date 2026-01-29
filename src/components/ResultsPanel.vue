@@ -5,7 +5,7 @@
       <div class="toolbar" style="width:100%">
         <button
           class="btn secondary"
-          title="Alle sichtbaren Einträge auswählen"
+          title="Alle sichtbaren Einträge auswählen (Strg/Cmd + A)"
           aria-label="Alle sichtbaren Einträge auswählen"
           @click="selectAll"
         >
@@ -21,7 +21,7 @@
         </button>
         <button
           class="btn primary push-right"
-          :title="downloadTooltip"
+          :title="`${downloadTooltip} (Strg/Cmd + D)`"
           :aria-label="downloadTooltip"
           :disabled="visibleSelected.length === 0"
           @click="handleDownload"
