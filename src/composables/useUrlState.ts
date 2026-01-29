@@ -1,5 +1,6 @@
 import type { AppState } from '../types'
 import { toLocalDateInputValue } from '../utils/date'
+import { sanitizeUrlParam, sanitizeLabel } from '../utils/sanitize'
 
 export function useUrlState(state: { value: AppState }) {
   function encodeStateToURL(): void {
@@ -50,15 +51,35 @@ export function useUrlState(state: { value: AppState }) {
     const q = new URLSearchParams(location.search)
     const result: ReturnType<typeof loadStateFromURL> = {}
 
-    if (q.get('l')) result.label = q.get('l')!
-    if (q.get('d')) result.date = q.get('d')!
-    if (q.get('t')) result.time = q.get('t')!
-
-    const u = q.get('u')
-    if (u) {
-      result.units = u.split(',').filter(Boolean)
+    // Sanitize label
+    const labelParam = sanitizeUrlParam(q.get('l'))
+    if (labelParam) {
+      result.label = sanitizeLabel(labelParam)
     }
 
+    // Validate date format (YYYY-MM-DD)
+    const dateParam = q.get('d')
+    if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
+      result.date = dateParam
+    }
+
+    // Validate time format (HH:MM or HH:MM:SS)
+    const timeParam = q.get('t')
+    if (timeParam && /^([0-1][0-9]|2[0-3]):([0-5][0-9])(:([0-5][0-9]))?$/.test(timeParam)) {
+      result.time = timeParam
+    }
+
+    // Validate units
+    const u = q.get('u')
+    if (u) {
+      const validUnits = ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds']
+      const units = u.split(',').filter(Boolean).filter(unit => validUnits.includes(unit))
+      if (units.length > 0) {
+        result.units = units
+      }
+    }
+
+    // Validate patterns
     const p = q.get('p')
     if (p) {
       const set = new Set(p.split(',').filter(Boolean))
@@ -68,9 +89,28 @@ export function useUrlState(state: { value: AppState }) {
       }
     }
 
-    if (q.get('theme')) result.theme = q.get('theme')!
-    if (q.get('yf')) result.yearFrom = parseInt(q.get('yf')!, 10)
-    if (q.get('yt')) result.yearTo = parseInt(q.get('yt')!, 10)
+    // Validate theme
+    const themeParam = q.get('theme')
+    if (themeParam && ['light', 'dark', 'system'].includes(themeParam)) {
+      result.theme = themeParam
+    }
+
+    // Validate year range
+    const yfParam = q.get('yf')
+    if (yfParam) {
+      const yearFrom = parseInt(yfParam, 10)
+      if (!isNaN(yearFrom) && yearFrom >= 1900 && yearFrom <= 2200) {
+        result.yearFrom = yearFrom
+      }
+    }
+
+    const ytParam = q.get('yt')
+    if (ytParam) {
+      const yearTo = parseInt(ytParam, 10)
+      if (!isNaN(yearTo) && yearTo >= 1900 && yearTo <= 2200) {
+        result.yearTo = yearTo
+      }
+    }
 
     return result
   }

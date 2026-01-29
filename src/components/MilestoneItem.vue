@@ -1,9 +1,9 @@
 <template>
-  <div class="item" :data-year="event.date.getFullYear()">
+  <div class="item" :data-year="event.date.getFullYear()" role="listitem">
     <input
       type="checkbox"
       :checked="checked"
-      aria-label="auswählen"
+      :aria-label="`${event.baseTitle} ${event.since} auswählen`"
       @change="$emit('toggle')"
     />
     <div class="grow">
@@ -11,9 +11,7 @@
         <span class="ttl-num">{{ event.baseTitle }}</span>
         <span class="since"> {{ event.since }}</span>
       </div>
-      <div class="sub">
-        {{ formatDate(event.date) }} • {{ event.inHuman }}
-      </div>
+      <div class="sub">{{ formatDate(event.date) }} • {{ event.inHuman }}</div>
     </div>
     <span :class="['tag', event.unit]">{{ unitLabel }}</span>
   </div>
