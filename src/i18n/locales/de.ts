@@ -14,7 +14,7 @@ export default {
     success: 'Erfolg'
   },
   ui: {
-    title: 'Jubiläums-Finder',
+    title: 'Jubiläumsrechner',
     description: 'Berechne besondere Meilensteine & exportiere sie als Kalender',
     inputs: 'Eingaben',
     milestones: 'Meilensteine',

@@ -14,7 +14,7 @@ export default {
     success: 'Success'
   },
   ui: {
-    title: 'Anniversary Finder',
+    title: 'Anniversary Calculator',
     description: 'Calculate special milestones & export them as calendar',
     inputs: 'Inputs',
     milestones: 'Milestones',

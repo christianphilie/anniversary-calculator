@@ -1,7 +1,7 @@
 {
-  "name": "anniversary-milestones-calculator",
+  "name": "anniversary-calculator",
   "version": "1.0.0",
-  "description": "This project is a web-based \"Jubiläums-Finder\" (Anniversary Finder) that allows users to calculate and explore special date and time milestones based on a given start date. These milestones can include various units like years, months, weeks, days, hours, minutes, and seconds, and can be filtered by different numerical patterns such as rounded multiples or repdigits. The application provides functionality to export selected milestones into an .ics calendar file.",
+  "description": "Web-based Vue 3 + TypeScript anniversary calculator to discover special date milestones like \"1000 days\" or \"10 years\" from any starting date. Find rounded multiples and repdigits across years, months, weeks, days, hours, minutes, and seconds. Export selected milestones as .ics calendar files.",
   "type": "module",
   "scripts": {
     "dev": "vite",
