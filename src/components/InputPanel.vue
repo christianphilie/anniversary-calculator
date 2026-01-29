@@ -2,11 +2,17 @@
   <section class="panel">
     <div class="hd">
       <strong>🎯 Eingaben</strong>
-      <button class="btn ghost" title="Eingaben zurücksetzen" @click="handleReset">
+      <button
+        class="btn ghost"
+        title="Eingaben zurücksetzen"
+        aria-label="Eingaben zurücksetzen"
+        @click="handleReset"
+      >
         Zurücksetzen
       </button>
     </div>
     <div class="bd">
+      <ErrorAlert />
       <form @submit.prevent="handleSubmit">
         <div class="field">
           <label for="label">Titel (optional)</label>
@@ -15,17 +21,42 @@
             v-model="formData.label"
             type="text"
             placeholder="Kennenlernen, Geburt, Hochzeit …"
+            :aria-invalid="fieldErrors.label ? 'true' : 'false'"
+            :aria-describedby="fieldErrors.label ? 'label-error' : undefined"
           />
+          <span v-if="fieldErrors.label" id="label-error" class="field-error" role="alert">
+            {{ fieldErrors.label }}
+          </span>
         </div>
 
         <div class="row">
           <div class="field">
             <label for="date">Datum</label>
-            <input id="date" v-model="formData.date" type="date" required />
+            <input
+              id="date"
+              v-model="formData.date"
+              type="date"
+              required
+              :aria-invalid="fieldErrors.date ? 'true' : 'false'"
+              :aria-describedby="fieldErrors.date ? 'date-error' : undefined"
+            />
+            <span v-if="fieldErrors.date" id="date-error" class="field-error" role="alert">
+              {{ fieldErrors.date }}
+            </span>
           </div>
           <div class="field">
             <label for="time">Uhrzeit (optional)</label>
-            <input id="time" v-model="formData.time" type="time" step="1" />
+            <input
+              id="time"
+              v-model="formData.time"
+              type="time"
+              step="1"
+              :aria-invalid="fieldErrors.time ? 'true' : 'false'"
+              :aria-describedby="fieldErrors.time ? 'time-error' : undefined"
+            />
+            <span v-if="fieldErrors.time" id="time-error" class="field-error" role="alert">
+              {{ fieldErrors.time }}
+            </span>
           </div>
         </div>
 
@@ -64,7 +95,12 @@
         <div class="row">
           <div class="field">
             <label for="yearFrom">Jahre von</label>
-            <select id="yearFrom" v-model.number="formData.yearFrom">
+            <select
+              id="yearFrom"
+              v-model.number="formData.yearFrom"
+              :aria-invalid="fieldErrors.yearRange ? 'true' : 'false'"
+              :aria-describedby="fieldErrors.yearRange ? 'year-range-error' : undefined"
+            >
               <option v-for="y in yearFromOptions" :key="y" :value="y">
                 {{ y }}
               </option>
@@ -72,11 +108,19 @@
           </div>
           <div class="field">
             <label for="yearTo">Jahre bis</label>
-            <select id="yearTo" v-model.number="formData.yearTo">
+            <select
+              id="yearTo"
+              v-model.number="formData.yearTo"
+              :aria-invalid="fieldErrors.yearRange ? 'true' : 'false'"
+              :aria-describedby="fieldErrors.yearRange ? 'year-range-error' : undefined"
+            >
               <option v-for="y in yearToOptions" :key="y" :value="y">
                 {{ y }}
               </option>
             </select>
+            <span v-if="fieldErrors.yearRange" id="year-range-error" class="field-error" role="alert">
+              {{ fieldErrors.yearRange }}
+            </span>
           </div>
         </div>
       </form>
@@ -91,9 +135,29 @@ import { CONFIG } from '../types'
 import { toLocalDateInputValue } from '../utils/date'
 import { useUrlState } from '../composables/useUrlState'
 import { useAppState } from '../composables/useAppState'
+import { useError } from '../composables/useError'
+import ErrorAlert from './ErrorAlert.vue'
+import {
+  validateLabel,
+  validateUnits,
+  validatePatterns,
+  validateYearRange,
+  parseDate
+} from '../utils/validation'
+import { sanitizeLabel } from '../utils/sanitize'
 
 const { state, recompute: recomputeState } = useAppState()
 const { loadStateFromURL, encodeStateToURL } = useUrlState(state)
+const { setError, clearError } = useError()
+
+const fieldErrors = ref<{
+  label?: string
+  date?: string
+  time?: string
+  units?: string
+  patterns?: string
+  yearRange?: string
+}>({})
 
 // No emit needed - we use composable directly
 
@@ -144,35 +208,94 @@ function handleSubmit(): void {
 }
 
 function compute(): void {
-  if (!formData.value.date) return
+  // Clear previous errors
+  clearError()
+  fieldErrors.value = {}
 
-  const [y, m, d] = formData.value.date.split('-').map(Number)
-  const timeStr = formData.value.time || '12:00:00'
-  const [hh, mm, ss = '00'] = timeStr.split(':')
-  const start = new Date(y, m - 1, d, Number(hh), Number(mm), Number(ss))
+  try {
+    // Sanitize and validate label
+    if (formData.value.label.trim()) {
+      const sanitizedLabel = sanitizeLabel(formData.value.label.trim())
+      const labelValidation = validateLabel(sanitizedLabel)
+      if (!labelValidation.valid) {
+        fieldErrors.value.label = labelValidation.error
+        setError(labelValidation.error || 'Ungültiger Titel')
+        return
+      }
+      // Update formData with sanitized value
+      formData.value.label = sanitizedLabel
+    }
 
-  if (isNaN(start.getTime())) {
-    console.error('Invalid date')
-    return
+    // Validate date and time
+    if (!formData.value.date) {
+      fieldErrors.value.date = 'Bitte wähle ein Datum aus'
+      setError('Bitte wähle ein Datum aus')
+      return
+    }
+
+    const { date: start, error: dateError } = parseDate(
+      formData.value.date,
+      formData.value.time || '12:00:00'
+    )
+
+    if (dateError) {
+      if (dateError.includes('Zeit')) {
+        fieldErrors.value.time = dateError
+      } else {
+        fieldErrors.value.date = dateError
+      }
+      setError(dateError)
+      return
+    }
+
+    // Validate units
+    const unitsValidation = validateUnits(formData.value.units)
+    if (!unitsValidation.valid) {
+      fieldErrors.value.units = unitsValidation.error
+      setError(unitsValidation.error || 'Bitte wähle mindestens eine Einheit aus')
+      return
+    }
+
+    // Validate patterns
+    const patternsValidation = validatePatterns(formData.value.patterns)
+    if (!patternsValidation.valid) {
+      fieldErrors.value.patterns = patternsValidation.error
+      setError(patternsValidation.error || 'Bitte wähle mindestens ein Muster aus')
+      return
+    }
+
+    // Ensure year range is valid
+    const yearFrom = Math.max(startYear.value, formData.value.yearFrom)
+    const yearTo = Math.max(yearFrom, Math.min(startYear.value + CONFIG.MAX_SPAN, formData.value.yearTo))
+
+    // Validate year range
+    const yearRangeValidation = validateYearRange(yearFrom, yearTo, startYear.value)
+    if (!yearRangeValidation.valid) {
+      fieldErrors.value.yearRange = yearRangeValidation.error
+      setError(yearRangeValidation.error || 'Ungültiger Jahresbereich')
+      return
+    }
+
+    recomputeState(
+      start,
+      formData.value.label.trim(),
+      formData.value.units,
+      formData.value.patterns,
+      yearFrom,
+      yearTo
+    )
+
+    encodeStateToURL()
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Ein unerwarteter Fehler ist aufgetreten'
+    setError(errorMessage)
+    console.error('Compute error:', err)
   }
-
-  // Ensure year range is valid
-  const yearFrom = Math.max(startYear.value, formData.value.yearFrom)
-  const yearTo = Math.max(yearFrom, Math.min(startYear.value + CONFIG.MAX_SPAN, formData.value.yearTo))
-
-  recomputeState(
-    start,
-    formData.value.label.trim(),
-    formData.value.units,
-    formData.value.patterns,
-    yearFrom,
-    yearTo
-  )
-
-  encodeStateToURL()
 }
 
 function handleReset(): void {
+  clearError()
+  fieldErrors.value = {}
   const today = new Date()
   formData.value = {
     label: '',

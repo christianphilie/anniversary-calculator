@@ -3,15 +3,26 @@
     <div class="hd">
       <strong>📊 Meilensteine</strong>
       <div class="toolbar" style="width:100%">
-        <button class="btn secondary" title="Alle sichtbaren Einträge auswählen" @click="selectAll">
+        <button
+          class="btn secondary"
+          title="Alle sichtbaren Einträge auswählen"
+          aria-label="Alle sichtbaren Einträge auswählen"
+          @click="selectAll"
+        >
           ✅ Alle auswählen
         </button>
-        <button class="btn secondary" title="Auswahl sichtbarer Einträge aufheben" @click="selectNone">
+        <button
+          class="btn secondary"
+          title="Auswahl sichtbarer Einträge aufheben"
+          aria-label="Auswahl sichtbarer Einträge aufheben"
+          @click="selectNone"
+        >
           🚫 Alle abwählen
         </button>
         <button
           class="btn primary push-right"
           :title="downloadTooltip"
+          :aria-label="downloadTooltip"
           :disabled="visibleSelected.length === 0"
           @click="handleDownload"
         >
@@ -21,13 +32,13 @@
     </div>
 
     <div class="bd">
-      <div v-if="isLoading" class="empty">
-        <div class="loading"></div> Berechne Meilensteine...
+      <div v-if="isLoading" class="empty" role="status" aria-live="polite" aria-busy="true">
+        <div class="loading" aria-hidden="true"></div> Berechne Meilensteine...
       </div>
-      <div v-else-if="!state.eventsView.length" class="empty">
+      <div v-else-if="!state.eventsView.length" class="empty" role="status" aria-live="polite">
         Keine Einträge im Zeitraum. Passe Einheiten/Muster oder den Jahresbereich an.
       </div>
-      <div v-else class="list">
+      <div v-else class="list" role="list" aria-label="Meilensteine">
         <template v-for="(ev, idx) in state.eventsView" :key="ev.id">
           <YearSeparator
             v-if="shouldShowYearSeparator(idx, ev.date.getFullYear())"

@@ -1,9 +1,12 @@
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 import type { Ref, ComputedRef } from 'vue'
 import type { AppState, Unit, Patterns, MilestoneEvent } from '../types'
 import { computeRangeWindow } from '../utils/compute'
+import { useError } from './useError'
 
 export function useAppState() {
+  const { handleError } = useError()
+  
   const state: Ref<AppState> = ref({
     start: null,
     label: '',
@@ -25,17 +28,26 @@ export function useAppState() {
     )
   })
 
-  function recompute(
+  async function recompute(
     start: Date,
     label: string,
     units: Unit[],
     patterns: Patterns,
     yearFrom: number,
     yearTo: number
-  ): void {
+  ): Promise<void> {
     isLoading.value = true
 
     try {
+      // Validate inputs
+      if (isNaN(start.getTime())) {
+        throw new Error('Ungültiges Startdatum')
+      }
+
+      if (yearFrom > yearTo) {
+        throw new Error('Startjahr muss vor Endjahr liegen')
+      }
+
       state.value.start = start
       state.value.label = label
       state.value.units = units
@@ -46,6 +58,10 @@ export function useAppState() {
       const fromDate = new Date(yearFrom, 0, 1, 0, 0, 0)
       const toDate = new Date(yearTo, 11, 31, 23, 59, 59)
 
+      if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
+        throw new Error('Ungültiger Jahresbereich')
+      }
+
       const events = computeRangeWindow(
         start,
         { label, units, patterns },
@@ -55,6 +71,16 @@ export function useAppState() {
 
       state.value.eventsAll = events
       state.value.eventsView = events
+
+      // Focus management: Move focus to first result after computation
+      await nextTick()
+      const firstResult = document.querySelector('.list [role="listitem"] input[type="checkbox"]') as HTMLInputElement
+      if (firstResult) {
+        firstResult.focus()
+      }
+    } catch (err) {
+      handleError(err, 'Fehler beim Berechnen der Meilensteine')
+      // Keep previous state on error
     } finally {
       isLoading.value = false
     }
