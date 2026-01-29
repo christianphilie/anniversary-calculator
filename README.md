@@ -17,7 +17,8 @@ This project is a web-based "Jubiläums-Finder" (Anniversary Finder) that allows
 
 ## How to Use
 
-1.  **Open `index.html`:** Simply open the `anniversary-milestones/index.html` file in your web browser.
+1.  **Development:** Run `npm run dev` and open the URL shown in the terminal (usually `http://localhost:3000`)
+2.  **Production:** Run `npm run build` and serve the `dist/` folder with any static file server
 2.  **Input Details:**
     *   **Titel (optional):** Provide a descriptive title for your event (e.g., "Kennenlernen", "Geburt", "Hochzeit").
     *   **Datum:** Select the significant start date.
@@ -36,24 +37,80 @@ This project is a web-based "Jubiläums-Finder" (Anniversary Finder) that allows
 
 ## Development
 
-The project is built with plain HTML, CSS, and JavaScript, making it easy to understand and modify.
+The project is built with **Vue 3**, **TypeScript**, and **Vite** for a modern, maintainable codebase.
 
-*   `index.html`: Contains the entire application, including structure, styling, and logic.
+### Tech Stack
 
-### Styling
+*   **Vue 3** - Progressive JavaScript framework with Composition API
+*   **TypeScript** - Type-safe JavaScript for better developer experience
+*   **Vite** - Fast build tool and development server
+*   **CSS Variables** - Theming system supporting light and dark modes
 
-The styling is defined using CSS variables for theming, supporting light and dark modes.
+### Project Structure
 
-### JavaScript
+```
+src/
+├── components/          # Vue components
+│   ├── AppHeader.vue
+│   ├── InputPanel.vue
+│   ├── ResultsPanel.vue
+│   ├── ThemeSwitch.vue
+│   ├── YearSeparator.vue
+│   └── MilestoneItem.vue
+├── composables/         # Vue composables (reusable logic)
+│   ├── useAppState.ts   # Application state management
+│   ├── useTheme.ts      # Theme management
+│   └── useUrlState.ts   # URL state persistence
+├── utils/               # Utility functions
+│   ├── date.ts          # Date calculations
+│   ├── patterns.ts      # Pattern matching logic
+│   ├── i18n.ts          # Internationalization
+│   ├── ics.ts           # ICS file generation
+│   └── compute.ts       # Milestone computation
+├── types/               # TypeScript type definitions
+│   └── index.ts
+├── styles/              # CSS styles
+│   └── main.css
+├── App.vue              # Root component
+└── main.ts              # Application entry point
+```
 
-The JavaScript handles:
+### Getting Started
 
-*   **DOM Manipulation:** Interacting with form elements, year range selects, and result list.
-*   **Date Calculations:** Custom functions for accurate date and time arithmetic with proper month/year clamping.
-*   **Pattern Matching:** Logic to identify specific numerical patterns for milestones (rounded multiples and repdigits).
-*   **Performance Optimization:** Efficient milestone calculation within specified year ranges (up to 300 years from start date).
-*   **State Management:** Managing the application's state, including year ranges, selected milestones, and form inputs.
-*   **URL Parameters:** Encoding and decoding complete application state from the URL for sharing and bookmarking.
-*   **ICS File Generation:** Creating valid `.ics` files for calendar export with proper timezone handling.
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-Feel free to explore the `index.html` file to understand the implementation details.
+2. **Start development server:**
+   ```bash
+   npm run dev
+   ```
+
+3. **Build for production:**
+   ```bash
+   npm run build
+   ```
+
+4. **Type checking:**
+   ```bash
+   npm run type-check
+   ```
+
+### Key Features
+
+*   **Component-Based Architecture:** Modular Vue components for better maintainability
+*   **Type Safety:** TypeScript ensures type correctness throughout the codebase
+*   **Composables:** Reusable logic with Vue Composition API
+*   **Hot Module Replacement:** Instant updates during development with Vite
+*   **Optimized Builds:** Production builds are optimized and minified
+
+### Code Organization
+
+*   **Components:** UI components organized by feature
+*   **Composables:** Shared reactive logic (state, theme, URL)
+*   **Utils:** Pure functions for calculations and transformations
+*   **Types:** Centralized TypeScript type definitions
+*   **Styles:** Global CSS with CSS variables for theming
+
+Feel free to explore the `src/` directory to understand the implementation details.
