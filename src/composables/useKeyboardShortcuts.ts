@@ -17,7 +17,7 @@ export interface KeyboardShortcut {
 }
 
 export function useKeyboardShortcuts() {
-  const { applyTheme, themeMode } = useTheme()
+  const { toggleTheme } = useTheme()
   const { state, selectAll, visibleSelected } = useAppState()
   const { clearError, error } = useError()
   const { success } = useToast()
@@ -28,11 +28,8 @@ export function useKeyboardShortcuts() {
       ctrl: true,
       meta: true,
       handler: () => {
-        // Cycle through themes: light -> dark -> system -> light
-        const themes: Array<'light' | 'dark' | 'system'> = ['light', 'dark', 'system']
-        const currentIndex = themes.indexOf(themeMode.value)
-        const nextIndex = (currentIndex + 1) % themes.length
-        applyTheme(themes[nextIndex])
+        // Toggle between light and dark theme
+        toggleTheme()
       },
       description: 'Theme wechseln',
       global: true
