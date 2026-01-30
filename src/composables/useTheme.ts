@@ -1,5 +1,6 @@
 import { ref, onMounted } from 'vue'
 import type { Ref } from 'vue'
+import { safeLocalStorageGet, safeLocalStorageSet } from '../utils/storage'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
 
@@ -22,7 +23,7 @@ export function useTheme() {
     currentTheme.value = theme
     document.body.setAttribute('data-theme', theme)
     document.body.dataset.themeMode = mode
-    localStorage.setItem('themeMode', mode)
+    safeLocalStorageSet('themeMode', mode)
   }
 
   function updateSystemTheme(): void {
@@ -32,7 +33,7 @@ export function useTheme() {
   }
 
   onMounted(() => {
-    const saved = (localStorage.getItem('themeMode') || 'system') as ThemeMode
+    const saved = (safeLocalStorageGet('themeMode', 'system')) as ThemeMode
     applyTheme(saved)
 
     if (mm.addEventListener) {

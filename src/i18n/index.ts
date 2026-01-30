@@ -3,16 +3,38 @@ import type { Ref } from 'vue'
 import de from './locales/de'
 import en from './locales/en'
 import { updateFormatters } from '../utils/i18n'
+import { safeLocalStorageGet, safeLocalStorageSet } from '../utils/storage'
+import { warn } from '../utils/logger'
 
 export type Locale = 'de' | 'en'
 
 const LOCALE_KEY = 'app-locale'
 
+/**
+ * i18n Architecture Note:
+ * 
+ * This file (src/i18n/index.ts) handles:
+ * - Translation management (t function)
+ * - Locale switching
+ * - Message loading from locale files
+ * 
+ * The file src/utils/i18n.ts handles:
+ * - Date/number formatting (Intl.DateTimeFormat, Intl.NumberFormat)
+ * - Unit label formatting (getUnitLabel, humanDiff)
+ * - Locale-aware formatting utilities
+ * 
+ * This separation is intentional:
+ * - i18n/index.ts: High-level translation system
+ * - utils/i18n.ts: Low-level formatting utilities
+ * 
+ * Both files work together but serve different purposes.
+ */
+
 // Singleton instance
 let i18nInstance: ReturnType<typeof createI18n> | null = null
 
 function createI18n() {
-  const initialLocale = (localStorage.getItem(LOCALE_KEY) || 'de') as Locale
+  const initialLocale = (safeLocalStorageGet(LOCALE_KEY, 'de')) as Locale
   const locale: Ref<Locale> = ref(initialLocale)
   
   // Initialize formatters with initial locale
@@ -33,7 +55,7 @@ function createI18n() {
       }
       
       if (typeof value !== 'string') {
-        console.warn(`Translation missing for key: ${key}`)
+        warn(`Translation missing for key: ${key}`)
         return key
       }
       
@@ -50,7 +72,7 @@ function createI18n() {
 
   function setLocale(newLocale: Locale): void {
     locale.value = newLocale
-    localStorage.setItem(LOCALE_KEY, newLocale)
+    safeLocalStorageSet(LOCALE_KEY, newLocale)
     document.documentElement.lang = newLocale
     updateFormatters(newLocale)
   }

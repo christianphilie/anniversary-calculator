@@ -109,6 +109,8 @@ import { buildICS, downloadICS } from '../utils/ics'
 import { exportToCSV, exportToJSON, exportToPDF, downloadFile } from '../utils/export'
 import { generateShareUrl, shareMilestones, isNativeShareAvailable } from '../utils/share'
 import { copyToClipboard } from '../utils/clipboard'
+import { generateFilename } from '../utils/filename'
+import { logError } from '../utils/logger'
 import YearSeparator from './YearSeparator.vue'
 import MilestoneItem from './MilestoneItem.vue'
 
@@ -159,8 +161,7 @@ function handleDownloadICS(): void {
   if (!subset.length) return
 
   const ics = buildICS(subset)
-  const label = (state.value.label || 'Jubilaeum').toLowerCase().replace(/\s+/g, '_')
-  downloadICS(`${label}_jubilaeen.ics`, ics)
+  downloadICS(generateFilename(state.value.label, 'ics'), ics)
 }
 
 function handleDownloadCSV(): void {
@@ -168,8 +169,7 @@ function handleDownloadCSV(): void {
   if (!subset.length) return
 
   const csv = exportToCSV(subset)
-  const label = (state.value.label || 'Jubilaeum').toLowerCase().replace(/\s+/g, '_')
-  downloadFile(`${label}_jubilaeen.csv`, csv, 'text/csv;charset=utf-8')
+  downloadFile(generateFilename(state.value.label, 'csv'), csv, 'text/csv;charset=utf-8')
 }
 
 function handleDownloadJSON(): void {
@@ -177,8 +177,7 @@ function handleDownloadJSON(): void {
   if (!subset.length) return
 
   const json = exportToJSON(subset)
-  const label = (state.value.label || 'Jubilaeum').toLowerCase().replace(/\s+/g, '_')
-  downloadFile(`${label}_jubilaeen.json`, json, 'application/json;charset=utf-8')
+  downloadFile(generateFilename(state.value.label, 'json'), json, 'application/json;charset=utf-8')
 }
 
 function handleDownloadPDF(): void {
@@ -198,11 +197,10 @@ function handleDownloadPDF(): void {
         patterns: state.value.patterns
       }
     )
-    const label = (state.value.label || 'Jubilaeum').toLowerCase().replace(/\s+/g, '_')
-    pdf.save(`${label}_jubilaeen.pdf`)
+    pdf.save(generateFilename(state.value.label, 'pdf'))
     success(t.value('success.exported'))
   } catch (err) {
-    console.error('PDF export error:', err)
+    logError('PDF export error:', err)
     error(t.value('errors.exportError'))
   }
 }

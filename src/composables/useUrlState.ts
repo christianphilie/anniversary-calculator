@@ -2,6 +2,7 @@ import type { AppState } from '../types'
 import { toLocalDateInputValue } from '../utils/date'
 import { sanitizeUrlParam, sanitizeLabel } from '../utils/sanitize'
 import { parseShareUrl } from '../utils/share'
+import { safeLocalStorageGet } from '../utils/storage'
 
 export function useUrlState(state: { value: AppState }) {
   function encodeStateToURL(): void {
@@ -31,7 +32,7 @@ export function useUrlState(state: { value: AppState }) {
         .join(',')
     )
 
-    const themeMode = localStorage.getItem('themeMode')
+    const themeMode = safeLocalStorageGet('themeMode', '')
     if (themeMode) {
       params.set('theme', themeMode)
     }

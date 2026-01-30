@@ -1,3 +1,5 @@
+import { logError } from './logger'
+
 /**
  * Generates a shareable URL for one or more milestones
  * 
@@ -118,7 +120,7 @@ export async function shareMilestones(
     } catch (err) {
       // User cancelled or error occurred
       if ((err as Error).name !== 'AbortError') {
-        console.error('Share failed:', err)
+        logError('Share failed:', err)
       }
       return false
     }

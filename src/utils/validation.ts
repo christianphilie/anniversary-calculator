@@ -64,11 +64,45 @@ export function validateLabel(label: string): ValidationResult {
   return { valid: true }
 }
 
+// Constants for year validation
+const MIN_YEAR = 1900
+const MAX_YEAR = 2200
+const MAX_YEAR_SPAN = 300 // Maximum years between yearFrom and yearTo
+
 export function validateYearRange(yearFrom: number, yearTo: number, startYear: number): ValidationResult {
+  // Validate yearFrom bounds
+  if (yearFrom < MIN_YEAR) {
+    return { valid: false, error: `Das Startjahr muss mindestens ${MIN_YEAR} sein` }
+  }
+  
+  if (yearFrom > MAX_YEAR) {
+    return { valid: false, error: `Das Startjahr darf maximal ${MAX_YEAR} sein` }
+  }
+
+  // Validate yearTo bounds
+  if (yearTo < MIN_YEAR) {
+    return { valid: false, error: `Das Endjahr muss mindestens ${MIN_YEAR} sein` }
+  }
+  
+  if (yearTo > MAX_YEAR) {
+    return { valid: false, error: `Das Endjahr darf maximal ${MAX_YEAR} sein` }
+  }
+
+  // Validate against startYear
   if (yearFrom < startYear) {
     return { valid: false, error: `Das Startjahr muss mindestens ${startYear} sein` }
   }
 
+  // Validate maximum span
+  const span = yearTo - yearFrom
+  if (span > MAX_YEAR_SPAN) {
+    return {
+      valid: false,
+      error: `Der Jahresbereich darf maximal ${MAX_YEAR_SPAN} Jahre umfassen`
+    }
+  }
+
+  // Validate against CONFIG.MAX_SPAN
   if (yearTo > startYear + CONFIG.MAX_SPAN) {
     return {
       valid: false,
@@ -78,6 +112,11 @@ export function validateYearRange(yearFrom: number, yearTo: number, startYear: n
 
   if (yearTo < yearFrom) {
     return { valid: false, error: 'Das Endjahr muss nach dem Startjahr liegen' }
+  }
+
+  // Validate that numbers are actually numbers (not NaN, Infinity, etc.)
+  if (!Number.isFinite(yearFrom) || !Number.isFinite(yearTo)) {
+    return { valid: false, error: 'Ungültige Jahreswerte' }
   }
 
   return { valid: true }

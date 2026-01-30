@@ -303,7 +303,7 @@ function compute(): void {
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Ein unerwarteter Fehler ist aufgetreten'
     setError(errorMessage)
-    console.error('Compute error:', err)
+    // Error is already handled by setError above
   }
 }
 

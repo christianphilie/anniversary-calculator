@@ -1,5 +1,6 @@
 import { ref, provide, inject } from 'vue'
 import type { Ref } from 'vue'
+import { logError } from '../utils/logger'
 
 export interface AppError {
   message: string
@@ -61,7 +62,7 @@ function createErrorState(): ErrorState {
     } else {
       setError(defaultMessage)
     }
-    console.error('Error:', err)
+    logError('Error:', err)
   }
 
   return {

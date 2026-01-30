@@ -1,6 +1,7 @@
 import type { MilestoneEvent } from '../types'
 import { fmtFull } from './i18n'
 import { useI18n } from '../i18n'
+import { logError } from './logger'
 
 /**
  * Copies text to clipboard using the modern Clipboard API with fallback for older browsers
@@ -42,7 +43,7 @@ export async function copyToClipboard(text: string): Promise<boolean> {
       }
     }
   } catch (err) {
-    console.error('Failed to copy to clipboard:', err)
+    logError('Failed to copy to clipboard:', err)
     return false
   }
 }
