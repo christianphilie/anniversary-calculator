@@ -2,7 +2,7 @@ import type { MilestoneEvent, Unit, Patterns } from '../types'
 import { CONFIG } from '../types'
 import { addYears, addMonths, addWeeks, addDays, addHours, addMinutes, addSeconds, diffMonths, yearsBetween, MS } from './date'
 import { buildCandidates, classifyPatterns } from './patterns'
-import { labelDE, humanDiff, fmtNum, fmtFull } from './i18n'
+import { getUnitLabel, humanDiff, fmtNum, fmtFull } from './i18n'
 
 type UnitAdder = (date: Date, n: number) => Date
 
@@ -28,6 +28,7 @@ export interface ComputeOptions {
   label: string
   units: Unit[]
   patterns: Patterns
+  locale?: 'de' | 'en'
 }
 
 /**
@@ -61,10 +62,15 @@ export function computeRangeWindow(
     if (date < from || date > to) return
     if (n < CONFIG.MIN_N[unit]) return
 
-    const baseTitle = `${fmtNum.format(n)} ${labelDE(unit, n)}`
-    const since = `seit ${opts.label || 'Start'}`
-    const startText = fmtFull.format(start) + ' Uhr'
-    const desc = `${fmtNum.format(n)} ${labelDE(unit, n)} seit ${startText}`
+    const locale = opts.locale || 'de'
+    const sinceText = locale === 'en' ? 'since' : 'seit'
+    const startText = locale === 'en' ? 'Start' : 'Start'
+    const timeSuffix = locale === 'en' ? '' : ' Uhr'
+    
+    const baseTitle = `${fmtNum().format(n)} ${getUnitLabel(unit, n, locale)}`
+    const since = `${sinceText} ${opts.label || startText}`
+    const formattedStart = fmtFull().format(start) + timeSuffix
+    const desc = `${fmtNum().format(n)} ${getUnitLabel(unit, n, locale)} ${sinceText} ${formattedStart}`
 
     evs.push({
       id: `${unit}-${n}-${date.getTime()}`,
@@ -73,7 +79,7 @@ export function computeRangeWindow(
       date,
       baseTitle,
       since,
-      inHuman: humanDiff(new Date(), date),
+      inHuman: humanDiff(new Date(), date, locale),
       desc,
       patterns: classifyPatterns(n)
     })

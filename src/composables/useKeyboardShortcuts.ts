@@ -46,7 +46,7 @@ export function useKeyboardShortcuts() {
           selectAll()
         }
       },
-      description: 'Alle Meilensteine auswählen',
+      description: 'Alle Jubiläen auswählen',
       global: false // Only when not in input field
     },
     {
@@ -98,7 +98,7 @@ export function useKeyboardShortcuts() {
         // Copy first selected milestone if any
         if (visibleSelected.value.length > 0) {
           const firstSelected = visibleSelected.value[0]
-          const text = formatMilestoneText(firstSelected, state.value.label)
+          const text = formatMilestoneText(firstSelected)
           const copied = await copyToClipboard(text)
           if (copied) {
             success('Meilenstein kopiert')

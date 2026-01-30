@@ -21,13 +21,13 @@ export function dativeDE(unit: Unit, n: number): string {
 
 // English unit labels
 const unitEN: Record<Unit, [string, string]> = {
-  years: ['Year', 'Years'],
-  months: ['Month', 'Months'],
-  weeks: ['Week', 'Weeks'],
-  days: ['Day', 'Days'],
-  hours: ['Hour', 'Hours'],
-  minutes: ['Minute', 'Minutes'],
-  seconds: ['Second', 'Seconds']
+  years: ['year', 'years'],
+  months: ['month', 'months'],
+  weeks: ['week', 'weeks'],
+  days: ['day', 'days'],
+  hours: ['hour', 'hours'],
+  minutes: ['minute', 'minutes'],
+  seconds: ['second', 'seconds']
 }
 
 export function labelEN(unit: Unit, n: number): string {
@@ -88,13 +88,18 @@ export function getNumberFormatter(locale: 'de' | 'en' = 'de'): Intl.NumberForma
 }
 
 // Legacy exports for backward compatibility (will use current locale)
-let fmtFull: Intl.DateTimeFormat = getDateFormatter('de')
-let fmtNum: Intl.NumberFormat = getNumberFormatter('de')
+let currentLocale: 'de' | 'en' = 'de'
 
 // Update formatters when locale changes
 export function updateFormatters(locale: 'de' | 'en'): void {
-  fmtFull = getDateFormatter(locale)
-  fmtNum = getNumberFormatter(locale)
+  currentLocale = locale
 }
 
-export { fmtFull, fmtNum }
+// Reactive formatters that use current locale
+export function fmtFull(): Intl.DateTimeFormat {
+  return getDateFormatter(currentLocale)
+}
+
+export function fmtNum(): Intl.NumberFormat {
+  return getNumberFormatter(currentLocale)
+}

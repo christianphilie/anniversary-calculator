@@ -11,13 +11,14 @@ export default {
     selectNone: 'Deselect all',
     loading: 'Loading...',
     error: 'Error',
-    success: 'Success'
+    success: 'Success',
+    shortcut: 'Ctrl/Cmd + K to switch'
   },
   ui: {
     title: 'Anniversary Calculator',
-    description: 'Calculate special milestones & export them as calendar',
+    description: 'Calculate special anniversaries & export them as calendar',
     inputs: 'Inputs',
-    milestones: 'Milestones',
+    milestones: 'Anniversaries',
     results: 'Results'
   },
   form: {
@@ -27,10 +28,13 @@ export default {
     time: 'Time (optional)',
     units: 'Units',
     patterns: 'Patterns',
-    yearFrom: 'Years from',
-    yearTo: 'Years to',
-    roundedMultiples: 'Rounded multiples (500, 10,000, …)',
-    repdigits: 'Repdigits (11, 2,222, 333, …)'
+    yearRange: 'Year Range',
+    yearFrom: 'from',
+    yearTo: 'to',
+    roundedMultiples: 'Rounded multiples',
+    roundedMultiplesExamples: '500, 2,000, 10,000, …',
+    repdigits: 'Repdigits',
+    repdigitsExamples: '11, 2,222, 333, 444,444,444 …'
   },
   units: {
     years: 'Years',
@@ -60,16 +64,33 @@ export default {
   },
   results: {
     empty: 'No entries in time range. Adjust units/patterns or year range.',
-    loading: 'Calculating milestones...',
+    loading: 'Calculating anniversaries...',
     downloadTooltip: 'Download calendar file for {{count}} event{{plural}} in .ics format',
     downloadTooltipNone: 'No selected visible entries',
-    selectAll: 'Select all visible entries',
-    selectNone: 'Deselect visible entries',
-    selectYearAll: 'Select all milestones for {{year}}',
+    selectAll: 'Select all',
+    selectNone: 'Deselect all',
+    selectYearAll: 'Select all anniversaries for {{year}}',
     selectYearNone: 'Deselect for {{year}}',
+    selectYearAllShort: 'Select year',
+    selectYearNoneShort: 'Deselect year',
+    year: 'Year',
     since: 'since',
     in: 'In',
     ago: 'ago'
+  },
+  export: {
+    title: 'Export',
+    description: 'Select anniversaries and export them in various formats like ICS, CSV, or JSON. You can also share the current view with others.',
+    exportCSV: 'Export as CSV',
+    exportJSON: 'Export as JSON',
+    exportPDF: 'Export as PDF',
+    exportPDFDisabled: 'Export as PDF (not yet implemented)',
+    shareView: 'Share view',
+    shareViewTitle: 'Share current view',
+    milestonesTitle: 'Anniversaries'
+  },
+  inputs: {
+    description: 'Enter your start date and select the units and patterns to calculate anniversaries for.'
   },
   errors: {
     invalidDate: 'Invalid date',
@@ -78,7 +99,7 @@ export default {
     invalidYearRange: 'Invalid year range',
     noUnits: 'Please select at least one unit',
     noPatterns: 'Please select at least one pattern',
-    computeError: 'Error calculating milestones',
+    computeError: 'Error calculating anniversaries',
     copyError: 'Error copying',
     shareError: 'Error sharing'
   },

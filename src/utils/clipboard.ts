@@ -1,5 +1,6 @@
 import type { MilestoneEvent } from '../types'
 import { fmtFull } from './i18n'
+import { useI18n } from '../i18n'
 
 /**
  * Copies text to clipboard using the modern Clipboard API with fallback for older browsers
@@ -50,26 +51,34 @@ export async function copyToClipboard(text: string): Promise<boolean> {
  * Formats a milestone event as a readable text string for copying to clipboard
  * 
  * @param event - The milestone event to format
- * @param label - Optional label/title for the milestone
  * @returns Formatted text string with milestone details
  * 
  * @example
  * ```ts
- * const text = formatMilestoneText(event, 'Birthday')
- * // Returns: "Birthday:\n1000 Tage seit Start\nDatum: 1. Januar 2023, 12:00 Uhr\nIn: in 100 Tagen"
+ * const text = formatMilestoneText(event)
+ * // Returns: "30 Jahre seit Christians Geburtstag\nvor 6 Jahren, am Donnerstag, 28. März 2019 um 12:00 Uhr"
  * ```
  */
-export function formatMilestoneText(event: MilestoneEvent, label: string): string {
-  const dateStr = fmtFull.format(event.date) + ' Uhr'
-  const lines = [
-    `${event.baseTitle} ${event.since}`,
-    `Datum: ${dateStr}`,
-    `In: ${event.inHuman}`
-  ]
+export function formatMilestoneText(event: MilestoneEvent): string {
+  const { locale } = useI18n()
+  const formattedDate = fmtFull().format(event.date)
   
-  if (label) {
-    lines.unshift(`${label}:`)
+  // Format date string: add "am"/"on" prefix and replace comma before time with "um"/"at"
+  let dateStr: string
+  if (locale.value === 'de') {
+    // German: "am Donnerstag, 28. März 2019 um 12:00 Uhr"
+    // fmtFull gives: "Donnerstag, 28. März 2019, 12:00"
+    dateStr = formattedDate
+      .replace(/^([^,]+),/, 'am $1,') // Add "am" before weekday
+      .replace(/, (\d{1,2}:\d{2})/, ' um $1 Uhr') // Replace comma+space before time with " um " and add " Uhr"
+  } else {
+    // English: "on Thursday, March 28, 2019 at 12:00 PM"
+    // fmtFull gives: "Thursday, March 28, 2019, 12:00 PM" (or similar)
+    dateStr = formattedDate
+      .replace(/^([^,]+),/, 'on $1,') // Add "on" before weekday
+      .replace(/, (\d{1,2}:\d{2}(?:\s*[AP]M)?)/i, ' at $1') // Replace comma+space before time with " at "
   }
   
-  return lines.join('\n')
+  // Format: "30 Jahre seit Christians Geburtstag\nvor 6 Jahren, am Donnerstag, 28. März 2019 um 12:00 Uhr"
+  return `${event.baseTitle} ${event.since}\n${event.inHuman}, ${dateStr}`
 }

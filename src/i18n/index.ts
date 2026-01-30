@@ -2,6 +2,7 @@ import { ref, computed } from 'vue'
 import type { Ref } from 'vue'
 import de from './locales/de'
 import en from './locales/en'
+import { updateFormatters } from '../utils/i18n'
 
 export type Locale = 'de' | 'en'
 
@@ -11,7 +12,11 @@ const LOCALE_KEY = 'app-locale'
 let i18nInstance: ReturnType<typeof createI18n> | null = null
 
 function createI18n() {
-  const locale: Ref<Locale> = ref((localStorage.getItem(LOCALE_KEY) || 'de') as Locale)
+  const initialLocale = (localStorage.getItem(LOCALE_KEY) || 'de') as Locale
+  const locale: Ref<Locale> = ref(initialLocale)
+  
+  // Initialize formatters with initial locale
+  updateFormatters(initialLocale)
   
   const messages = {
     de,
@@ -47,6 +52,7 @@ function createI18n() {
     locale.value = newLocale
     localStorage.setItem(LOCALE_KEY, newLocale)
     document.documentElement.lang = newLocale
+    updateFormatters(newLocale)
   }
 
   return {

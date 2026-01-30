@@ -1,8 +1,9 @@
-import { ref, computed, nextTick, provide, inject } from 'vue'
+import { ref, computed, nextTick, provide, inject, watch } from 'vue'
 import type { Ref, ComputedRef } from 'vue'
 import type { AppState, Unit, Patterns, MilestoneEvent } from '../types'
 import { computeRangeWindow } from '../utils/compute'
 import { useError } from './useError'
+import { useI18n } from '../i18n'
 
 const APP_STATE_KEY = Symbol('appState')
 
@@ -20,6 +21,7 @@ interface AppStateComposable {
 
 function createAppState(): AppStateComposable {
   const { handleError } = useError()
+  const { locale } = useI18n()
   
   const state: Ref<AppState> = ref({
     start: null,
@@ -78,13 +80,17 @@ function createAppState(): AppStateComposable {
 
       const events = computeRangeWindow(
         start,
-        { label, units, patterns },
+        { label, units, patterns, locale: locale.value },
         fromDate,
         toDate
       )
 
       state.value.eventsAll = events
       state.value.eventsView = events
+
+      // Select all events by default for easy export
+      state.value.selected.clear()
+      events.forEach(ev => state.value.selected.add(ev.id))
 
       // Focus management: Move focus to first result after computation
       await nextTick()
@@ -93,7 +99,7 @@ function createAppState(): AppStateComposable {
         firstResult.focus()
       }
     } catch (err) {
-      handleError(err, 'Fehler beim Berechnen der Meilensteine')
+      handleError(err, 'Fehler beim Berechnen der Jubiläen')
       // Keep previous state on error
     } finally {
       isLoading.value = false
@@ -139,6 +145,20 @@ function createAppState(): AppStateComposable {
     state.value.eventsAll = []
     state.value.eventsView = []
   }
+
+  // Recompute events when locale changes to update humanDiff strings
+  watch(locale, () => {
+    if (state.value.start && state.value.yearFrom !== null && state.value.yearTo !== null) {
+      recompute(
+        state.value.start,
+        state.value.label,
+        state.value.units,
+        state.value.patterns,
+        state.value.yearFrom,
+        state.value.yearTo
+      )
+    }
+  })
 
   return {
     state,

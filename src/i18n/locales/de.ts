@@ -11,13 +11,14 @@ export default {
     selectNone: 'Alle abwählen',
     loading: 'Lädt...',
     error: 'Fehler',
-    success: 'Erfolg'
+    success: 'Erfolg',
+    shortcut: 'Strg/Cmd + K zum Wechseln'
   },
   ui: {
     title: 'Jubiläumsrechner',
-    description: 'Berechne besondere Meilensteine & exportiere sie als Kalender',
+    description: 'Berechne besondere Jubiläen & exportiere sie als Kalender',
     inputs: 'Eingaben',
-    milestones: 'Meilensteine',
+    milestones: 'Jubiläen',
     results: 'Ergebnisse'
   },
   form: {
@@ -27,10 +28,13 @@ export default {
     time: 'Uhrzeit (optional)',
     units: 'Einheiten',
     patterns: 'Muster',
-    yearFrom: 'Jahre von',
-    yearTo: 'Jahre bis',
-    roundedMultiples: 'Runde Vielfache (500, 10.000, …)',
-    repdigits: 'Schnapszahlen (11, 2.222, 333, …)'
+    yearRange: 'Jahresbereich',
+    yearFrom: 'von',
+    yearTo: 'bis',
+    roundedMultiples: 'Runde Vielfache',
+    roundedMultiplesExamples: '500, 2.000, 10.000, …',
+    repdigits: 'Schnapszahlen',
+    repdigitsExamples: '11, 2.222, 333, 444.444.444 …'
   },
   units: {
     years: 'Jahre',
@@ -60,16 +64,33 @@ export default {
   },
   results: {
     empty: 'Keine Einträge im Zeitraum. Passe Einheiten/Muster oder den Jahresbereich an.',
-    loading: 'Berechne Meilensteine...',
+    loading: 'Berechne Jubiläen...',
     downloadTooltip: 'Kalenderdatei für {{count}} Ereignis{{plural}} im .ics-Format herunterladen',
     downloadTooltipNone: 'Keine ausgewählten sichtbaren Einträge',
-    selectAll: 'Alle sichtbaren Einträge auswählen',
-    selectNone: 'Auswahl sichtbarer Einträge aufheben',
-    selectYearAll: 'Alle Meilensteine für {{year}} auswählen',
+    selectAll: 'Alle auswählen',
+    selectNone: 'Alle abwählen',
+    selectYearAll: 'Alle Jubiläen für {{year}} auswählen',
     selectYearNone: 'Auswahl für {{year}} aufheben',
+    selectYearAllShort: 'Jahr auswählen',
+    selectYearNoneShort: 'Jahr abwählen',
+    year: 'Jahr',
     since: 'seit',
     in: 'In',
     ago: 'vor'
+  },
+  export: {
+    title: 'Exportieren',
+    description: 'Wähle Jubiläen aus und exportiere sie in verschiedenen Formaten wie ICS, CSV oder JSON. Du kannst auch die aktuelle Ansicht mit anderen teilen.',
+    exportCSV: 'Als CSV exportieren',
+    exportJSON: 'Als JSON exportieren',
+    exportPDF: 'Als PDF exportieren',
+    exportPDFDisabled: 'Als PDF exportieren (noch nicht implementiert)',
+    shareView: 'Ansicht teilen',
+    shareViewTitle: 'Aktuelle Ansicht teilen',
+    milestonesTitle: 'Jubiläen'
+  },
+  inputs: {
+    description: 'Gib dein Startdatum ein und wähle die Einheiten und Muster aus, nach denen Jubiläen berechnet werden sollen.'
   },
   errors: {
     invalidDate: 'Ungültiges Datum',
@@ -78,7 +99,7 @@ export default {
     invalidYearRange: 'Ungültiger Jahresbereich',
     noUnits: 'Bitte wähle mindestens eine Einheit aus',
     noPatterns: 'Bitte wähle mindestens ein Muster aus',
-    computeError: 'Fehler beim Berechnen der Meilensteine',
+    computeError: 'Fehler beim Berechnen der Jubiläen',
     copyError: 'Fehler beim Kopieren',
     shareError: 'Fehler beim Teilen'
   },

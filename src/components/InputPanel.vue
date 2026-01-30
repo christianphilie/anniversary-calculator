@@ -1,37 +1,25 @@
 <template>
   <section class="panel">
     <div class="hd">
-      <strong>🎯 Eingaben</strong>
+      <strong>🎯 {{ t('ui.inputs') }}</strong>
       <button
         class="btn ghost"
-        title="Eingaben zurücksetzen"
-        aria-label="Eingaben zurücksetzen"
+        :title="t('common.reset')"
+        :aria-label="t('common.reset')"
         @click="handleReset"
       >
-        Zurücksetzen
+        {{ t('common.reset') }}
       </button>
     </div>
     <div class="bd">
+      <p class="inputs-description">
+        {{ t('inputs.description') }}
+      </p>
       <ErrorAlert />
       <form @submit.prevent="handleSubmit">
-        <div class="field">
-          <label for="label">Titel (optional)</label>
-          <input
-            id="label"
-            v-model="formData.label"
-            type="text"
-            placeholder="Kennenlernen, Geburt, Hochzeit …"
-            :aria-invalid="fieldErrors.label ? 'true' : 'false'"
-            :aria-describedby="fieldErrors.label ? 'label-error' : undefined"
-          />
-          <span v-if="fieldErrors.label" id="label-error" class="field-error" role="alert">
-            {{ fieldErrors.label }}
-          </span>
-        </div>
-
         <div class="row">
           <div class="field">
-            <label for="date">Datum</label>
+            <label for="date">{{ t('form.date') }}</label>
             <input
               id="date"
               v-model="formData.date"
@@ -45,7 +33,7 @@
             </span>
           </div>
           <div class="field">
-            <label for="time">Uhrzeit (optional)</label>
+            <label for="time">{{ t('form.time') }}</label>
             <input
               id="time"
               v-model="formData.time"
@@ -61,8 +49,58 @@
         </div>
 
         <div class="field">
-          <label>Einheiten</label>
-          <div class="chips">
+          <label for="label">{{ t('form.label') }}</label>
+          <input
+            id="label"
+            v-model="formData.label"
+            type="text"
+            :placeholder="t('form.labelPlaceholder')"
+            :aria-invalid="fieldErrors.label ? 'true' : 'false'"
+            :aria-describedby="fieldErrors.label ? 'label-error' : undefined"
+          />
+          <span v-if="fieldErrors.label" id="label-error" class="field-error" role="alert">
+            {{ fieldErrors.label }}
+          </span>
+        </div>
+
+        <div class="field">
+          <label>{{ t('form.yearRange') }}</label>
+          <div class="row">
+            <div class="field">
+              <label for="yearFrom" class="field-label-small">{{ t('form.yearFrom') }}</label>
+              <select
+                id="yearFrom"
+                v-model.number="formData.yearFrom"
+                :aria-invalid="fieldErrors.yearRange ? 'true' : 'false'"
+                :aria-describedby="fieldErrors.yearRange ? 'year-range-error' : undefined"
+              >
+                <option v-for="y in yearFromOptions" :key="y" :value="y">
+                  {{ y }}
+                </option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="yearTo" class="field-label-small">{{ t('form.yearTo') }}</label>
+              <select
+                id="yearTo"
+                v-model.number="formData.yearTo"
+                :aria-invalid="fieldErrors.yearRange ? 'true' : 'false'"
+                :aria-describedby="fieldErrors.yearRange ? 'year-range-error' : undefined"
+              >
+                <option v-for="y in yearToOptions" :key="y" :value="y">
+                  {{ y }}
+                </option>
+              </select>
+              <span v-if="fieldErrors.yearRange" id="year-range-error" class="field-error" role="alert">
+                {{ fieldErrors.yearRange }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>{{ t('form.units') }}</label>
+          <div class="chips chips-units">
             <label
               v-for="unit in units"
               :key="unit.value"
@@ -79,48 +117,22 @@
         </div>
 
         <div class="field">
-          <label>Muster</label>
-          <div class="chips">
-            <label class="chip">
+          <label>{{ t('form.patterns') }}</label>
+          <div class="chips chips-patterns">
+            <label class="chip chip-pattern">
               <input v-model="formData.patterns.rounded" type="checkbox" />
-              <span>Runde Vielfache (500, 10.000, …)</span>
+              <span class="chip-pattern-content">
+                <span class="chip-pattern-label">{{ t('form.roundedMultiples') }}</span>
+                <span class="chip-pattern-examples">{{ t('form.roundedMultiplesExamples') }}</span>
+              </span>
             </label>
-            <label class="chip">
+            <label class="chip chip-pattern">
               <input v-model="formData.patterns.repdigit" type="checkbox" />
-              <span>Schnapszahlen (11, 2.222, 333, …)</span>
+              <span class="chip-pattern-content">
+                <span class="chip-pattern-label">{{ t('form.repdigits') }}</span>
+                <span class="chip-pattern-examples">{{ t('form.repdigitsExamples') }}</span>
+              </span>
             </label>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="field">
-            <label for="yearFrom">Jahre von</label>
-            <select
-              id="yearFrom"
-              v-model.number="formData.yearFrom"
-              :aria-invalid="fieldErrors.yearRange ? 'true' : 'false'"
-              :aria-describedby="fieldErrors.yearRange ? 'year-range-error' : undefined"
-            >
-              <option v-for="y in yearFromOptions" :key="y" :value="y">
-                {{ y }}
-              </option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="yearTo">Jahre bis</label>
-            <select
-              id="yearTo"
-              v-model.number="formData.yearTo"
-              :aria-invalid="fieldErrors.yearRange ? 'true' : 'false'"
-              :aria-describedby="fieldErrors.yearRange ? 'year-range-error' : undefined"
-            >
-              <option v-for="y in yearToOptions" :key="y" :value="y">
-                {{ y }}
-              </option>
-            </select>
-            <span v-if="fieldErrors.yearRange" id="year-range-error" class="field-error" role="alert">
-              {{ fieldErrors.yearRange }}
-            </span>
           </div>
         </div>
       </form>
@@ -136,6 +148,7 @@ import { toLocalDateInputValue } from '../utils/date'
 import { useUrlState } from '../composables/useUrlState'
 import { useAppState } from '../composables/useAppState'
 import { useError } from '../composables/useError'
+import { useI18n } from '../i18n'
 import ErrorAlert from './ErrorAlert.vue'
 import {
   validateLabel,
@@ -149,6 +162,7 @@ import { sanitizeLabel } from '../utils/sanitize'
 const { state, recompute: recomputeState } = useAppState()
 const { loadStateFromURL, encodeStateToURL } = useUrlState(state)
 const { setError, clearError } = useError()
+const { t } = useI18n()
 
 const fieldErrors = ref<{
   label?: string
@@ -171,15 +185,15 @@ const formData = ref({
   yearTo: new Date().getFullYear() + 10
 })
 
-const units: Array<{ value: Unit; label: string }> = [
-  { value: 'years', label: 'Jahre' },
-  { value: 'months', label: 'Monate' },
-  { value: 'weeks', label: 'Wochen' },
-  { value: 'days', label: 'Tage' },
-  { value: 'hours', label: 'Stunden' },
-  { value: 'minutes', label: 'Minuten' },
-  { value: 'seconds', label: 'Sekunden' }
-]
+const units = computed((): Array<{ value: Unit; label: string }> => [
+  { value: 'years', label: t.value('units.years') },
+  { value: 'months', label: t.value('units.months') },
+  { value: 'weeks', label: t.value('units.weeks') },
+  { value: 'days', label: t.value('units.days') },
+  { value: 'hours', label: t.value('units.hours') },
+  { value: 'minutes', label: t.value('units.minutes') },
+  { value: 'seconds', label: t.value('units.seconds') }
+])
 
 const startYear = computed(() => {
   if (!formData.value.date) return new Date().getFullYear()
@@ -219,7 +233,7 @@ function compute(): void {
       const labelValidation = validateLabel(sanitizedLabel)
       if (!labelValidation.valid) {
         fieldErrors.value.label = labelValidation.error
-        setError(labelValidation.error || 'Ungültiger Titel')
+        setError(labelValidation.error || t.value('errors.invalidLabel'))
         return
       }
       // Update formData with sanitized value
@@ -228,8 +242,8 @@ function compute(): void {
 
     // Validate date and time
     if (!formData.value.date) {
-      fieldErrors.value.date = 'Bitte wähle ein Datum aus'
-      setError('Bitte wähle ein Datum aus')
+      fieldErrors.value.date = t.value('validation.dateRequired')
+      setError(t.value('validation.dateRequired'))
       return
     }
 
@@ -252,7 +266,7 @@ function compute(): void {
     const unitsValidation = validateUnits(formData.value.units)
     if (!unitsValidation.valid) {
       fieldErrors.value.units = unitsValidation.error
-      setError(unitsValidation.error || 'Bitte wähle mindestens eine Einheit aus')
+      setError(unitsValidation.error || t.value('errors.noUnits'))
       return
     }
 
@@ -260,7 +274,7 @@ function compute(): void {
     const patternsValidation = validatePatterns(formData.value.patterns)
     if (!patternsValidation.valid) {
       fieldErrors.value.patterns = patternsValidation.error
-      setError(patternsValidation.error || 'Bitte wähle mindestens ein Muster aus')
+      setError(patternsValidation.error || t.value('errors.noPatterns'))
       return
     }
 
@@ -272,7 +286,7 @@ function compute(): void {
     const yearRangeValidation = validateYearRange(yearFrom, yearTo, startYear.value)
     if (!yearRangeValidation.valid) {
       fieldErrors.value.yearRange = yearRangeValidation.error
-      setError(yearRangeValidation.error || 'Ungültiger Jahresbereich')
+      setError(yearRangeValidation.error || t.value('errors.invalidYearRange'))
       return
     }
 
@@ -329,6 +343,29 @@ watch(() => formData.value.yearFrom, () => {
   }
 })
 
+// Flag to prevent auto-adjustment during initial mount
+let isInitialMount = true
+
+// Auto-adjust year range when date changes (but not during initial mount)
+watch(() => formData.value.date, (newDate) => {
+  if (!newDate) return
+  
+  // Skip auto-adjustment during initial mount (URL state will be loaded first)
+  if (isInitialMount) return
+  
+  const dateYear = new Date(newDate).getFullYear()
+  const todayYear = new Date().getFullYear()
+  
+  // Set yearFrom to the year of the entered date
+  formData.value.yearFrom = dateYear
+  
+  // Set yearTo: max(dateYear + 10, todayYear + 5) to show both past and future milestones
+  // Cap at dateYear + MAX_SPAN to respect maximum range
+  const suggestedYearTo = Math.max(dateYear + 10, todayYear + 5)
+  const cappedYearTo = Math.min(dateYear + CONFIG.MAX_SPAN, suggestedYearTo)
+  formData.value.yearTo = Math.max(formData.value.yearFrom, cappedYearTo)
+})
+
 onMounted(() => {
   const urlState = loadStateFromURL()
   if (urlState.label) formData.value.label = urlState.label
@@ -336,22 +373,31 @@ onMounted(() => {
   if (urlState.time) formData.value.time = urlState.time
   if (urlState.units) formData.value.units = urlState.units as Unit[]
   if (urlState.patterns) formData.value.patterns = urlState.patterns
+  
+  // If yearFrom/yearTo are in URL, use them; otherwise auto-adjust will happen via watcher
   if (urlState.yearFrom) formData.value.yearFrom = urlState.yearFrom
   if (urlState.yearTo) formData.value.yearTo = urlState.yearTo
 
-  // Set default year range based on start date
-  const sy = startYear.value
-  if (!formData.value.yearFrom || formData.value.yearFrom < sy) {
-    formData.value.yearFrom = sy
-  }
-  const todayYear = new Date().getFullYear()
-  const wantedTo = Math.max(sy + 10, todayYear + 10)
-  const cappedTo = Math.min(sy + CONFIG.MAX_SPAN, wantedTo)
-  if (!formData.value.yearTo || formData.value.yearTo < formData.value.yearFrom) {
-    formData.value.yearTo = cappedTo
+  // Auto-adjust year range if not set from URL (watcher will handle this, but we ensure it's set initially)
+  if (!urlState.yearFrom || !urlState.yearTo) {
+    const dateYear = startYear.value
+    const todayYear = new Date().getFullYear()
+    
+    if (!urlState.yearFrom) {
+      formData.value.yearFrom = dateYear
+    }
+    
+    if (!urlState.yearTo) {
+      const suggestedYearTo = Math.max(dateYear + 10, todayYear + 5)
+      const cappedYearTo = Math.min(dateYear + CONFIG.MAX_SPAN, suggestedYearTo)
+      formData.value.yearTo = Math.max(formData.value.yearFrom, cappedYearTo)
+    }
   }
 
   compute()
+
+  // Mark initial mount as complete (now date changes will trigger auto-adjustment)
+  isInitialMount = false
 
   // Select milestones from share URL after computation
   if (urlState.milestoneIds && urlState.milestoneIds.length > 0) {
