@@ -80,7 +80,7 @@ export default {
   },
   export: {
     title: 'Export',
-    description: 'Select anniversaries and export them in various formats like ICS, CSV, JSON, or PDF. You can also share the current view with others.',
+    description: 'Select anniversaries and export them in various formats. ICS can be imported directly into your calendar. Other formats: PDF, CSV, and JSON. You can also share the current view with others.',
     exportCSV: 'Export as CSV',
     exportJSON: 'Export as JSON',
     exportPDF: 'Export as PDF',

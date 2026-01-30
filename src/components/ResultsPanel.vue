@@ -1,6 +1,6 @@
 <template>
+  <!-- Export Section -->
   <section class="panel">
-    <!-- Export Section -->
     <div class="hd">
       <strong>📤 {{ t('export.title') }}</strong>
     </div>
@@ -21,6 +21,15 @@
           </button>
           <button
             class="btn primary"
+            :title="`${t('export.exportPDF')} (${visibleSelected.length} ${t('common.selectAll').toLowerCase()})`"
+            :aria-label="t('export.exportPDF')"
+            :disabled="visibleSelected.length === 0"
+            @click="handleDownloadPDF"
+          >
+            📑 PDF
+          </button>
+          <button
+            class="btn primary"
             :title="`${t('export.exportCSV')} (${visibleSelected.length} ${t('common.selectAll').toLowerCase()})`"
             :aria-label="t('export.exportCSV')"
             :disabled="visibleSelected.length === 0"
@@ -37,15 +46,6 @@
           >
             📄 JSON
           </button>
-          <button
-            class="btn primary"
-            :title="`${t('export.exportPDF')} (${visibleSelected.length} ${t('common.selectAll').toLowerCase()})`"
-            :aria-label="t('export.exportPDF')"
-            :disabled="visibleSelected.length === 0"
-            @click="handleDownloadPDF"
-          >
-            📑 PDF
-          </button>
         </div>
         <div class="share-button-wrapper">
           <button
@@ -59,9 +59,11 @@
         </div>
       </div>
     </div>
+  </section>
 
-    <!-- Milestones Section -->
-    <div class="hd milestones-header">
+  <!-- Milestones Section -->
+  <section class="panel">
+    <div class="hd">
       <strong>📊 {{ t('export.milestonesTitle') }}</strong>
       <label class="milestones-checkbox-label">
         <span>{{ t('results.selectAll') }}</span>

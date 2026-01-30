@@ -80,7 +80,7 @@ export default {
   },
   export: {
     title: 'Exportieren',
-    description: 'Wähle Jubiläen aus und exportiere sie in verschiedenen Formaten wie ICS, CSV, JSON oder PDF. Du kannst auch die aktuelle Ansicht mit anderen teilen.',
+    description: 'Wähle Jubiläen aus und exportiere sie in verschiedenen Formaten. ICS kann direkt in deinen Kalender importiert werden. Weitere Formate: PDF, CSV und JSON. Du kannst auch die aktuelle Ansicht mit anderen teilen.',
     exportCSV: 'Als CSV exportieren',
     exportJSON: 'Als JSON exportieren',
     exportPDF: 'Als PDF exportieren',

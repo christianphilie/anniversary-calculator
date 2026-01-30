@@ -5,7 +5,9 @@
       <AppHeader />
       <main id="main-content" class="grid">
         <InputPanel />
-        <ResultsPanel />
+        <div class="results-grid">
+          <ResultsPanel />
+        </div>
       </main>
       <Toast />
       <KeyboardShortcutsHelp />

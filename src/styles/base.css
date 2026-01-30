@@ -72,9 +72,16 @@ h1{
   display:grid;
   grid-template-columns:minmax(280px,360px) minmax(0,1fr);
   gap:24px;
+  align-items:start;
+}
+.results-grid{
+  display:flex;
+  flex-direction:column;
+  gap:24px;
 }
 @media (max-width:1024px){
   .grid{grid-template-columns:1fr;gap:20px}
+  .results-grid{gap:20px}
 }
 
 /* Smooth scroll */

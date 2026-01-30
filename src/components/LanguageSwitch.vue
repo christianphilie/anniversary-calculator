@@ -1,70 +1,68 @@
 <template>
-  <div class="lang-switch" role="group" aria-label="Sprache">
-    <button
-      v-for="lang in languages"
-      :key="lang.value"
-      :class="['lang-btn', { active: locale === lang.value }]"
-      :aria-pressed="locale === lang.value"
-      :aria-label="`Sprache: ${lang.label}`"
-      :title="lang.label"
-      @click="setLocale(lang.value)"
-    >
-      {{ lang.flag }} {{ lang.label }}
-    </button>
-  </div>
+  <button
+    class="lang-toggle"
+    :aria-label="`Sprache: ${currentLang.label}`"
+    :title="currentLang.label"
+    @click="toggleLocale"
+  >
+    <span aria-hidden="true">{{ currentLang.flag }}</span>
+  </button>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useI18n } from '../i18n'
 import type { Locale } from '../i18n'
 
 const { locale, setLocale } = useI18n()
 
 const languages: Array<{ value: Locale; label: string; flag: string }> = [
-  { value: 'de', label: 'DE', flag: '🇩🇪' },
-  { value: 'en', label: 'EN', flag: '🇬🇧' }
+  { value: 'de', label: 'Deutsch', flag: '🇩🇪' },
+  { value: 'en', label: 'English', flag: '🇬🇧' }
 ]
+
+const currentLang = computed(() => {
+  return languages.find(lang => lang.value === locale.value) || languages[0]
+})
+
+function toggleLocale(): void {
+  const currentIndex = languages.findIndex(lang => lang.value === locale.value)
+  const nextIndex = (currentIndex + 1) % languages.length
+  setLocale(languages[nextIndex].value)
+}
 </script>
 
 <style scoped>
-.lang-switch {
-  display: inline-flex;
-  gap: 0;
-  background: var(--panel);
+.lang-toggle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   border: 1px solid var(--border);
-  border-radius: 999px;
-  overflow: hidden;
-  padding: 4px;
-  box-shadow: var(--shadow-sm);
-}
-
-.lang-btn {
-  border: 0;
-  background: transparent;
-  padding: 6px 12px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--muted);
-  line-height: 1.2;
-  border-radius: 999px;
-  transition: var(--transition);
-  white-space: nowrap;
-}
-
-.lang-btn.active {
   background: var(--card);
-  color: var(--text);
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+  transition: var(--transition);
   box-shadow: var(--shadow-sm);
+  padding: 0;
+  line-height: 1;
 }
 
-.lang-btn:hover:not(.active) {
-  color: var(--text);
+.lang-toggle:hover {
+  background: var(--panel);
+  border-color: var(--brand);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
-.lang-btn:focus-visible {
+.lang-toggle:focus-visible {
   outline: none;
   box-shadow: var(--focus);
+}
+
+.lang-toggle:active {
+  transform: translateY(0);
 }
 </style>

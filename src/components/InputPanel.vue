@@ -34,14 +34,18 @@
           </div>
           <div class="field">
             <label for="time">{{ t('form.time') }}</label>
-            <input
-              id="time"
-              v-model="formData.time"
-              type="time"
-              step="1"
-              :aria-invalid="fieldErrors.time ? 'true' : 'false'"
-              :aria-describedby="fieldErrors.time ? 'time-error' : undefined"
-            />
+            <div class="time-input-wrapper">
+              <input
+                id="time"
+                v-model="formData.time"
+                type="time"
+                step="1"
+                :class="{ 'time-empty': !formData.time }"
+                :aria-invalid="fieldErrors.time ? 'true' : 'false'"
+                :aria-describedby="fieldErrors.time ? 'time-error' : undefined"
+              />
+              <span v-if="!formData.time" class="time-placeholder">0:00:00</span>
+            </div>
             <span v-if="fieldErrors.time" id="time-error" class="field-error" role="alert">
               {{ fieldErrors.time }}
             </span>
@@ -252,7 +256,7 @@ function compute(): void {
 
     const { date: start, error: dateError } = parseDate(
       formData.value.date,
-      formData.value.time || '12:00:00',
+      formData.value.time || '0:00:00',
       translate
     )
 
