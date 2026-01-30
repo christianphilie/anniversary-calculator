@@ -80,7 +80,7 @@ export default {
   },
   export: {
     title: 'Exportieren',
-    description: 'Wähle Jubiläen aus und exportiere sie in verschiedenen Formaten wie ICS, CSV oder JSON. Du kannst auch die aktuelle Ansicht mit anderen teilen.',
+    description: 'Wähle Jubiläen aus und exportiere sie in verschiedenen Formaten wie ICS, CSV, JSON oder PDF. Du kannst auch die aktuelle Ansicht mit anderen teilen.',
     exportCSV: 'Als CSV exportieren',
     exportJSON: 'Als JSON exportieren',
     exportPDF: 'Als PDF exportieren',
@@ -101,12 +101,14 @@ export default {
     noPatterns: 'Bitte wähle mindestens ein Muster aus',
     computeError: 'Fehler beim Berechnen der Jubiläen',
     copyError: 'Fehler beim Kopieren',
-    shareError: 'Fehler beim Teilen'
+    shareError: 'Fehler beim Teilen',
+    exportError: 'Fehler beim Exportieren'
   },
   success: {
     copied: 'Meilenstein kopiert',
     linkCopied: 'Link kopiert',
-    shared: 'Geteilt'
+    shared: 'Geteilt',
+    exported: 'Exportiert'
   },
   validation: {
     dateRequired: 'Bitte wähle ein Datum aus',

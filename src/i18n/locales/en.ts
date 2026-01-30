@@ -80,7 +80,7 @@ export default {
   },
   export: {
     title: 'Export',
-    description: 'Select anniversaries and export them in various formats like ICS, CSV, or JSON. You can also share the current view with others.',
+    description: 'Select anniversaries and export them in various formats like ICS, CSV, JSON, or PDF. You can also share the current view with others.',
     exportCSV: 'Export as CSV',
     exportJSON: 'Export as JSON',
     exportPDF: 'Export as PDF',
@@ -101,12 +101,14 @@ export default {
     noPatterns: 'Please select at least one pattern',
     computeError: 'Error calculating anniversaries',
     copyError: 'Error copying',
-    shareError: 'Error sharing'
+    shareError: 'Error sharing',
+    exportError: 'Error exporting'
   },
   success: {
     copied: 'Milestone copied',
     linkCopied: 'Link copied',
-    shared: 'Shared'
+    shared: 'Shared',
+    exported: 'Exported'
   },
   validation: {
     dateRequired: 'Please select a date',

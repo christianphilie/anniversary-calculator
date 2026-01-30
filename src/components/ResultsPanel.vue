@@ -39,9 +39,10 @@
           </button>
           <button
             class="btn primary"
-            :title="t('export.exportPDFDisabled')"
+            :title="`${t('export.exportPDF')} (${visibleSelected.length} ${t('common.selectAll').toLowerCase()})`"
             :aria-label="t('export.exportPDF')"
-            disabled
+            :disabled="visibleSelected.length === 0"
+            @click="handleDownloadPDF"
           >
             📑 PDF
           </button>
@@ -105,7 +106,7 @@ import { useUrlState } from '../composables/useUrlState'
 import { useToast } from '../composables/useToast'
 import { useI18n } from '../i18n'
 import { buildICS, downloadICS } from '../utils/ics'
-import { exportToCSV, exportToJSON, downloadFile } from '../utils/export'
+import { exportToCSV, exportToJSON, exportToPDF, downloadFile } from '../utils/export'
 import { generateShareUrl, shareMilestones, isNativeShareAvailable } from '../utils/share'
 import { copyToClipboard } from '../utils/clipboard'
 import YearSeparator from './YearSeparator.vue'
@@ -114,7 +115,7 @@ import MilestoneItem from './MilestoneItem.vue'
 const { state, isLoading, visibleSelected, selectAll, selectNone, toggleSelection } = useAppState()
 const { encodeStateToURL } = useUrlState(state)
 const { success, error } = useToast()
-const { t } = useI18n()
+const { locale, t } = useI18n()
 
 const downloadTooltip = computed(() => {
   const n = visibleSelected.value.length
@@ -159,7 +160,7 @@ function handleDownloadICS(): void {
 
   const ics = buildICS(subset)
   const label = (state.value.label || 'Jubilaeum').toLowerCase().replace(/\s+/g, '_')
-  downloadICS(`${label}_auswahl.ics`, ics)
+  downloadICS(`${label}_jubilaeen.ics`, ics)
 }
 
 function handleDownloadCSV(): void {
@@ -168,7 +169,7 @@ function handleDownloadCSV(): void {
 
   const csv = exportToCSV(subset)
   const label = (state.value.label || 'Jubilaeum').toLowerCase().replace(/\s+/g, '_')
-  downloadFile(`${label}_auswahl.csv`, csv, 'text/csv;charset=utf-8')
+  downloadFile(`${label}_jubilaeen.csv`, csv, 'text/csv;charset=utf-8')
 }
 
 function handleDownloadJSON(): void {
@@ -177,7 +178,33 @@ function handleDownloadJSON(): void {
 
   const json = exportToJSON(subset)
   const label = (state.value.label || 'Jubilaeum').toLowerCase().replace(/\s+/g, '_')
-  downloadFile(`${label}_auswahl.json`, json, 'application/json;charset=utf-8')
+  downloadFile(`${label}_jubilaeen.json`, json, 'application/json;charset=utf-8')
+}
+
+function handleDownloadPDF(): void {
+  const subset = visibleSelected.value
+  if (!subset.length) return
+
+  try {
+    const pdf = exportToPDF(
+      subset,
+      state.value.label || '',
+      locale.value as 'de' | 'en',
+      {
+        start: state.value.start,
+        yearFrom: state.value.yearFrom,
+        yearTo: state.value.yearTo,
+        units: state.value.units,
+        patterns: state.value.patterns
+      }
+    )
+    const label = (state.value.label || 'Jubilaeum').toLowerCase().replace(/\s+/g, '_')
+    pdf.save(`${label}_jubilaeen.pdf`)
+    success(t.value('success.exported'))
+  } catch (err) {
+    console.error('PDF export error:', err)
+    error(t.value('errors.exportError'))
+  }
 }
 
 async function handleShare(): Promise<void> {
