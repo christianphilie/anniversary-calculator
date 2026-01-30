@@ -74,6 +74,10 @@ h1{
   gap:24px;
   align-items:start;
 }
+.left-column{
+  display:flex;
+  flex-direction:column;
+}
 .results-grid{
   display:flex;
   flex-direction:column;

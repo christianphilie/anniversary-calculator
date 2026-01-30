@@ -130,5 +130,8 @@ export default {
     patternsRequired: 'Bitte wähle mindestens ein Muster aus',
     dateParseError: 'Ungültiges Datum oder Zeit',
     dateParseFailed: 'Fehler beim Parsen des Datums'
+  },
+  footer: {
+    viewOnGitHub: 'Auf GitHub ansehen'
   }
 }
