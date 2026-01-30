@@ -7,18 +7,51 @@ import { useI18n } from '../i18n'
 
 const APP_STATE_KEY = Symbol('appState')
 
+/**
+ * Composable interface for application state management.
+ * Provides reactive state, loading indicators, and methods for computing and managing milestones.
+ */
 interface AppStateComposable {
+  /** Reactive application state containing milestones, selections, and configuration */
   state: Ref<AppState>
+  /** Loading state indicator for async operations */
   isLoading: Ref<boolean>
+  /** Computed array of currently selected visible milestones */
   visibleSelected: ComputedRef<MilestoneEvent[]>
+  /**
+   * Recomputes milestones based on input parameters.
+   * @param start - The starting date for milestone calculations
+   * @param label - Label/title for the milestones
+   * @param units - Array of units to calculate (years, months, weeks, etc.)
+   * @param patterns - Pattern options (rounded, repdigit)
+   * @param yearFrom - Start year for the calculation window
+   * @param yearTo - End year for the calculation window
+   */
   recompute: (start: Date, label: string, units: Unit[], patterns: Patterns, yearFrom: number, yearTo: number) => Promise<void>
+  /** Selects all visible milestones */
   selectAll: () => void
+  /** Deselects all visible milestones */
   selectNone: () => void
+  /**
+   * Toggles the selection state of a specific milestone.
+   * @param id - The ID of the milestone to toggle
+   */
   toggleSelection: (id: string) => void
+  /**
+   * Selects or deselects all milestones for a specific year.
+   * @param year - The year to select/deselect
+   * @param select - Whether to select (true) or deselect (false)
+   */
   selectYear: (year: number, select: boolean) => void
+  /** Resets the application state to initial values */
   reset: () => void
 }
 
+/**
+ * Creates a new application state instance.
+ * This function is called internally by provideAppState() and useAppState().
+ * @returns AppStateComposable instance with reactive state and methods
+ */
 function createAppState(): AppStateComposable {
   const { handleError } = useError()
   const { locale } = useI18n()
@@ -173,6 +206,17 @@ function createAppState(): AppStateComposable {
   }
 }
 
+/**
+ * Composable hook for accessing application state.
+ * Use this in components to access and modify the global application state.
+ * 
+ * @returns AppStateComposable instance with state and methods
+ * @example
+ * ```typescript
+ * const { state, recompute, selectAll } = useAppState()
+ * await recompute(startDate, 'Birthday', ['years'], { rounded: true }, 2020, 2030)
+ * ```
+ */
 export function useAppState(): AppStateComposable {
   // Try to inject first (if provided by parent)
   const injected = inject<AppStateComposable | undefined>(APP_STATE_KEY)
@@ -184,6 +228,17 @@ export function useAppState(): AppStateComposable {
   return createAppState()
 }
 
+/**
+ * Provides application state to the component tree.
+ * Call this once in the root component (App.vue) to make state available to all child components.
+ * 
+ * @returns AppStateComposable instance
+ * @example
+ * ```typescript
+ * // In App.vue
+ * provideAppState()
+ * ```
+ */
 export function provideAppState(): AppStateComposable {
   const appState = createAppState()
   provide(APP_STATE_KEY, appState)

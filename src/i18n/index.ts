@@ -62,6 +62,18 @@ function createI18n() {
   }
 }
 
+/**
+ * Composable hook for internationalization.
+ * Provides reactive translation function and locale management.
+ * 
+ * @returns Object with locale, translation function, and setLocale method
+ * @example
+ * ```typescript
+ * const { locale, t, setLocale } = useI18n()
+ * const text = t.value('common.save')
+ * setLocale('en')
+ * ```
+ */
 export function useI18n() {
   if (!i18nInstance) {
     i18nInstance = createI18n()
