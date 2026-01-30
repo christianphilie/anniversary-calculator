@@ -112,13 +112,23 @@ export default {
   },
   validation: {
     dateRequired: 'Please select a date',
+    dateInvalid: 'Invalid date',
     dateTooOld: 'Date must be after {{year}}',
     dateTooNew: 'Date must be before {{year}}',
     timeInvalid: 'Invalid time format (expected: HH:MM or HH:MM:SS)',
     labelTooLong: 'Title must not exceed 100 characters',
     labelInvalidChars: 'Title contains invalid characters',
+    labelNotAllowedChars: 'Title contains not allowed characters',
     yearFromTooEarly: 'Start year must be at least {{year}}',
+    yearFromTooLate: 'Start year must not exceed {{year}}',
+    yearToTooEarly: 'End year must be at least {{year}}',
     yearToTooLate: 'End year must not exceed {{year}}',
-    yearToBeforeFrom: 'End year must be after start year'
+    yearToBeforeFrom: 'End year must be after start year',
+    yearSpanTooLarge: 'Year range must not exceed {{span}} years',
+    yearRangeInvalid: 'Invalid year values',
+    unitsRequired: 'Please select at least one unit',
+    patternsRequired: 'Please select at least one pattern',
+    dateParseError: 'Invalid date or time',
+    dateParseFailed: 'Error parsing date'
   }
 }

@@ -9,10 +9,11 @@ export function escapeHtml(text: string): string {
 
 /**
  * Sanitizes a string by removing potentially dangerous characters
+ * Note: Apostrophes are allowed for titles/labels
  */
 export function sanitizeInput(input: string): string {
   return input
-    .replace(/[<>\"'&]/g, '') // Remove HTML special characters
+    .replace(/[<>\"&]/g, '') // Remove HTML special characters (but keep apostrophes)
     .trim()
 }
 
@@ -36,8 +37,8 @@ export function sanitizeUrlParam(param: string | null, maxLength = 200): string 
  * Validates that a string contains only safe characters for labels/titles
  */
 export function isSafeString(input: string): boolean {
-  // Allow letters, numbers, spaces, and common punctuation
-  const safePattern = /^[a-zA-Z0-9äöüÄÖÜß\s.,!?\-_()]+$/
+  // Allow letters, numbers, spaces, common punctuation, and apostrophes
+  const safePattern = /^[a-zA-Z0-9äöüÄÖÜß\s.,!?\-_()']+$/
   return safePattern.test(input)
 }
 

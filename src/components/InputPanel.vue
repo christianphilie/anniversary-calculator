@@ -226,11 +226,14 @@ function compute(): void {
   clearError()
   fieldErrors.value = {}
 
+  // Get translation function
+  const translate = (key: string, params?: Record<string, string | number>) => t.value(key, params)
+
   try {
     // Sanitize and validate label
     if (formData.value.label.trim()) {
       const sanitizedLabel = sanitizeLabel(formData.value.label.trim())
-      const labelValidation = validateLabel(sanitizedLabel)
+      const labelValidation = validateLabel(sanitizedLabel, translate)
       if (!labelValidation.valid) {
         fieldErrors.value.label = labelValidation.error
         setError(labelValidation.error || t.value('errors.invalidLabel'))
@@ -249,11 +252,15 @@ function compute(): void {
 
     const { date: start, error: dateError } = parseDate(
       formData.value.date,
-      formData.value.time || '12:00:00'
+      formData.value.time || '12:00:00',
+      translate
     )
 
     if (dateError) {
-      if (dateError.includes('Zeit')) {
+      // Check if error is about time (works for both languages)
+      const timeKeywords = ['Zeit', 'time', 'Time']
+      const isTimeError = timeKeywords.some(keyword => dateError.includes(keyword))
+      if (isTimeError) {
         fieldErrors.value.time = dateError
       } else {
         fieldErrors.value.date = dateError
@@ -263,7 +270,7 @@ function compute(): void {
     }
 
     // Validate units
-    const unitsValidation = validateUnits(formData.value.units)
+    const unitsValidation = validateUnits(formData.value.units, translate)
     if (!unitsValidation.valid) {
       fieldErrors.value.units = unitsValidation.error
       setError(unitsValidation.error || t.value('errors.noUnits'))
@@ -271,7 +278,7 @@ function compute(): void {
     }
 
     // Validate patterns
-    const patternsValidation = validatePatterns(formData.value.patterns)
+    const patternsValidation = validatePatterns(formData.value.patterns, translate)
     if (!patternsValidation.valid) {
       fieldErrors.value.patterns = patternsValidation.error
       setError(patternsValidation.error || t.value('errors.noPatterns'))
@@ -283,7 +290,7 @@ function compute(): void {
     const yearTo = Math.max(yearFrom, Math.min(startYear.value + CONFIG.MAX_SPAN, formData.value.yearTo))
 
     // Validate year range
-    const yearRangeValidation = validateYearRange(yearFrom, yearTo, startYear.value)
+    const yearRangeValidation = validateYearRange(yearFrom, yearTo, startYear.value, translate)
     if (!yearRangeValidation.valid) {
       fieldErrors.value.yearRange = yearRangeValidation.error
       setError(yearRangeValidation.error || t.value('errors.invalidYearRange'))
@@ -335,6 +342,18 @@ watch(
     }, CONFIG.DEBOUNCE_DELAY)
   },
   { deep: true }
+)
+
+// Watch for label changes and auto-submit after 0.5s delay
+let labelDebounceTimer: ReturnType<typeof setTimeout> | null = null
+watch(
+  () => formData.value.label,
+  () => {
+    if (labelDebounceTimer) clearTimeout(labelDebounceTimer)
+    labelDebounceTimer = setTimeout(() => {
+      compute()
+    }, 500) // 0.5 seconds delay
+  }
 )
 
 watch(() => formData.value.yearFrom, () => {

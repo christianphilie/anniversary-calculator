@@ -112,13 +112,23 @@ export default {
   },
   validation: {
     dateRequired: 'Bitte wähle ein Datum aus',
+    dateInvalid: 'Ungültiges Datum',
     dateTooOld: 'Das Datum muss nach {{year}} sein',
     dateTooNew: 'Das Datum muss vor {{year}} sein',
     timeInvalid: 'Ungültiges Zeitformat (erwartet: HH:MM oder HH:MM:SS)',
     labelTooLong: 'Der Titel darf maximal 100 Zeichen lang sein',
     labelInvalidChars: 'Der Titel enthält ungültige Zeichen',
+    labelNotAllowedChars: 'Der Titel enthält nicht erlaubte Zeichen',
     yearFromTooEarly: 'Das Startjahr muss mindestens {{year}} sein',
+    yearFromTooLate: 'Das Startjahr darf maximal {{year}} sein',
+    yearToTooEarly: 'Das Endjahr muss mindestens {{year}} sein',
     yearToTooLate: 'Das Endjahr darf maximal {{year}} sein',
-    yearToBeforeFrom: 'Das Endjahr muss nach dem Startjahr liegen'
+    yearToBeforeFrom: 'Das Endjahr muss nach dem Startjahr liegen',
+    yearSpanTooLarge: 'Der Jahresbereich darf maximal {{span}} Jahre umfassen',
+    yearRangeInvalid: 'Ungültige Jahreswerte',
+    unitsRequired: 'Bitte wähle mindestens eine Einheit aus',
+    patternsRequired: 'Bitte wähle mindestens ein Muster aus',
+    dateParseError: 'Ungültiges Datum oder Zeit',
+    dateParseFailed: 'Fehler beim Parsen des Datums'
   }
 }
