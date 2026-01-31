@@ -1,4 +1,5 @@
 import { isSafeString } from './sanitize'
+import { CONFIG } from '../types'
 
 export interface ValidationResult {
   valid: boolean
@@ -16,7 +17,7 @@ function defaultT(key: string, params?: Record<string, string | number>): string
     'validation.dateTooOld': `Das Datum muss nach ${params?.year || 1900} sein`,
     'validation.dateTooNew': `Das Datum muss vor ${params?.year || 2200} sein`,
     'validation.timeInvalid': 'Ungültiges Zeitformat (erwartet: HH:MM oder HH:MM:SS)',
-    'validation.labelTooLong': 'Der Titel darf maximal 100 Zeichen lang sein',
+    'validation.labelTooLong': `Der Titel darf maximal ${CONFIG.MAX_LABEL_LENGTH || 100} Zeichen lang sein`,
     'validation.labelInvalidChars': 'Der Titel enthält ungültige Zeichen',
     'validation.labelNotAllowedChars': 'Der Titel enthält nicht erlaubte Zeichen',
     'validation.yearFromTooEarly': `Das Startjahr muss mindestens ${params?.year || 1900} sein`,
@@ -24,7 +25,7 @@ function defaultT(key: string, params?: Record<string, string | number>): string
     'validation.yearToTooEarly': `Das Endjahr muss mindestens ${params?.year || 1900} sein`,
     'validation.yearToTooLate': `Das Endjahr darf maximal ${params?.year || 2200} sein`,
     'validation.yearToBeforeFrom': 'Das Endjahr muss nach dem Startjahr liegen',
-    'validation.yearSpanTooLarge': `Der Jahresbereich darf maximal ${params?.span || 300} Jahre umfassen`,
+    'validation.yearSpanTooLarge': `Der Jahresbereich darf maximal ${params?.span || CONFIG.MAX_SPAN} Jahre umfassen`,
     'validation.yearRangeInvalid': 'Ungültige Jahreswerte',
     'validation.unitsRequired': 'Bitte wähle mindestens eine Einheit aus',
     'validation.patternsRequired': 'Bitte wähle mindestens ein Muster aus',
@@ -75,8 +76,10 @@ export function validateTime(timeStr: string, t: TranslateFunction = defaultT): 
   return { valid: true }
 }
 
+const MAX_LABEL_LENGTH = 100 // Maximum length for labels
+
 export function validateLabel(label: string, t: TranslateFunction = defaultT): ValidationResult {
-  if (label.length > 100) {
+  if (label.length > MAX_LABEL_LENGTH) {
     return { valid: false, error: t('validation.labelTooLong') }
   }
 
@@ -97,7 +100,7 @@ export function validateLabel(label: string, t: TranslateFunction = defaultT): V
 // Constants for year validation
 const MIN_YEAR = 1900
 const MAX_YEAR = 2200
-const MAX_YEAR_SPAN = 300 // Maximum years between yearFrom and yearTo
+const MAX_YEAR_SPAN = CONFIG.MAX_SPAN // Maximum years between yearFrom and yearTo
 
 export function validateYearRange(
   yearFrom: number,
@@ -137,9 +140,9 @@ export function validateYearRange(
     }
   }
 
-  // Validate against max 100 years in the future from current year
+  // Validate against max MAX_YEARS_IN_FUTURE years in the future from current year
   const currentYear = new Date().getFullYear()
-  const maxYearTo = currentYear + 100
+  const maxYearTo = currentYear + CONFIG.MAX_YEARS_IN_FUTURE
   if (yearTo > maxYearTo) {
     return {
       valid: false,

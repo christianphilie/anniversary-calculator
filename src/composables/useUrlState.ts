@@ -3,28 +3,35 @@ import { toLocalDateInputValue } from '../utils/date'
 import { sanitizeUrlParam, sanitizeLabel } from '../utils/sanitize'
 import { parseShareUrl } from '../utils/share'
 import { safeLocalStorageGet } from '../utils/storage'
+import {
+  getUrlParam,
+  setUrlParam,
+  isValidDateParam,
+  isValidTimeParam,
+  parseYearParam,
+  parseUnitsParam,
+  parsePatternsParam,
+  parseThemeParam
+} from '../utils/url'
+
+const VALID_UNITS = ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds'] as const
+const VALID_THEMES = ['light', 'dark', 'system'] as const
 
 export function useUrlState(state: { value: AppState }) {
   function encodeStateToURL(): void {
     const params = new URLSearchParams()
 
-    if (state.value.label) {
-      params.set('l', state.value.label)
-    }
+    setUrlParam(params, 'l', state.value.label)
 
     if (state.value.start) {
-      params.set('d', toLocalDateInputValue(state.value.start))
-      // Time would need to be stored separately
-      if (state.value.yearFrom !== null) {
-        params.set('yf', String(state.value.yearFrom))
-      }
-      if (state.value.yearTo !== null) {
-        params.set('yt', String(state.value.yearTo))
-      }
+      setUrlParam(params, 'd', toLocalDateInputValue(state.value.start))
+      setUrlParam(params, 'yf', state.value.yearFrom)
+      setUrlParam(params, 'yt', state.value.yearTo)
     }
 
-    params.set('u', state.value.units.join(','))
-    params.set(
+    setUrlParam(params, 'u', state.value.units.join(','))
+    setUrlParam(
+      params,
       'p',
       Object.entries(state.value.patterns)
         .filter(([, v]) => v)
@@ -33,9 +40,7 @@ export function useUrlState(state: { value: AppState }) {
     )
 
     const themeMode = safeLocalStorageGet('themeMode', '')
-    if (themeMode) {
-      params.set('theme', themeMode)
-    }
+    setUrlParam(params, 'theme', themeMode || null)
 
     history.replaceState(null, '', '?' + params.toString())
   }
@@ -54,65 +59,53 @@ export function useUrlState(state: { value: AppState }) {
     const q = new URLSearchParams(location.search)
     const result: ReturnType<typeof loadStateFromURL> = {}
 
-    // Sanitize label
-    const labelParam = sanitizeUrlParam(q.get('l'))
+    // Sanitize and validate label
+    const labelParam = sanitizeUrlParam(getUrlParam(q, 'l'))
     if (labelParam) {
       result.label = sanitizeLabel(labelParam)
     }
 
     // Validate date format (YYYY-MM-DD)
-    const dateParam = q.get('d')
-    if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
+    const dateParam = getUrlParam(q, 'd')
+    if (isValidDateParam(dateParam)) {
       result.date = dateParam
     }
 
     // Validate time format (HH:MM or HH:MM:SS)
-    const timeParam = q.get('t')
-    if (timeParam && /^([0-1][0-9]|2[0-3]):([0-5][0-9])(:([0-5][0-9]))?$/.test(timeParam)) {
+    const timeParam = getUrlParam(q, 't')
+    if (isValidTimeParam(timeParam)) {
       result.time = timeParam
     }
 
     // Validate units
-    const u = q.get('u')
-    if (u) {
-      const validUnits = ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds']
-      const units = u.split(',').filter(Boolean).filter(unit => validUnits.includes(unit))
-      if (units.length > 0) {
-        result.units = units
-      }
+    const unitsParam = getUrlParam(q, 'u')
+    const units = parseUnitsParam(unitsParam, VALID_UNITS as unknown as string[])
+    if (units.length > 0) {
+      result.units = units as typeof VALID_UNITS[number][]
     }
 
     // Validate patterns
-    const p = q.get('p')
-    if (p) {
-      const set = new Set(p.split(',').filter(Boolean))
-      result.patterns = {
-        rounded: set.has('rounded'),
-        repdigit: set.has('repdigit')
-      }
+    const patternsParam = getUrlParam(q, 'p')
+    const patterns = parsePatternsParam(patternsParam)
+    if (patterns) {
+      result.patterns = patterns
     }
 
     // Validate theme
-    const themeParam = q.get('theme')
-    if (themeParam && ['light', 'dark', 'system'].includes(themeParam)) {
+    const themeParam = parseThemeParam(getUrlParam(q, 'theme'), VALID_THEMES as unknown as string[])
+    if (themeParam) {
       result.theme = themeParam
     }
 
     // Validate year range
-    const yfParam = q.get('yf')
-    if (yfParam) {
-      const yearFrom = parseInt(yfParam, 10)
-      if (!isNaN(yearFrom) && yearFrom >= 1900 && yearFrom <= 2200) {
-        result.yearFrom = yearFrom
-      }
+    const yearFrom = parseYearParam(getUrlParam(q, 'yf'))
+    if (yearFrom !== null) {
+      result.yearFrom = yearFrom
     }
 
-    const ytParam = q.get('yt')
-    if (ytParam) {
-      const yearTo = parseInt(ytParam, 10)
-      if (!isNaN(yearTo) && yearTo >= 1900 && yearTo <= 2200) {
-        result.yearTo = yearTo
-      }
+    const yearTo = parseYearParam(getUrlParam(q, 'yt'))
+    if (yearTo !== null) {
+      result.yearTo = yearTo
     }
 
     // Parse milestone IDs from share URL

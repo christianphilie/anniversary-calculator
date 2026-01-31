@@ -1,4 +1,5 @@
 import { logError } from './logger'
+import { setUrlParam } from './url'
 
 /**
  * Generates a shareable URL for one or more milestones
@@ -26,13 +27,13 @@ export function generateShareUrl(milestoneIds: string[]): string {
       // For many IDs, use base64 encoding
       try {
         const idsString = milestoneIds.join(',')
-        params.set('m', btoa(idsString))
+        setUrlParam(params, 'm', btoa(idsString))
       } catch {
         // Fallback to comma-separated if base64 fails
-        params.set('m', milestoneIds.join(','))
+        setUrlParam(params, 'm', milestoneIds.join(','))
       }
     } else {
-      params.set('m', milestoneIds.join(','))
+      setUrlParam(params, 'm', milestoneIds.join(','))
     }
   }
   

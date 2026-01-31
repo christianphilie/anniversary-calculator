@@ -54,7 +54,8 @@ export function sanitizeLabel(label: string): string {
   sanitized = sanitized.replace(/on\w+\s*=/gi, '')
   
   // Trim and limit length
-  sanitized = sanitized.trim().slice(0, 100)
+  const MAX_LABEL_LENGTH = 100 // Maximum length for labels (matches validation)
+  sanitized = sanitized.trim().slice(0, MAX_LABEL_LENGTH)
   
   return sanitized
 }

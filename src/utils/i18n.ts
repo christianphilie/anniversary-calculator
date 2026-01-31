@@ -88,10 +88,17 @@ export function getNumberFormatter(locale: 'de' | 'en' = 'de'): Intl.NumberForma
 }
 
 // Legacy exports for backward compatibility (will use current locale)
-let currentLocale: 'de' | 'en' = 'de'
+// Type-safe locale storage
+type Locale = 'de' | 'en'
+let currentLocale: Locale = 'de'
 
 // Update formatters when locale changes
-export function updateFormatters(locale: 'de' | 'en'): void {
+export function updateFormatters(locale: Locale): void {
+  if (locale !== 'de' && locale !== 'en') {
+    console.warn(`Invalid locale: ${locale}, falling back to 'de'`)
+    currentLocale = 'de'
+    return
+  }
   currentLocale = locale
 }
 
