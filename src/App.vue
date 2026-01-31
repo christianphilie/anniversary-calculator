@@ -6,6 +6,7 @@
       <main id="main-content" class="grid">
         <div class="left-column">
           <InputPanel />
+          <ExportPanel />
           <AppFooter />
         </div>
         <div class="results-grid">
@@ -25,6 +26,7 @@ import { useKeyboardShortcuts } from './composables/useKeyboardShortcuts'
 import ErrorBoundary from './components/ErrorBoundary.vue'
 import AppHeader from './components/AppHeader.vue'
 import InputPanel from './components/InputPanel.vue'
+import ExportPanel from './components/ExportPanel.vue'
 import ResultsPanel from './components/ResultsPanel.vue'
 import AppFooter from './components/AppFooter.vue'
 import Toast from './components/Toast.vue'
