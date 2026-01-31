@@ -9,6 +9,9 @@
   transition:var(--transition);
   overflow:hidden;
 }
+.panel .bd{
+  position:relative;
+}
 .panel:hover{
   box-shadow:var(--shadow-md);
 }
@@ -22,6 +25,9 @@
   background:var(--panel);
   height:52px;
   box-sizing:border-box;
+  position:relative;
+  overflow:visible;
+  z-index:10;
 }
 .panel .hd strong{
   font-size:16px;

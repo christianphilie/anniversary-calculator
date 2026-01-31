@@ -23,7 +23,7 @@ export default {
   },
   form: {
     label: 'Title (optional)',
-    labelPlaceholder: 'Meeting, Birth, Wedding …',
+    labelPlaceholder: 'Birthday, Meeting, Wedding …',
     date: 'Date',
     time: 'Time (optional)',
     units: 'Units',
@@ -31,6 +31,12 @@ export default {
     yearRange: 'Year Range',
     yearFrom: 'from',
     yearTo: 'to',
+    addPreviousYears: 'Add previous 10 years',
+    addNextYears: 'Add next 10 years',
+    addPrevious: 'Previous',
+    addNext: 'Next',
+    showMoreYears: 'Show more years',
+    jumpToYear: 'Jump to year',
     roundedMultiples: 'Rounded multiples',
     roundedMultiplesExamples: '500, 2,000, 10,000, …',
     repdigits: 'Repdigits',
@@ -80,14 +86,19 @@ export default {
   },
   export: {
     title: 'Export',
-    description: 'Select anniversaries and export them in various formats. ICS can be imported directly into your calendar. Other formats: PDF, CSV, and JSON. You can also share the current view with others.',
+    description: 'Export all visible anniversaries in various formats. ICS can be imported directly into your calendar. Other formats: PDF, CSV, and JSON. You can also share the current view with others.',
     exportCSV: 'Export as CSV',
     exportJSON: 'Export as JSON',
     exportPDF: 'Export as PDF',
     exportPDFDisabled: 'Export as PDF (not yet implemented)',
     shareView: 'Share view',
     shareViewTitle: 'Share current view',
-    milestonesTitle: 'Anniversaries'
+    milestonesTitle: 'Anniversaries',
+    icsHelpTitle: 'Import ICS into iOS Calendar',
+    icsHelpStep1: 'Download the ICS file',
+    icsHelpStep2: 'Open the file on your iPhone',
+    icsHelpStep3: 'Tap "Add to Calendar"',
+    icsHelpStep4: 'The anniversaries will be added to your calendar'
   },
   inputs: {
     description: 'Enter your start date and select the units and patterns to calculate anniversaries for.'

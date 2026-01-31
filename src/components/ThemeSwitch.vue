@@ -5,7 +5,7 @@
     :title="`${t('theme.switch')}: ${currentTheme === 'light' ? t('theme.dark') : t('theme.light')}`"
     @click="toggleTheme"
   >
-    <span aria-hidden="true">{{ currentTheme === 'light' ? '☀️' : '🌙' }}</span>
+    <span aria-hidden="true">{{ currentTheme === 'light' ? '🌙' : '☀️' }}</span>
   </button>
 </template>
 

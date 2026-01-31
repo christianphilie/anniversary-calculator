@@ -22,7 +22,9 @@ const languages: Array<{ value: Locale; label: string; flag: string }> = [
 ]
 
 const currentLang = computed(() => {
-  return languages.find(lang => lang.value === locale.value) || languages[0]
+  const currentIndex = languages.findIndex(lang => lang.value === locale.value)
+  const nextIndex = (currentIndex + 1) % languages.length
+  return languages[nextIndex] || languages[0]
 })
 
 function toggleLocale(): void {

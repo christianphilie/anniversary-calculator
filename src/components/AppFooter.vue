@@ -47,6 +47,8 @@ const { t } = useI18n()
   font-size: 13px;
   color: var(--muted);
   line-height: 1.5;
+  text-align: center;
+  align-items: center;
 }
 
 .footer-text {

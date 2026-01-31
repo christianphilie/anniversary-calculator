@@ -23,7 +23,7 @@ export default {
   },
   form: {
     label: 'Titel (optional)',
-    labelPlaceholder: 'Kennenlernen, Geburt, Hochzeit …',
+    labelPlaceholder: 'Geburtstag, Kennenlernen, Hochzeit …',
     date: 'Datum',
     time: 'Uhrzeit (optional)',
     units: 'Einheiten',
@@ -31,6 +31,12 @@ export default {
     yearRange: 'Jahresbereich',
     yearFrom: 'von',
     yearTo: 'bis',
+    addPreviousYears: 'Vorherige 10 Jahre hinzufügen',
+    addNextYears: 'Nächste 10 Jahre hinzufügen',
+    addPrevious: 'Vorher',
+    addNext: 'Nachher',
+    showMoreYears: 'Mehr Jahre anzeigen',
+    jumpToYear: 'Zu Jahr springen',
     roundedMultiples: 'Runde Vielfache',
     roundedMultiplesExamples: '500, 2.000, 10.000, …',
     repdigits: 'Schnapszahlen',
@@ -80,14 +86,19 @@ export default {
   },
   export: {
     title: 'Exportieren',
-    description: 'Wähle Jubiläen aus und exportiere sie in verschiedenen Formaten. ICS kann direkt in deinen Kalender importiert werden. Weitere Formate: PDF, CSV und JSON. Du kannst auch die aktuelle Ansicht mit anderen teilen.',
+    description: 'Exportiere alle sichtbaren Jubiläen in verschiedenen Formaten. ICS kann direkt in deinen Kalender importiert werden. Weitere Formate: PDF, CSV und JSON. Du kannst auch die aktuelle Ansicht mit anderen teilen.',
     exportCSV: 'Als CSV exportieren',
     exportJSON: 'Als JSON exportieren',
     exportPDF: 'Als PDF exportieren',
     exportPDFDisabled: 'Als PDF exportieren (noch nicht implementiert)',
     shareView: 'Ansicht teilen',
     shareViewTitle: 'Aktuelle Ansicht teilen',
-    milestonesTitle: 'Jubiläen'
+    milestonesTitle: 'Jubiläen',
+    icsHelpTitle: 'ICS in iOS-Kalender importieren',
+    icsHelpStep1: 'Lade die ICS-Datei herunter',
+    icsHelpStep2: 'Öffne die Datei auf deinem iPhone',
+    icsHelpStep3: 'Tippe auf "In Kalender hinzufügen"',
+    icsHelpStep4: 'Die Jubiläen werden zu deinem Kalender hinzugefügt'
   },
   inputs: {
     description: 'Gib dein Startdatum ein und wähle die Einheiten und Muster aus, nach denen Jubiläen berechnet werden sollen.'
