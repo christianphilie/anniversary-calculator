@@ -1,11 +1,5 @@
 <template>
   <div class="item" :data-year="event.date.getFullYear()" role="listitem">
-    <input
-      type="checkbox"
-      :checked="checked"
-      :aria-label="`${event.baseTitle} ${event.since} ${t('common.selectAll')}`"
-      @change="$emit('toggle')"
-    />
     <div class="grow">
       <div class="when">
         <span class="ttl-num">{{ event.baseTitle }}</span> <span class="since">{{ event.since }}</span>
@@ -39,11 +33,6 @@ import { useI18n } from '../i18n'
 
 const props = defineProps<{
   event: MilestoneEvent
-  checked: boolean
-}>()
-
-defineEmits<{
-  toggle: []
 }>()
 
 const { success, error } = useToast()

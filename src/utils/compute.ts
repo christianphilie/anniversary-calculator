@@ -64,12 +64,16 @@ export function computeRangeWindow(
 
     const locale = opts.locale || 'de'
     const sinceText = locale === 'en' ? 'since' : 'seit'
-    const startText = locale === 'en' ? 'Start' : 'Start'
     const timeSuffix = locale === 'en' ? '' : ' Uhr'
+    const formattedStart = fmtFull().format(start) + timeSuffix
     
     const baseTitle = `${fmtNum().format(n)} ${getUnitLabel(unit, n, locale)}`
-    const since = `${sinceText} ${opts.label || startText}`
-    const formattedStart = fmtFull().format(start) + timeSuffix
+    // If no label, use "seit [Datum] um [Uhrzeit]" instead of "seit Start"
+    const since = opts.label 
+      ? `${sinceText} ${opts.label}`
+      : (locale === 'en' 
+        ? `since ${formattedStart}` 
+        : `seit ${formattedStart}`)
     const desc = `${fmtNum().format(n)} ${getUnitLabel(unit, n, locale)} ${sinceText} ${formattedStart}`
 
     evs.push({

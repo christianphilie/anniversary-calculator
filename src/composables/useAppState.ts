@@ -1,4 +1,4 @@
-import { ref, computed, nextTick, provide, inject, watch } from 'vue'
+import { ref, computed, provide, inject, watch } from 'vue'
 import type { Ref, ComputedRef } from 'vue'
 import type { AppState, Unit, Patterns, MilestoneEvent } from '../types'
 import { computeRangeWindow } from '../utils/compute'
@@ -120,17 +120,6 @@ function createAppState(): AppStateComposable {
 
       state.value.eventsAll = events
       state.value.eventsView = events
-
-      // Select all events by default for easy export
-      state.value.selected.clear()
-      events.forEach(ev => state.value.selected.add(ev.id))
-
-      // Focus management: Move focus to first result after computation
-      await nextTick()
-      const firstResult = document.querySelector('.list [role="listitem"] input[type="checkbox"]') as HTMLInputElement
-      if (firstResult) {
-        firstResult.focus()
-      }
     } catch (err) {
       handleError(err, 'Fehler beim Berechnen der Jubiläen')
       // Keep previous state on error

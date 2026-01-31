@@ -2,8 +2,6 @@ import { onMounted, onUnmounted } from 'vue'
 import { useTheme } from './useTheme'
 import { useAppState } from './useAppState'
 import { useError } from './useError'
-import { copyToClipboard, formatMilestoneText } from '../utils/clipboard'
-import { useToast } from './useToast'
 
 export interface KeyboardShortcut {
   key: string
@@ -18,9 +16,8 @@ export interface KeyboardShortcut {
 
 export function useKeyboardShortcuts() {
   const { toggleTheme } = useTheme()
-  const { state, selectAll, visibleSelected } = useAppState()
+  const { state } = useAppState()
   const { clearError, error } = useError()
-  const { success } = useToast()
 
   const shortcuts: KeyboardShortcut[] = [
     {
@@ -33,18 +30,6 @@ export function useKeyboardShortcuts() {
       },
       description: 'Theme wechseln',
       global: true
-    },
-    {
-      key: 'a',
-      ctrl: true,
-      meta: true,
-      handler: () => {
-        if (state.value.eventsView.length > 0) {
-          selectAll()
-        }
-      },
-      description: 'Alle Jubiläen auswählen',
-      global: false // Only when not in input field
     },
     {
       key: 'Escape',
@@ -76,8 +61,8 @@ export function useKeyboardShortcuts() {
       ctrl: true,
       meta: true,
       handler: () => {
-        // Download if there are selected milestones
-        if (visibleSelected.value.length > 0) {
+        // Download ICS file if there are visible milestones
+        if (state.value.eventsView.length > 0) {
           const downloadBtn = document.querySelector('[aria-label*="Kalenderdatei"]') as HTMLButtonElement
           if (downloadBtn && !downloadBtn.disabled) {
             downloadBtn.click()
@@ -88,22 +73,60 @@ export function useKeyboardShortcuts() {
       global: false
     },
     {
-      key: 'c',
+      key: 'ArrowUp',
       ctrl: true,
-      meta: true,
-      handler: async () => {
-        // Copy first selected milestone if any
-        if (visibleSelected.value.length > 0) {
-          const firstSelected = visibleSelected.value[0]
-          const text = formatMilestoneText(firstSelected)
-          const copied = await copyToClipboard(text)
-          if (copied) {
-            success('Meilenstein kopiert')
+      meta: false,
+      handler: () => {
+        // Navigate to previous year in results
+        const yearSeparators = Array.from(document.querySelectorAll('.year-sep')) as HTMLElement[]
+        const currentScroll = window.scrollY
+        let targetYear: HTMLElement | null = null
+        
+        for (let i = yearSeparators.length - 1; i >= 0; i--) {
+          const rect = yearSeparators[i].getBoundingClientRect()
+          if (rect.top < currentScroll + 100) {
+            targetYear = yearSeparators[i]
+            break
+          }
+        }
+        
+        if (targetYear) {
+          const prevBtn = targetYear.querySelector('.year-nav-up') as HTMLButtonElement
+          if (prevBtn && !prevBtn.disabled) {
+            prevBtn.click()
           }
         }
       },
-      description: 'Ersten ausgewählten Meilenstein kopieren',
-      global: false
+      description: 'Zu vorherigem Jahr springen',
+      global: true
+    },
+    {
+      key: 'ArrowDown',
+      ctrl: true,
+      meta: false,
+      handler: () => {
+        // Navigate to next year in results
+        const yearSeparators = Array.from(document.querySelectorAll('.year-sep')) as HTMLElement[]
+        const currentScroll = window.scrollY
+        let targetYear: HTMLElement | null = null
+        
+        for (let i = 0; i < yearSeparators.length; i++) {
+          const rect = yearSeparators[i].getBoundingClientRect()
+          if (rect.top > currentScroll + 100) {
+            targetYear = yearSeparators[i]
+            break
+          }
+        }
+        
+        if (targetYear) {
+          const nextBtn = targetYear.querySelector('.year-nav-down') as HTMLButtonElement
+          if (nextBtn && !nextBtn.disabled) {
+            nextBtn.click()
+          }
+        }
+      },
+      description: 'Zu nächstem Jahr springen',
+      global: true
     }
   ]
 

@@ -18,7 +18,8 @@
   letter-spacing:0.1em;
   display:flex;
   align-items:center;
-  gap:16px;
+  gap:8px;
+  justify-content:center;
   position:sticky;
   top:80px;
   background:transparent;
@@ -34,6 +35,7 @@
 .year-sep .y{
   flex:1;
   font-weight:600;
+  text-align:center;
 }
 .year-checkbox{
   width:18px;
@@ -150,6 +152,36 @@
 }
 @media (max-width:640px){
   .toolbar .push-right{margin-left:0;width:100%}
+}
+
+/* Year Range Expand Buttons */
+.year-range-expand-btn{
+  width:100%;
+  background:transparent;
+  border:1px dashed var(--border);
+  color:var(--muted);
+  border-radius:var(--radius);
+  padding:8px 12px;
+  font-size:12px;
+  cursor:pointer;
+  transition:var(--transition);
+  margin:12px 0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+}
+.year-expand-arrow{
+  display:inline-block;
+}
+.year-range-expand-btn:hover{
+  background:var(--panel);
+  border-color:var(--brand);
+  color:var(--text);
+}
+.year-range-expand-btn:focus-visible{
+  outline:none;
+  box-shadow:var(--focus);
 }
 
 /* Animations */
