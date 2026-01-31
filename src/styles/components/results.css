@@ -1,42 +1,45 @@
 /* ========= Results & List Components ========= */
 
+/* Year Navigation Sticky */
+.year-navigation-sticky {
+  position: sticky;
+  top: 152px;
+  z-index: 19;
+  background: var(--panel);
+  margin-top: 0;
+  border-radius: 0;
+}
+@media (max-width:768px){
+  .year-navigation-sticky {
+    top: 52px;
+  }
+}
+
+/* Milestones Count */
+.milestones-count{
+  font-size:11px;
+  color:var(--muted);
+  font-weight:700;
+  margin-left:auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:20px;
+  height:20px;
+  padding:0 6px;
+  border-radius:10px;
+  background:var(--panel);
+  border:1px solid var(--border);
+}
+
 /* Results List */
 .list{
   display:grid;
   gap:8px;
-}
-
-/* Year Separator */
-.year-sep{
-  margin-top:24px;
-  margin-bottom:12px;
-  padding:16px;
-  color:var(--muted);
-  font-weight:600;
-  font-size:11px;
-  text-transform:uppercase;
-  letter-spacing:0.1em;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  justify-content:center;
-  position:sticky;
-  top:80px;
-  background:transparent;
-  z-index:10;
-  border-bottom:1px solid var(--border);
-}
-.year-sep:first-child{
   margin-top:0;
 }
-@media (max-width:768px){
-  .year-sep{top:0}
-}
-.year-sep .y{
-  flex:1;
-  font-weight:600;
-  text-align:center;
-}
+
+/* Year Separator - Styles moved to component scoped styles */
 .year-checkbox{
   width:18px;
   height:18px;
