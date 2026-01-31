@@ -11,8 +11,7 @@ export default {
     selectNone: 'Alle abwählen',
     loading: 'Lädt...',
     error: 'Fehler',
-    success: 'Erfolg',
-    shortcut: 'Strg/Cmd + K zum Wechseln'
+    success: 'Erfolg'
   },
   ui: {
     title: 'Jubiläumsrechner',

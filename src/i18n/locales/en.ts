@@ -11,8 +11,7 @@ export default {
     selectNone: 'Deselect all',
     loading: 'Loading...',
     error: 'Error',
-    success: 'Success',
-    shortcut: 'Ctrl/Cmd + K to switch'
+    success: 'Success'
   },
   ui: {
     title: 'Anniversary Calculator',
