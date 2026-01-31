@@ -4,24 +4,33 @@ A modern, feature-rich web application for calculating and exploring special dat
 
 ## ✨ Features
 
+### Core Functionality
+
 *   📅 **Customizable Start Date & Time:** Define any past or present date and an optional time as your starting point.
-*   📊 **Smart Year Range Selection:** Automatically adjusts year range when entering a date, or manually select specific years.
-*   ⏱️ **Multiple Units:** Calculate milestones in years, months, weeks, days, hours, minutes, and seconds.
+*   📊 **Smart Year Range Selection:** Automatically adjusts year range when entering a date, or manually select specific years. Expand ranges dynamically with "Load more" buttons.
+*   ⏱️ **Multiple Units:** Calculate milestones in years, months, weeks, days, hours, minutes, and seconds. Select any combination of units.
 *   🔢 **Pattern-Based Milestone Generation:**
-    *   **Rounded Multiples:** Find milestones like 10, 100, 500, 1,000, 10,000, etc.
-    *   **Repdigits (Schnapszahlen):** Identify milestones such as 11, 222, 3,333, etc.
-*   ⚡ **Real-time Updates:** Automatic recalculation as you modify inputs, with optimized performance for large date ranges.
+    *   **Rounded Multiples:** Find milestones like 10, 100, 500, 1,000, 10,000, etc. Perfect for celebrating round numbers.
+    *   **Repdigits (Schnapszahlen):** Identify milestones such as 11, 222, 3,333, etc. Special numbers with repeating digits.
+
+### Export & Sharing
+
 *   📥 **Multiple Export Formats:**
-    *   **ICS:** Download selected milestones as `.ics` calendar files
-    *   **CSV:** Export data for spreadsheet applications
-    *   **JSON:** Export structured data for further processing
-*   📋 **Copy to Clipboard:** Quickly copy milestone information in a concise format.
-*   🔗 **Share Functionality:** Share your milestone view with others via URL or native share API.
-*   🌍 **Internationalization:** Full support for German and English with locale-aware date/number formatting.
-*   🎨 **Theming:** Switch between light, dark, or system-preferred color schemes.
-*   ⌨️ **Keyboard Shortcuts:** Efficient navigation and actions via keyboard shortcuts.
-*   🔗 **URL Persistence:** Share or bookmark your specific calculations as the application state is reflected in the URL.
-*   ♿ **Accessibility:** Full ARIA support, keyboard navigation, and screen reader compatibility.
+    *   **ICS:** Download selected milestones as `.ics` calendar files for import into Google Calendar, Outlook, Apple Calendar, etc.
+    *   **CSV:** Export data for spreadsheet applications (Excel, Google Sheets, Numbers)
+    *   **JSON:** Export structured data for further processing or integration with other tools
+    *   **PDF:** Generate formatted PDF documents with all milestones
+*   📋 **Copy to Clipboard:** Quickly copy milestone information in a concise, readable format. Perfect for sharing in messages or emails.
+*   🔗 **Share Functionality:** Share your milestone view with others via URL or native share API. URLs contain all state information for easy sharing.
+
+### User Experience
+
+*   ⚡ **Real-time Updates:** Automatic recalculation as you modify inputs, with optimized performance for large date ranges. No need to click "Calculate".
+*   🌍 **Internationalization:** Full support for German and English with locale-aware date/number formatting. Switch languages instantly.
+*   🎨 **Theming:** Switch between light, dark, or system-preferred color schemes. Preferences are saved automatically.
+*   🔗 **URL Persistence:** Share or bookmark your specific calculations as the application state is reflected in the URL. Reload the page to restore your state.
+*   ♿ **Accessibility:** Full ARIA support, keyboard navigation, and screen reader compatibility. WCAG 2.1 AA compliant.
+*   📱 **Responsive Design:** Optimized for desktop, tablet, and mobile devices. Touch-friendly interface on mobile.
 
 ## 🚀 Quick Start
 
@@ -71,6 +80,7 @@ A modern, feature-rich web application for calculating and exploring special dat
 - **Units:** Years, Months, Weeks
 - **Patterns:** Rounded Multiples, Repdigits
 - **Result:** Find milestones like "1000 Wochen", "25 Jahre", "111 Monate"
+- **Use Case:** Track special birthday milestones, plan celebrations for round numbers
 
 ### Example 2: Relationship Milestones
 - **Title:** "Kennenlernen"
@@ -78,6 +88,7 @@ A modern, feature-rich web application for calculating and exploring special dat
 - **Units:** Days, Weeks, Months
 - **Patterns:** Rounded Multiples
 - **Result:** Celebrate milestones like "100 Tage", "500 Tage", "1000 Tage"
+- **Use Case:** Celebrate relationship anniversaries, track time together
 
 ### Example 3: Work Anniversaries
 - **Title:** "Arbeitsbeginn"
@@ -85,18 +96,33 @@ A modern, feature-rich web application for calculating and exploring special dat
 - **Units:** Years, Months
 - **Patterns:** Rounded Multiples
 - **Result:** Track professional milestones
+- **Use Case:** Monitor career milestones, plan work anniversaries
 
-## ⌨️ Keyboard Shortcuts
+### Example 4: Project Milestones
+- **Title:** "Projektstart"
+- **Date:** Project start date
+- **Units:** Days, Weeks, Months, Years
+- **Patterns:** Rounded Multiples, Repdigits
+- **Result:** Track project duration milestones
+- **Use Case:** Monitor project progress, celebrate milestones
 
-- `Ctrl/Cmd + K` - Toggle keyboard shortcuts help
-- `Ctrl/Cmd + A` - Select/deselect all visible milestones
-- `Ctrl/Cmd + D` - Download ICS file
-- `Ctrl/Cmd + C` - Copy milestone (when focused)
-- `Esc` - Close modals/dialogs
+### Example 5: Custom Events
+- **Title:** Any custom label (e.g., "Hochzeit", "Umzug", "Abschluss")
+- **Date:** Any past or present date
+- **Units:** Select any combination
+- **Patterns:** Choose patterns that interest you
+- **Result:** Discover meaningful milestones for any event
 
 ## 💻 Development
 
 The project is built with **Vue 3**, **TypeScript**, and **Vite** for a modern, maintainable codebase.
+
+### Prerequisites
+
+- **Node.js:** Version 18.x or higher
+- **npm:** Version 9.x or higher (comes with Node.js)
+
+### Development Workflow
 
 ### 🛠️ Tech Stack
 
@@ -118,16 +144,14 @@ src/
 │   ├── ThemeSwitch.vue  # Theme selection component
 │   ├── LanguageSwitch.vue # Language selection component
 │   ├── Toast.vue        # Toast notification component
-│   ├── ErrorAlert.vue   # Error display component
-│   └── KeyboardShortcutsHelp.vue # Keyboard shortcuts modal
+│   └── ErrorAlert.vue   # Error display component
 ├── composables/         # Vue composables (reusable logic)
 │   ├── useAppState.ts   # Application state management
 │   ├── useTheme.ts      # Theme management
 │   ├── useUrlState.ts   # URL state persistence
 │   ├── useI18n.ts       # Internationalization
 │   ├── useToast.ts      # Toast notifications
-│   ├── useError.ts      # Error handling
-│   └── useKeyboardShortcuts.ts # Keyboard shortcuts
+│   └── useError.ts      # Error handling
 ├── utils/               # Utility functions
 │   ├── date.ts          # Date calculations (addYears, addMonths, etc.)
 │   ├── patterns.ts      # Pattern matching logic (rounded, repdigit)
@@ -158,37 +182,54 @@ src/
 
 ### 🏁 Getting Started
 
-1. **Install dependencies:**
+1. **Clone the repository:**
+   ```bash
+   git clone <repository-url>
+   cd anniversary-calculator
+   ```
+
+2. **Install dependencies:**
    ```bash
    npm install
    ```
 
-2. **Start development server:**
+3. **Start development server:**
    ```bash
    npm run dev
    ```
-
-3. **Build for production:**
-   ```bash
-   npm run build
-   ```
+   The app will be available at `http://localhost:3000` (or the port shown in terminal)
 
 4. **Type checking:**
    ```bash
    npm run type-check
    ```
+   Run this before committing to catch TypeScript errors
+
+5. **Build for production:**
+   ```bash
+   npm run build
+   ```
+   Creates optimized production build in `dist/` directory
+
+6. **Preview production build:**
+   ```bash
+   npm run preview
+   ```
+   Test the production build locally before deploying
 
 ### 🔑 Key Features
 
-*   **Component-Based Architecture:** Modular Vue components for better maintainability
-*   **Type Safety:** TypeScript ensures type correctness throughout the codebase
-*   **Composables:** Reusable logic with Vue Composition API
-*   **Hot Module Replacement:** Instant updates during development with Vite
-*   **Optimized Builds:** Production builds are optimized and minified
-*   **Accessibility:** Full ARIA support, keyboard navigation, screen reader compatibility
-*   **Internationalization:** Custom i18n system with locale-aware formatting
-*   **Responsive Design:** Mobile-first approach with breakpoints
-*   **Dark Mode:** System-aware theme switching with smooth transitions
+*   **Component-Based Architecture:** Modular Vue components for better maintainability and reusability
+*   **Type Safety:** TypeScript ensures type correctness throughout the codebase, catching errors at compile time
+*   **Composables:** Reusable logic with Vue Composition API for shared state and functionality
+*   **Hot Module Replacement:** Instant updates during development with Vite for fast iteration
+*   **Optimized Builds:** Production builds are optimized, minified, and tree-shaken for minimal bundle size
+*   **Accessibility:** Full ARIA support, keyboard navigation, and screen reader compatibility (WCAG 2.1 AA compliant)
+*   **Internationalization:** Custom i18n system with locale-aware date and number formatting
+*   **Responsive Design:** Mobile-first approach with breakpoints for optimal experience on all devices
+*   **Dark Mode:** System-aware theme switching with smooth transitions and persistent preferences
+*   **Error Handling:** Comprehensive error boundaries and user-friendly error messages
+*   **Performance:** Optimized calculations with memoization and efficient rendering
 
 ### 📋 Code Organization
 
@@ -199,21 +240,68 @@ src/
 *   **Styles:** Modular CSS with design tokens and component styles
 *   **i18n:** Translation files and locale management
 
-## 🌐 Browser Support
-
-- Chrome/Edge (latest)
-- Firefox (latest)
-- Safari (latest)
-- Mobile browsers (iOS Safari, Chrome Mobile)
-
 ## 📚 Documentation
 
-- **[API Documentation](./docs/API.md)** - Detailed API reference for composables and utilities
+- **[API Documentation](./docs/API.md)** - Detailed API reference for composables and utilities (coming soon)
 - **[Implementation Plan](./.cursor/IMPLEMENTATION_PLAN.md)** - Feature implementation roadmap
+
+## 🧪 Testing
+
+Run the test suite:
+
+```bash
+# Run tests in watch mode
+npm run test
+
+# Run tests once
+npm run test:run
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run tests with UI
+npm run test:ui
+```
+
+## 🚀 Deployment
+
+### Building for Production
+
+```bash
+npm run build
+```
+
+This creates an optimized production build in the `dist/` directory.
+
+### Deploying
+
+The application is a static site and can be deployed to any static hosting service:
+
+- **Vercel:** `vercel deploy`
+- **Netlify:** Drag and drop the `dist/` folder
+- **GitHub Pages:** Configure to serve from `dist/` directory
+- **Any static host:** Upload the contents of `dist/` to your server
+
+### Environment Variables
+
+No environment variables are required. The application works entirely client-side.
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Here's how you can help:
+
+1. **Report bugs:** Open an issue with a clear description and steps to reproduce
+2. **Suggest features:** Share your ideas for new features or improvements
+3. **Submit PRs:** Fork the repo, make your changes, and submit a pull request
+4. **Improve documentation:** Help improve the README or add code comments
+
+### Development Guidelines
+
+- Follow the existing code style (TypeScript, Vue 3 Composition API)
+- Add tests for new features
+- Update documentation as needed
+- Ensure accessibility (ARIA labels, keyboard navigation)
+- Test in multiple browsers
 
 ## 📄 License
 
@@ -221,4 +309,4 @@ This project is open source and available under the MIT License.
 
 ---
 
-💡 **Tip:** Explore the `src/` directory to understand the implementation details. The codebase is well-organized and documented with JSDoc comments.
+💡 **Tip:** Explore the `src/` directory to understand the implementation details. The codebase is well-organized and documented with JSDoc comments. All utility functions include comprehensive documentation and examples.
