@@ -51,5 +51,5 @@ export const CONFIG = {
     years: 1
   },
   REPDIGIT_MAX_LENGTH: 12,
-  DEFAULT_TIME: '0:00:00'
+  DEFAULT_TIME: '12:00:00'
 } as const

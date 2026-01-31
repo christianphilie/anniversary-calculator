@@ -25,7 +25,7 @@ export default {
     label: 'Titel (optional)',
     labelPlaceholder: 'Geburtstag, Kennenlernen, Hochzeit …',
     date: 'Datum',
-    time: 'Uhrzeit (optional)',
+    time: 'Uhrzeit',
     units: 'Einheiten',
     patterns: 'Muster',
     yearRange: 'Jahresbereich',
@@ -37,8 +37,12 @@ export default {
     addNext: 'Nachher',
     showMoreYears: 'Mehr Jahre anzeigen',
     jumpToYear: 'Zu Jahr springen',
+    jumpToYears: 'Zu Jahren springen',
+    scrollLeft: 'Nach links scrollen',
+    scrollRight: 'Nach rechts scrollen',
+    loadMore: 'Mehr laden',
     roundedMultiples: 'Runde Vielfache',
-    roundedMultiplesExamples: '500, 2.000, 10.000, …',
+    roundedMultiplesExamples: '500, 2.000, 10.000, 1.000.000 …',
     repdigits: 'Schnapszahlen',
     repdigitsExamples: '11, 2.222, 333, 444.444.444 …'
   },
@@ -86,7 +90,7 @@ export default {
   },
   export: {
     title: 'Exportieren',
-    description: 'Exportiere alle sichtbaren Jubiläen in verschiedenen Formaten. ICS kann direkt in deinen Kalender importiert werden. Weitere Formate: PDF, CSV und JSON. Du kannst auch die aktuelle Ansicht mit anderen teilen.',
+    description: 'Exportiere alle sichtbaren Jubiläen in verschiedenen Formaten oder teile die aktuelle Ansicht mit anderen.',
     exportCSV: 'Als CSV exportieren',
     exportJSON: 'Als JSON exportieren',
     exportPDF: 'Als PDF exportieren',
@@ -101,7 +105,9 @@ export default {
     icsHelpStep4: 'Die Jubiläen werden zu deinem Kalender hinzugefügt'
   },
   inputs: {
-    description: 'Gib dein Startdatum ein und wähle die Einheiten und Muster aus, nach denen Jubiläen berechnet werden sollen.'
+    descriptionDate: 'Gib dein Datum ein',
+    descriptionTitle: 'Gib optional einen Titel ein',
+    descriptionRefine: 'Verfeinere die Auswahl'
   },
   errors: {
     invalidDate: 'Ungültiges Datum',

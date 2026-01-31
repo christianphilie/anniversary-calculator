@@ -61,7 +61,7 @@ export function validateDate(dateStr: string, t: TranslateFunction = defaultT): 
 
 export function validateTime(timeStr: string, t: TranslateFunction = defaultT): ValidationResult {
   if (!timeStr) {
-    return { valid: true } // Time is optional
+    return { valid: false, error: t('validation.timeInvalid') }
   }
 
   // Normalize time string: convert single-digit hours to two-digit (e.g., "0:00:00" -> "00:00:00")
@@ -195,7 +195,7 @@ export function parseDate(
 
   try {
     const [y, m, d] = dateStr.split('-').map(Number)
-    const time = timeStr || '0:00:00'
+    const time = timeStr || '12:00:00'
     // Normalize time: convert single-digit hours to two-digit (e.g., "0:00:00" -> "00:00:00")
     const normalizedTime = time.replace(/^(\d):/, '0$1:')
     const [hh, mm, ss = '00'] = normalizedTime.split(':')

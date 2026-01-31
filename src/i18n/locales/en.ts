@@ -25,7 +25,7 @@ export default {
     label: 'Title (optional)',
     labelPlaceholder: 'Birthday, Meeting, Wedding …',
     date: 'Date',
-    time: 'Time (optional)',
+    time: 'Time',
     units: 'Units',
     patterns: 'Patterns',
     yearRange: 'Year Range',
@@ -37,8 +37,12 @@ export default {
     addNext: 'Next',
     showMoreYears: 'Show more years',
     jumpToYear: 'Jump to year',
+    jumpToYears: 'Jump to years',
+    scrollLeft: 'Scroll left',
+    scrollRight: 'Scroll right',
+    loadMore: 'Load more',
     roundedMultiples: 'Rounded multiples',
-    roundedMultiplesExamples: '500, 2,000, 10,000, …',
+    roundedMultiplesExamples: '500, 2,000, 10,000, 1,000,000 …',
     repdigits: 'Repdigits',
     repdigitsExamples: '11, 2,222, 333, 444,444,444 …'
   },
@@ -86,7 +90,7 @@ export default {
   },
   export: {
     title: 'Export',
-    description: 'Export all visible anniversaries in various formats. ICS can be imported directly into your calendar. Other formats: PDF, CSV, and JSON. You can also share the current view with others.',
+    description: 'Export all visible anniversaries in various formats or share the current view with others.',
     exportCSV: 'Export as CSV',
     exportJSON: 'Export as JSON',
     exportPDF: 'Export as PDF',
@@ -101,7 +105,9 @@ export default {
     icsHelpStep4: 'The anniversaries will be added to your calendar'
   },
   inputs: {
-    description: 'Enter your start date and select the units and patterns to calculate anniversaries for.'
+    descriptionDate: 'Enter your date',
+    descriptionTitle: 'Enter an optional title',
+    descriptionRefine: 'Refine the selection'
   },
   errors: {
     invalidDate: 'Invalid date',

@@ -12,128 +12,134 @@
       </button>
     </div>
     <div class="bd">
-      <p class="inputs-description">
-        {{ t('inputs.description') }}
-      </p>
       <ErrorAlert />
       <form @submit.prevent="handleSubmit">
-        <div class="row">
-          <div class="field">
-            <label for="date">{{ t('form.date') }}</label>
-            <input
-              id="date"
-              v-model="formData.date"
-              type="date"
-              @blur="handleDateBlur"
-              :aria-invalid="fieldErrors.date ? 'true' : 'false'"
-              :aria-describedby="fieldErrors.date ? 'date-error' : undefined"
-            />
-            <span v-if="fieldErrors.date" id="date-error" class="field-error" role="alert">
-              {{ fieldErrors.date }}
-            </span>
-          </div>
-          <div class="field">
-            <label for="time">{{ t('form.time') }}</label>
-            <input
-              id="time"
-              v-model="formData.time"
-              type="time"
-              step="1"
-              :aria-invalid="fieldErrors.time ? 'true' : 'false'"
-              :aria-describedby="fieldErrors.time ? 'time-error' : undefined"
-            />
-            <span v-if="fieldErrors.time" id="time-error" class="field-error" role="alert">
-              {{ fieldErrors.time }}
-            </span>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="label">{{ t('form.label') }}</label>
-          <input
-            id="label"
-            v-model="formData.label"
-            type="text"
-            :placeholder="t('form.labelPlaceholder')"
-            @blur="handleLabelBlur"
-            :aria-invalid="fieldErrors.label ? 'true' : 'false'"
-            :aria-describedby="fieldErrors.label ? 'label-error' : undefined"
-          />
-          <span v-if="fieldErrors.label" id="label-error" class="field-error" role="alert">
-            {{ fieldErrors.label }}
-          </span>
-        </div>
-
-        <div class="field">
-          <label>{{ t('form.yearRange') }}</label>
+        <div class="input-section">
           <div class="row">
             <div class="field">
-              <label for="yearFrom" class="field-label-small">{{ t('form.yearFrom') }}</label>
+              <label for="date">{{ t('form.date') }}</label>
               <input
-                id="yearFrom"
-                v-model.number="formData.yearFrom"
-                type="number"
-                step="1"
-                @blur="handleYearFromBlur"
-                @keydown.enter="handleYearFromBlur"
-                :aria-invalid="fieldErrors.yearRange ? 'true' : 'false'"
-                :aria-describedby="fieldErrors.yearRange ? 'year-range-error' : undefined"
+                id="date"
+                v-model="formData.date"
+                type="date"
+                @blur="handleDateBlur"
+                :aria-invalid="fieldErrors.date ? 'true' : 'false'"
+                :aria-describedby="fieldErrors.date ? 'date-error' : undefined"
               />
+              <span v-if="fieldErrors.date" id="date-error" class="field-error" role="alert">
+                {{ fieldErrors.date }}
+              </span>
             </div>
             <div class="field">
-              <label for="yearTo" class="field-label-small">{{ t('form.yearTo') }}</label>
+              <label for="time">{{ t('form.time') }}</label>
               <input
-                id="yearTo"
-                v-model.number="formData.yearTo"
-                type="number"
+                id="time"
+                v-model="formData.time"
+                type="time"
                 step="1"
-                @blur="handleYearToBlur"
-                @keydown.enter="handleYearToBlur"
-                :aria-invalid="fieldErrors.yearRange ? 'true' : 'false'"
-                :aria-describedby="fieldErrors.yearRange ? 'year-range-error' : undefined"
+                :aria-invalid="fieldErrors.time ? 'true' : 'false'"
+                :aria-describedby="fieldErrors.time ? 'time-error' : undefined"
               />
-              <span v-if="fieldErrors.yearRange" id="year-range-error" class="field-error" role="alert">
-                {{ fieldErrors.yearRange }}
+              <span v-if="fieldErrors.time" id="time-error" class="field-error" role="alert">
+                {{ fieldErrors.time }}
               </span>
             </div>
           </div>
         </div>
 
-        <div class="field">
-          <label>{{ t('form.units') }}</label>
-          <div class="chips chips-units">
-            <label
-              v-for="unit in units"
-              :key="unit.value"
-              :class="['chip', 'unit', unit.value]"
-            >
-              <input
-                v-model="formData.units"
-                type="checkbox"
-                :value="unit.value"
-              />
-              <span>{{ unit.label }}</span>
-            </label>
+        <div class="input-section">
+          <div class="field">
+            <label for="label">{{ t('form.label') }}</label>
+            <input
+              id="label"
+              v-model="formData.label"
+              type="text"
+              :placeholder="t('form.labelPlaceholder')"
+              @blur="handleLabelBlur"
+              :aria-invalid="fieldErrors.label ? 'true' : 'false'"
+              :aria-describedby="fieldErrors.label ? 'label-error' : undefined"
+            />
+            <span v-if="fieldErrors.label" id="label-error" class="field-error" role="alert">
+              {{ fieldErrors.label }}
+            </span>
           </div>
         </div>
 
-        <div class="field">
-          <label>{{ t('form.patterns') }}</label>
-          <div class="chips chips-patterns">
-            <label class="chip chip-pattern">
-              <input v-model="formData.patterns.rounded" type="checkbox" />
-              <span class="chip-pattern-content">
-                <span class="chip-pattern-label">{{ t('form.roundedMultiples') }}</span>
-                <span class="chip-pattern-examples">{{ t('form.roundedMultiplesExamples') }}</span>
-              </span>
-            </label>
-            <label class="chip chip-pattern">
-              <input v-model="formData.patterns.repdigit" type="checkbox" />
-              <span class="chip-pattern-content">
-                <span class="chip-pattern-label">{{ t('form.repdigits') }}</span>
-                <span class="chip-pattern-examples">{{ t('form.repdigitsExamples') }}</span>
-              </span>
-            </label>
+        <div class="input-section">
+          <div class="field">
+            <label>{{ t('form.yearRange') }}</label>
+            <div class="row">
+              <div class="field">
+                <label for="yearFrom" class="field-label-small">{{ t('form.yearFrom') }}</label>
+                <input
+                  id="yearFrom"
+                  v-model.number="formData.yearFrom"
+                  type="number"
+                  step="1"
+                  @blur="handleYearFromBlur"
+                  @keydown.enter="handleYearFromBlur"
+                  :aria-invalid="fieldErrors.yearRange ? 'true' : 'false'"
+                  :aria-describedby="fieldErrors.yearRange ? 'year-range-error' : undefined"
+                />
+              </div>
+              <div class="field">
+                <label for="yearTo" class="field-label-small">{{ t('form.yearTo') }}</label>
+                <input
+                  id="yearTo"
+                  v-model.number="formData.yearTo"
+                  type="number"
+                  step="1"
+                  @blur="handleYearToBlur"
+                  @keydown.enter="handleYearToBlur"
+                  :aria-invalid="fieldErrors.yearRange ? 'true' : 'false'"
+                  :aria-describedby="fieldErrors.yearRange ? 'year-range-error' : undefined"
+                />
+                <span v-if="fieldErrors.yearRange" id="year-range-error" class="field-error" role="alert">
+                  {{ fieldErrors.yearRange }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>{{ t('form.units') }}</label>
+            <div class="chips chips-units">
+              <label
+                v-for="unit in units"
+                :key="unit.value"
+                :class="['chip', 'unit', unit.value]"
+              >
+                <input
+                  v-model="formData.units"
+                  type="checkbox"
+                  :value="unit.value"
+                />
+                <span>{{ unit.label }}</span>
+                <span v-if="getUnitCount(unit.value) > 0" class="chip-count">{{ getUnitCount(unit.value) }}</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>{{ t('form.patterns') }}</label>
+            <div class="chips chips-patterns">
+              <label class="chip chip-pattern">
+                <input v-model="formData.patterns.rounded" type="checkbox" />
+                <span class="chip-pattern-content">
+                  <span class="chip-pattern-label">{{ t('form.roundedMultiples') }}</span>
+                  <span class="chip-pattern-examples">{{ t('form.roundedMultiplesExamples') }}</span>
+                </span>
+                <span v-if="getPatternCount('rounded') > 0" class="chip-count">{{ getPatternCount('rounded') }}</span>
+              </label>
+              <label class="chip chip-pattern">
+                <input v-model="formData.patterns.repdigit" type="checkbox" />
+                <span class="chip-pattern-content">
+                  <span class="chip-pattern-label">{{ t('form.repdigits') }}</span>
+                  <span class="chip-pattern-examples">{{ t('form.repdigitsExamples') }}</span>
+                </span>
+                <span v-if="getPatternCount('repdigit') > 0" class="chip-count">{{ getPatternCount('repdigit') }}</span>
+              </label>
+            </div>
           </div>
         </div>
       </form>
@@ -182,7 +188,7 @@ const todayYear = today.getFullYear()
 const formData = ref({
   label: '',
   date: toLocalDateInputValue(today),
-  time: '',
+  time: '12:00:00',
   units: ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds'] as Unit[],
   patterns: { rounded: true, repdigit: true },
   yearFrom: todayYear,
@@ -444,7 +450,7 @@ function handleReset(): void {
   formData.value = {
     label: '',
     date: toLocalDateInputValue(resetToday),
-    time: '',
+    time: '12:00:00',
     units: ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds'],
     patterns: { rounded: true, repdigit: true },
     yearFrom: resetYear,
@@ -453,6 +459,16 @@ function handleReset(): void {
   yearFromMin.value = resetYear
   yearToMax.value = resetYear + 100
   compute()
+}
+
+function getUnitCount(unit: Unit): number {
+  if (!state.value.eventsView.length) return 0
+  return state.value.eventsView.filter(ev => ev.unit === unit).length
+}
+
+function getPatternCount(pattern: 'rounded' | 'repdigit'): number {
+  if (!state.value.eventsView.length) return 0
+  return state.value.eventsView.filter(ev => ev.patterns[pattern]).length
 }
 
 // Watch for changes and recompute with debounce (but NOT for date/yearFrom/yearTo - those are handled on blur)
@@ -508,6 +524,7 @@ onMounted(() => {
   if (urlState.label) formData.value.label = urlState.label
   if (urlState.date) formData.value.date = urlState.date
   if (urlState.time) formData.value.time = urlState.time
+  else formData.value.time = '12:00:00'
   if (urlState.units) formData.value.units = urlState.units as Unit[]
   if (urlState.patterns) formData.value.patterns = urlState.patterns
   
