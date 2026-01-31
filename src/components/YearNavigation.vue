@@ -164,8 +164,14 @@ function scrollRight(): void {
 }
 
 function jumpToYear(year: number): void {
-  const element = document.getElementById(`y-${year}`)
-  if (element) {
+  // Wait for next tick to ensure DOM is ready
+  nextTick(() => {
+    const element = document.getElementById(`y-${year}`)
+    if (!element) {
+      console.warn(`Year separator not found: y-${year}`)
+      return
+    }
+    
     // Calculate total height of sticky elements:
     // - App Header (sticky at top:0): ~100px
     // - Panel Header (sticky at top:100px): 52px
@@ -174,28 +180,44 @@ function jumpToYear(year: number): void {
     const isMobile = window.innerWidth <= 768
     const headerOffset = isMobile ? 92 : 192
     
-    const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
-    const offsetPosition = elementPosition - headerOffset
+    // Use scrollIntoView with block: 'start' and then adjust for header offset
+    // Temporarily set scroll-margin-top to account for sticky headers
+    const originalScrollMarginTop = (element as HTMLElement).style.scrollMarginTop
+    ;(element as HTMLElement).style.scrollMarginTop = `${headerOffset}px`
     
-    window.scrollTo({
-      top: offsetPosition,
-      behavior: 'smooth'
+    // Use requestAnimationFrame to ensure scroll-margin-top is applied before scrollIntoView
+    requestAnimationFrame(() => {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      
+      // Restore original scroll-margin-top after scroll starts
+      setTimeout(() => {
+        ;(element as HTMLElement).style.scrollMarginTop = originalScrollMarginTop
+      }, 200)
     })
     
-    // Scroll the year navigation to show the selected year
+    // Update visible year after scroll completes
+    setTimeout(() => {
+      updateVisibleYear()
+    }, 300)
+    
+    // Scroll the year navigation horizontally to show the selected year
     if (scrollRef.value) {
-      const yearItems = scrollRef.value.querySelectorAll('.year-nav-item')
-      for (const item of yearItems) {
-        if (item.textContent === year.toString()) {
-          const containerRect = scrollRef.value.getBoundingClientRect()
-          const itemRect = item.getBoundingClientRect()
-          const scrollLeft = (item as HTMLElement).offsetLeft - containerRect.width / 2 + itemRect.width / 2
-          scrollRef.value.scrollTo({ left: scrollLeft, behavior: 'smooth' })
-          break
+      nextTick(() => {
+        const yearItems = scrollRef.value?.querySelectorAll('.year-nav-item')
+        if (yearItems) {
+          for (const item of yearItems) {
+            if (item.textContent === year.toString()) {
+              const containerRect = scrollRef.value!.getBoundingClientRect()
+              const itemRect = item.getBoundingClientRect()
+              const scrollLeft = (item as HTMLElement).offsetLeft - containerRect.width / 2 + itemRect.width / 2
+              scrollRef.value!.scrollTo({ left: scrollLeft, behavior: 'smooth' })
+              break
+            }
+          }
         }
-      }
+      })
     }
-  }
+  })
 }
 
 onMounted(() => {

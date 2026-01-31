@@ -38,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, nextTick } from 'vue'
 import { useAppState } from '../composables/useAppState'
 import { useI18n } from '../i18n'
 import { CONFIG } from '../types'
@@ -118,19 +118,32 @@ function addNextYears(): void {
  * @param year - The year to scroll to
  */
 function handleJumpToYear(year: number): void {
-  const element = document.getElementById(`y-${year}`)
-  if (!element) return
-  
-    // Calculate total height of sticky elements using config constants
+  // Wait for next tick to ensure DOM is ready
+  nextTick(() => {
+    const element = document.getElementById(`y-${year}`)
+    if (!element) {
+      console.warn(`Year separator not found: y-${year}`)
+      return
+    }
+    
+    // Calculate total height of sticky elements
     const isMobile = window.innerWidth <= 768
-    const headerOffset = isMobile ? CONFIG.STICKY_HEADER_OFFSET_MOBILE : CONFIG.STICKY_HEADER_OFFSET_DESKTOP
-  
-  const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
-  const offsetPosition = elementPosition - headerOffset
-  
-  window.scrollTo({
-    top: offsetPosition,
-    behavior: 'smooth'
+    const headerOffset = isMobile ? 92 : 192
+    
+    // Use scrollIntoView with block: 'start' and then adjust for header offset
+    // Temporarily set scroll-margin-top to account for sticky headers
+    const originalScrollMarginTop = (element as HTMLElement).style.scrollMarginTop
+    ;(element as HTMLElement).style.scrollMarginTop = `${headerOffset}px`
+    
+    // Use requestAnimationFrame to ensure scroll-margin-top is applied before scrollIntoView
+    requestAnimationFrame(() => {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      
+      // Restore original scroll-margin-top after scroll starts
+      setTimeout(() => {
+        ;(element as HTMLElement).style.scrollMarginTop = originalScrollMarginTop
+      }, 200)
+    })
   })
 }
 
