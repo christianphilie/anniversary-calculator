@@ -54,7 +54,7 @@ interface AppStateComposable {
  */
 function createAppState(): AppStateComposable {
   const { handleError } = useError()
-  const { locale } = useI18n()
+  const { locale, t } = useI18n()
   
   const state: Ref<AppState> = ref({
     start: null,
@@ -69,6 +69,7 @@ function createAppState(): AppStateComposable {
   })
 
   const isLoading = ref(false)
+  let recomputeAbortController: AbortController | null = null
 
   const visibleSelected: ComputedRef<MilestoneEvent[]> = computed(() => {
     const visSet = new Set(state.value.eventsView.map(ev => ev.id))
@@ -85,16 +86,23 @@ function createAppState(): AppStateComposable {
     yearFrom: number,
     yearTo: number
   ): Promise<void> {
+    // Cancel previous recompute if still running
+    if (recomputeAbortController) {
+      recomputeAbortController.abort()
+    }
+    recomputeAbortController = new AbortController()
+    const signal = recomputeAbortController.signal
+
     isLoading.value = true
 
     try {
       // Validate inputs
       if (isNaN(start.getTime())) {
-        throw new Error('Ungültiges Startdatum')
+        throw new Error(t.value('errors.invalidDate'))
       }
 
       if (yearFrom > yearTo) {
-        throw new Error('Startjahr muss vor Endjahr liegen')
+        throw new Error(t.value('validation.yearToBeforeFrom'))
       }
 
       state.value.start = start
@@ -108,7 +116,12 @@ function createAppState(): AppStateComposable {
       const toDate = new Date(yearTo, 11, 31, 23, 59, 59)
 
       if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
-        throw new Error('Ungültiger Jahresbereich')
+        throw new Error(t.value('errors.invalidYearRange'))
+      }
+
+      // Check if operation was cancelled
+      if (signal.aborted) {
+        return
       }
 
       const events = computeRangeWindow(
@@ -118,13 +131,23 @@ function createAppState(): AppStateComposable {
         toDate
       )
 
+      // Check again if operation was cancelled before updating state
+      if (signal.aborted) {
+        return
+      }
+
       state.value.eventsAll = events
       state.value.eventsView = events
     } catch (err) {
-      handleError(err, 'Fehler beim Berechnen der Jubiläen')
+      // Don't handle AbortError as an error
+      if (err instanceof Error && err.name === 'AbortError') {
+        return
+      }
+      handleError(err, t.value('errors.computeError'))
       // Keep previous state on error
     } finally {
       isLoading.value = false
+      recomputeAbortController = null
     }
   }
 
