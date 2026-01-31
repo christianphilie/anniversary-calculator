@@ -45,6 +45,7 @@
 import { computed } from 'vue'
 import { useI18n } from '../i18n'
 import { useAppState } from '../composables/useAppState'
+import { CONFIG } from '../types'
 
 const props = defineProps<{
   year: number
@@ -107,7 +108,7 @@ const canAddPreviousYears = computed(() => {
 const canAddNextYears = computed(() => {
   if (!state.value.yearTo) return false
   const currentYear = new Date().getFullYear()
-  const maxYearTo = currentYear + 100
+  const maxYearTo = currentYear + CONFIG.MAX_YEARS_IN_FUTURE
   return state.value.yearTo < maxYearTo
 })
 </script>

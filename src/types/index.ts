@@ -51,5 +51,12 @@ export const CONFIG = {
     years: 1
   },
   REPDIGIT_MAX_LENGTH: 12,
-  DEFAULT_TIME: '12:00:00'
+  DEFAULT_TIME: '12:00:00',
+  // Year range constants
+  MAX_YEARS_IN_FUTURE: 100, // Maximum years in the future from current year
+  YEARS_TO_ADD_ON_EXPAND: 10, // Years to add when expanding range
+  // UI constants
+  STICKY_HEADER_OFFSET_DESKTOP: 192, // Total height of sticky elements on desktop
+  STICKY_HEADER_OFFSET_MOBILE: 92, // Total height of sticky elements on mobile
+  SCROLL_THRESHOLD: 100 // Pixels threshold for scroll detection
 } as const

@@ -2,6 +2,7 @@ import { onMounted, onUnmounted } from 'vue'
 import { useTheme } from './useTheme'
 import { useAppState } from './useAppState'
 import { useError } from './useError'
+import { CONFIG } from '../types'
 
 export interface KeyboardShortcut {
   key: string
@@ -84,7 +85,7 @@ export function useKeyboardShortcuts() {
         
         for (let i = yearSeparators.length - 1; i >= 0; i--) {
           const rect = yearSeparators[i].getBoundingClientRect()
-          if (rect.top < currentScroll + 100) {
+          if (rect.top < currentScroll + CONFIG.SCROLL_THRESHOLD) {
             targetYear = yearSeparators[i]
             break
           }
@@ -112,7 +113,7 @@ export function useKeyboardShortcuts() {
         
         for (let i = 0; i < yearSeparators.length; i++) {
           const rect = yearSeparators[i].getBoundingClientRect()
-          if (rect.top > currentScroll + 100) {
+          if (rect.top > currentScroll + CONFIG.SCROLL_THRESHOLD) {
             targetYear = yearSeparators[i]
             break
           }
