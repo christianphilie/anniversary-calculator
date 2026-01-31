@@ -176,16 +176,16 @@ async function handleShare(): Promise<void> {
   if (isNativeShareAvailable()) {
     const shared = await shareMilestones(milestoneIds, title, text)
     if (shared) {
-      success('Geteilt')
+      success(t.value('success.shared'))
     }
   } else {
     // Fallback: Copy URL to clipboard
     const copied = await copyToClipboard(url)
     
     if (copied) {
-      success('Link kopiert')
+      success(t.value('success.linkCopied'))
     } else {
-      error('Fehler beim Kopieren')
+      error(t.value('errors.copyError'))
     }
   }
 }
