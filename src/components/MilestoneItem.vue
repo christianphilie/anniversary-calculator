@@ -42,10 +42,12 @@ const unitLabel = computed(() => {
   return t.value(`units.${props.event.unit}`)
 })
 
+// Cache formatter to avoid recreating on every render
+const dateFormatter = computed(() => fmtFull())
+
 const formatDate = computed(() => {
   return (date: Date): string => {
-    const formatter = fmtFull()
-    const formatted = formatter.format(date)
+    const formatted = dateFormatter.value.format(date)
     // Add "Uhr" for German, "o'clock" or similar for English
     return locale.value === 'de' ? `${formatted} Uhr` : formatted
   }

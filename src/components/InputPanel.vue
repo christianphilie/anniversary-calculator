@@ -148,9 +148,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed, onMounted } from 'vue'
+import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
 import type { Unit } from '../types'
 import { CONFIG } from '../types'
+
+// Constants for year range
+const MAX_YEARS_IN_FUTURE = CONFIG.MAX_YEARS_IN_FUTURE
 import { toLocalDateInputValue } from '../utils/date'
 import { useUrlState } from '../composables/useUrlState'
 import { useAppState } from '../composables/useAppState'
@@ -212,7 +215,7 @@ const startYear = computed(() => {
 
 const currentYear = computed(() => new Date().getFullYear())
 const yearFromMin = ref<number>(todayYear)
-const yearToMax = ref<number>(todayYear + 100)
+const yearToMax = ref<number>(todayYear + MAX_YEARS_IN_FUTURE)
 
 // Min/Max years for input validation
 // Min: Start year (date input) or current year, whichever is earlier (no going back before that)
@@ -261,7 +264,7 @@ function handleDateBlur(): void {
   const dateYear = new Date(formData.value.date).getFullYear()
   const todayYear = new Date().getFullYear()
   const minAllowed = Math.min(dateYear, todayYear)
-  const maxAllowed = todayYear + 100
+  const maxAllowed = todayYear + MAX_YEARS_IN_FUTURE
   
   // Always adjust yearFrom to be within valid range based on new date
   formData.value.yearFrom = minAllowed
@@ -310,7 +313,7 @@ function handleYearToBlur(): void {
   if (isNaN(value) || !isFinite(value)) {
     // Reset to valid value if invalid
     const todayYear = currentYear.value
-    formData.value.yearTo = todayYear + 100
+    formData.value.yearTo = todayYear + MAX_YEARS_IN_FUTURE
     compute()
     return
   }
@@ -336,109 +339,175 @@ function handleSubmit(): void {
   compute()
 }
 
+/**
+ * Validates and sanitizes the label input
+ * @returns Object with validation result and sanitized label
+ */
+function validateAndSanitizeLabel(): { valid: boolean; sanitizedLabel?: string; error?: string } {
+  const translate = (key: string, params?: Record<string, string | number>) => t.value(key, params)
+  const labelTrimmed = formData.value.label.trim()
+  
+  if (!labelTrimmed) {
+    return { valid: true, sanitizedLabel: '' }
+  }
+  
+  const sanitizedLabel = sanitizeLabel(labelTrimmed)
+  const labelValidation = validateLabel(sanitizedLabel, translate)
+  
+  if (!labelValidation.valid) {
+    return { valid: false, error: labelValidation.error }
+  }
+  
+  // Only update formData if it was actually changed (e.g., sanitization removed something)
+  if (sanitizedLabel !== labelTrimmed) {
+    formData.value.label = sanitizedLabel
+  }
+  
+  return { valid: true, sanitizedLabel }
+}
+
+/**
+ * Validates date and time inputs
+ * @returns Object with parsed date or error message
+ */
+function validateDateAndTime(): { valid: boolean; date?: Date; error?: string; errorField?: 'date' | 'time' } {
+  const translate = (key: string, params?: Record<string, string | number>) => t.value(key, params)
+  
+  if (!formData.value.date) {
+    return { valid: false }
+  }
+
+  // Check if date looks incomplete (e.g., "1989-03-2" or "1989-03-" would be invalid but user might still be typing)
+  const dateStr = formData.value.date
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    return { valid: false }
+  }
+
+  const { date: start, error: dateError } = parseDate(
+    formData.value.date,
+    formData.value.time || '0:00:00',
+    translate
+  )
+
+  if (dateError) {
+    // Check if error is about time (works for both languages)
+    const timeKeywords = ['Zeit', 'time', 'Time']
+    const isTimeError = timeKeywords.some(keyword => dateError.includes(keyword))
+    return {
+      valid: false,
+      error: dateError,
+      errorField: isTimeError ? 'time' : 'date'
+    }
+  }
+
+  return { valid: true, date: start }
+}
+
+/**
+ * Validates units and patterns selections
+ * @returns Object with validation results
+ */
+function validateSelections(): { valid: boolean; error?: string; errorField?: 'units' | 'patterns' } {
+  const translate = (key: string, params?: Record<string, string | number>) => t.value(key, params)
+  
+  const unitsValidation = validateUnits(formData.value.units, translate)
+  if (!unitsValidation.valid) {
+    return { valid: false, error: unitsValidation.error, errorField: 'units' }
+  }
+
+  const patternsValidation = validatePatterns(formData.value.patterns, translate)
+  if (!patternsValidation.valid) {
+    return { valid: false, error: patternsValidation.error, errorField: 'patterns' }
+  }
+
+  return { valid: true }
+}
+
+/**
+ * Validates and normalizes the year range
+ * @returns Object with normalized year range or error
+ */
+function validateAndNormalizeYearRange(): { valid: boolean; yearFrom?: number; yearTo?: number; error?: string } {
+  const translate = (key: string, params?: Record<string, string | number>) => t.value(key, params)
+  const todayYear = new Date().getFullYear()
+  const maxYearTo = todayYear + MAX_YEARS_IN_FUTURE
+  
+  // yearFrom can be from startYear to currentYear (or expanded range)
+  const yearFrom = Math.max(startYear.value, Math.min(formData.value.yearFrom, Math.max(startYear.value, todayYear)))
+  const yearTo = Math.min(Math.max(yearFrom, formData.value.yearTo), maxYearTo)
+
+  const yearRangeValidation = validateYearRange(yearFrom, yearTo, startYear.value, translate)
+  if (!yearRangeValidation.valid) {
+    return { valid: false, error: yearRangeValidation.error }
+  }
+
+  return { valid: true, yearFrom, yearTo }
+}
+
+/**
+ * Main computation function that validates all inputs and triggers milestone calculation
+ */
 function compute(): void {
   // Clear previous errors
   clearError()
   fieldErrors.value = {}
 
-  // Get translation function
-  const translate = (key: string, params?: Record<string, string | number>) => t.value(key, params)
-
   try {
-    // Sanitize and validate label (trim only for validation, don't modify formData during typing)
-    const labelTrimmed = formData.value.label.trim()
-    if (labelTrimmed) {
-      const sanitizedLabel = sanitizeLabel(labelTrimmed)
-      const labelValidation = validateLabel(sanitizedLabel, translate)
-      if (!labelValidation.valid) {
-        fieldErrors.value.label = labelValidation.error
-        setError(labelValidation.error || t.value('errors.invalidLabel'))
-        return
-      }
-      // Only update formData if it was actually changed (e.g., sanitization removed something)
-      if (sanitizedLabel !== labelTrimmed) {
-        formData.value.label = sanitizedLabel
-      }
-    }
-
-    // Validate date and time (only validate if date is present and looks complete)
-    if (!formData.value.date) {
-      // Don't show error if date is empty - user might still be typing
+    // Validate and sanitize label
+    const labelResult = validateAndSanitizeLabel()
+    if (!labelResult.valid) {
+      fieldErrors.value.label = labelResult.error
+      setError(labelResult.error || t.value('errors.invalidLabel'))
       return
     }
 
-    // Check if date looks incomplete (e.g., "1989-03-2" or "1989-03-" would be invalid but user might still be typing)
-    // Only validate if date is a complete date string (YYYY-MM-DD format)
-    const dateStr = formData.value.date
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-      // Date is incomplete, don't validate yet
+    // Validate date and time
+    const dateResult = validateDateAndTime()
+    if (!dateResult.valid) {
+      if (dateResult.error) {
+        if (dateResult.errorField === 'time') {
+          fieldErrors.value.time = dateResult.error
+        } else {
+          fieldErrors.value.date = dateResult.error
+        }
+        setError(dateResult.error)
+      }
       return
     }
 
-    const { date: start, error: dateError } = parseDate(
-      formData.value.date,
-      formData.value.time || '0:00:00',
-      translate
-    )
-
-    if (dateError) {
-      // Check if error is about time (works for both languages)
-      const timeKeywords = ['Zeit', 'time', 'Time']
-      const isTimeError = timeKeywords.some(keyword => dateError.includes(keyword))
-      if (isTimeError) {
-        fieldErrors.value.time = dateError
+    // Validate selections
+    const selectionsResult = validateSelections()
+    if (!selectionsResult.valid) {
+      if (selectionsResult.errorField === 'units') {
+        fieldErrors.value.units = selectionsResult.error
       } else {
-        fieldErrors.value.date = dateError
+        fieldErrors.value.patterns = selectionsResult.error
       }
-      setError(dateError)
+      setError(selectionsResult.error || t.value(selectionsResult.errorField === 'units' ? 'errors.noUnits' : 'errors.noPatterns'))
       return
     }
-
-    // Validate units
-    const unitsValidation = validateUnits(formData.value.units, translate)
-    if (!unitsValidation.valid) {
-      fieldErrors.value.units = unitsValidation.error
-      setError(unitsValidation.error || t.value('errors.noUnits'))
-      return
-    }
-
-    // Validate patterns
-    const patternsValidation = validatePatterns(formData.value.patterns, translate)
-    if (!patternsValidation.valid) {
-      fieldErrors.value.patterns = patternsValidation.error
-      setError(patternsValidation.error || t.value('errors.noPatterns'))
-      return
-    }
-
-    // Ensure year range is valid
-    const todayYear = new Date().getFullYear()
-    const maxYearTo = todayYear + 100 // Max 100 years in the future
-    // yearFrom can be from startYear to currentYear (or expanded range)
-    const yearFrom = Math.max(startYear.value, Math.min(formData.value.yearFrom, Math.max(startYear.value, todayYear)))
-    const yearTo = Math.min(Math.max(yearFrom, formData.value.yearTo), maxYearTo)
 
     // Validate year range
-    const yearRangeValidation = validateYearRange(yearFrom, yearTo, startYear.value, translate)
-    if (!yearRangeValidation.valid) {
-      fieldErrors.value.yearRange = yearRangeValidation.error
-      setError(yearRangeValidation.error || t.value('errors.invalidYearRange'))
+    const yearRangeResult = validateAndNormalizeYearRange()
+    if (!yearRangeResult.valid) {
+      fieldErrors.value.yearRange = yearRangeResult.error
+      setError(yearRangeResult.error || t.value('errors.invalidYearRange'))
       return
     }
 
-    // Use trimmed label for computation (but formData keeps original for editing)
+    // All validations passed - trigger recomputation
     const trimmedLabel = formData.value.label.trim()
     recomputeState(
-      start,
+      dateResult.date!,
       trimmedLabel,
       formData.value.units,
       formData.value.patterns,
-      yearFrom,
-      yearTo
+      yearRangeResult.yearFrom!,
+      yearRangeResult.yearTo!
     )
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Ein unerwarteter Fehler ist aufgetreten'
     setError(errorMessage)
-    // Error is already handled by setError above
   }
 }
 
@@ -454,21 +523,43 @@ function handleReset(): void {
     units: ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds'],
     patterns: { rounded: true, repdigit: true },
     yearFrom: resetYear,
-    yearTo: resetYear + 100
+    yearTo: resetYear + MAX_YEARS_IN_FUTURE
   }
   yearFromMin.value = resetYear
-  yearToMax.value = resetYear + 100
+  yearToMax.value = resetYear + MAX_YEARS_IN_FUTURE
   compute()
 }
 
+// Computed properties for efficient counting (cached, only recalculates when eventsView changes)
+const unitCounts = computed(() => {
+  const counts: Record<Unit, number> = {
+    years: 0,
+    months: 0,
+    weeks: 0,
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0
+  }
+  state.value.eventsView.forEach(ev => {
+    counts[ev.unit] = (counts[ev.unit] || 0) + 1
+  })
+  return counts
+})
+
+const patternCounts = computed(() => {
+  return {
+    rounded: state.value.eventsView.filter(ev => ev.patterns.rounded).length,
+    repdigit: state.value.eventsView.filter(ev => ev.patterns.repdigit).length
+  }
+})
+
 function getUnitCount(unit: Unit): number {
-  if (!state.value.eventsView.length) return 0
-  return state.value.eventsView.filter(ev => ev.unit === unit).length
+  return unitCounts.value[unit] || 0
 }
 
 function getPatternCount(pattern: 'rounded' | 'repdigit'): number {
-  if (!state.value.eventsView.length) return 0
-  return state.value.eventsView.filter(ev => ev.patterns[pattern]).length
+  return patternCounts.value[pattern] || 0
 }
 
 // Watch for changes and recompute with debounce (but NOT for date/yearFrom/yearTo - those are handled on blur)
@@ -542,11 +633,23 @@ onMounted(() => {
     }
     
     if (!urlState.yearTo) {
-      // Default to 100 years in the future
-      formData.value.yearTo = todayYear + 100
+      // Default to MAX_YEARS_IN_FUTURE years in the future
+      formData.value.yearTo = todayYear + MAX_YEARS_IN_FUTURE
     }
   }
 
   compute()
+})
+
+// Cleanup timers on unmount to prevent memory leaks
+onUnmounted(() => {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer)
+    debounceTimer = null
+  }
+  if (labelDebounceTimer) {
+    clearTimeout(labelDebounceTimer)
+    labelDebounceTimer = null
+  }
 })
 </script>

@@ -41,6 +41,7 @@
 import { computed } from 'vue'
 import { useAppState } from '../composables/useAppState'
 import { useI18n } from '../i18n'
+import { CONFIG } from '../types'
 import YearSeparator from './YearSeparator.vue'
 import MilestoneItem from './MilestoneItem.vue'
 import YearNavigation from './YearNavigation.vue'
@@ -48,18 +49,38 @@ import YearNavigation from './YearNavigation.vue'
 const { state, isLoading, recompute } = useAppState()
 const { t } = useI18n()
 
+// Cache current year to avoid multiple Date object creations
+const currentYear = computed(() => new Date().getFullYear())
+
 const startYear = computed(() => {
-  if (!state.value.start) return new Date().getFullYear()
+  if (!state.value.start) return currentYear.value
   return state.value.start.getFullYear()
 })
 
+// Optimized year separator info: calculate once and cache
+const yearSeparatorInfo = computed(() => {
+  const info = new Map<number, { first: number; last: number }>()
+  state.value.eventsView.forEach((ev, idx) => {
+    const year = ev.date.getFullYear()
+    if (!info.has(year)) {
+      info.set(year, { first: idx, last: idx })
+    } else {
+      const existing = info.get(year)!
+      existing.last = idx
+    }
+  })
+  return info
+})
+
+/**
+ * Expands the year range backwards by up to CONFIG.YEARS_TO_ADD_ON_EXPAND years
+ */
 function addPreviousYears(): void {
   if (!state.value.yearFrom || !state.value.start) return
-  const currentYear = new Date().getFullYear()
   const dateYear = startYear.value
-  const minPossibleYear = Math.min(dateYear, currentYear)
-  // Add up to 10 years, but stop at minimum
-  const yearsToAdd = Math.min(10, state.value.yearFrom - minPossibleYear)
+  const minPossibleYear = Math.min(dateYear, currentYear.value)
+  // Add up to CONFIG.YEARS_TO_ADD_ON_EXPAND years, but stop at minimum
+  const yearsToAdd = Math.min(CONFIG.YEARS_TO_ADD_ON_EXPAND, state.value.yearFrom - minPossibleYear)
   const newYearFrom = Math.max(state.value.yearFrom - yearsToAdd, minPossibleYear)
   // Trigger recompute with new year range
   recompute(
@@ -68,16 +89,18 @@ function addPreviousYears(): void {
     state.value.units,
     state.value.patterns,
     newYearFrom,
-    state.value.yearTo || currentYear + 100
+    state.value.yearTo || currentYear.value + CONFIG.MAX_YEARS_IN_FUTURE
   )
 }
 
+/**
+ * Expands the year range forwards by up to CONFIG.YEARS_TO_ADD_ON_EXPAND years
+ */
 function addNextYears(): void {
   if (!state.value.yearTo || !state.value.start) return
-  const currentYear = new Date().getFullYear()
-  const maxYearTo = currentYear + 100
-  // Add up to 10 years, but stop at maximum
-  const yearsToAdd = Math.min(10, maxYearTo - state.value.yearTo)
+  const maxYearTo = currentYear.value + CONFIG.MAX_YEARS_IN_FUTURE
+  // Add up to CONFIG.YEARS_TO_ADD_ON_EXPAND years, but stop at maximum
+  const yearsToAdd = Math.min(CONFIG.YEARS_TO_ADD_ON_EXPAND, maxYearTo - state.value.yearTo)
   const newYearTo = Math.min(state.value.yearTo + yearsToAdd, maxYearTo)
   // Trigger recompute with new year range
   recompute(
@@ -85,59 +108,66 @@ function addNextYears(): void {
     state.value.label,
     state.value.units,
     state.value.patterns,
-    state.value.yearFrom || currentYear,
+    state.value.yearFrom || currentYear.value,
     newYearTo
   )
 }
 
+/**
+ * Scrolls to a specific year in the results list
+ * @param year - The year to scroll to
+ */
 function handleJumpToYear(year: number): void {
   const element = document.getElementById(`y-${year}`)
-  if (element) {
-    // Calculate total height of sticky elements:
-    // - App Header (sticky at top:0): ~100px
-    // - Panel Header (sticky at top:100px): 52px
-    // - Year Navigation (sticky at top:152px): 40px
-    // Total: 192px on desktop, 92px on mobile (header not sticky)
+  if (!element) return
+  
+    // Calculate total height of sticky elements using config constants
     const isMobile = window.innerWidth <= 768
-    const headerOffset = isMobile ? 92 : 192
-    
-    const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
-    const offsetPosition = elementPosition - headerOffset
-    
-    window.scrollTo({
-      top: offsetPosition,
-      behavior: 'smooth'
-    })
-  }
+    const headerOffset = isMobile ? CONFIG.STICKY_HEADER_OFFSET_MOBILE : CONFIG.STICKY_HEADER_OFFSET_DESKTOP
+  
+  const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
+  const offsetPosition = elementPosition - headerOffset
+  
+  window.scrollTo({
+    top: offsetPosition,
+    behavior: 'smooth'
+  })
 }
 
+/**
+ * Determines if a year separator should be shown at the given index
+ * @param index - The index in the events array
+ * @param year - The year of the current event
+ * @returns True if separator should be shown
+ */
 function shouldShowYearSeparator(index: number, year: number): boolean {
   if (index === 0) return true
   const prevYear = state.value.eventsView[index - 1]?.date.getFullYear()
   return prevYear !== year
 }
 
+/**
+ * Checks if the separator at the given index is the first separator for its year
+ * @param index - The index in the events array
+ * @returns True if this is the first separator for the year
+ */
 function isFirstYearSeparator(index: number): boolean {
-  // Check if this is the first year separator that will be shown
   if (index === 0) return true
-  // Find the first index where a year separator is shown
-  for (let i = 0; i < state.value.eventsView.length; i++) {
-    if (shouldShowYearSeparator(i, state.value.eventsView[i]?.date.getFullYear())) {
-      return i === index
-    }
-  }
-  return false
+  const year = state.value.eventsView[index]?.date.getFullYear()
+  if (year === undefined) return false
+  const info = yearSeparatorInfo.value.get(year)
+  return info?.first === index
 }
 
+/**
+ * Checks if the separator at the given index is the last separator for its year
+ * @param index - The index in the events array
+ * @returns True if this is the last separator for the year
+ */
 function isLastYearSeparator(index: number): boolean {
-  // Find the last index where a year separator is shown
-  let lastSeparatorIndex = -1
-  for (let i = state.value.eventsView.length - 1; i >= 0; i--) {
-    if (shouldShowYearSeparator(i, state.value.eventsView[i]?.date.getFullYear())) {
-      lastSeparatorIndex = i
-      break
-    }
-  }
-  return lastSeparatorIndex === index
+  const year = state.value.eventsView[index]?.date.getFullYear()
+  if (year === undefined) return false
+  const info = yearSeparatorInfo.value.get(year)
+  return info?.last === index
 }
 </script>

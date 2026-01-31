@@ -58,7 +58,18 @@ export function computeRangeWindow(
 ): MilestoneEvent[] {
   const evs: MilestoneEvent[] = []
 
-  function push(date: Date, n: number, unit: Unit): void {
+  // Pre-classify patterns for all candidates to avoid redundant calculations
+  // Build candidates once per unit and cache pattern classification
+  const patternCache = new Map<number, { rounded: boolean; repdigit: boolean }>()
+
+  function getPatterns(n: number): { rounded: boolean; repdigit: boolean } {
+    if (!patternCache.has(n)) {
+      patternCache.set(n, classifyPatterns(n))
+    }
+    return patternCache.get(n)!
+  }
+
+  function push(date: Date, n: number, unit: Unit, patterns: { rounded: boolean; repdigit: boolean }): void {
     if (date < from || date > to) return
     if (n < CONFIG.MIN_N[unit]) return
 
@@ -85,7 +96,7 @@ export function computeRangeWindow(
       since,
       inHuman: humanDiff(new Date(), date, locale),
       desc,
-      patterns: classifyPatterns(n)
+      patterns
     })
   }
 
@@ -94,20 +105,23 @@ export function computeRangeWindow(
 
     if (unit === 'years') {
       const maxN = yearsBetween(start, to) + 2
-      for (const n of buildCandidates(maxN, opts.patterns)) {
-        push(add(start, n), n, unit)
+      const candidates = buildCandidates(maxN, opts.patterns)
+      for (const n of candidates) {
+        push(add(start, n), n, unit, getPatterns(n))
       }
     } else if (unit === 'months') {
       const maxN = diffMonths(start, to) + 2
-      for (const n of buildCandidates(maxN, opts.patterns)) {
-        push(add(start, n), n, unit)
+      const candidates = buildCandidates(maxN, opts.patterns)
+      for (const n of candidates) {
+        push(add(start, n), n, unit, getPatterns(n))
       }
     } else {
       const per = unitMs[unit]
       if (per) {
         const maxN = Math.floor((to.getTime() - start.getTime()) / per) + 1
-        for (const n of buildCandidates(maxN, opts.patterns)) {
-          push(add(start, n), n, unit)
+        const candidates = buildCandidates(maxN, opts.patterns)
+        for (const n of candidates) {
+          push(add(start, n), n, unit, getPatterns(n))
         }
       }
     }
