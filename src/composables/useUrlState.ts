@@ -42,6 +42,9 @@ export function useUrlState(state: { value: AppState }) {
     const themeMode = safeLocalStorageGet('themeMode', '')
     setUrlParam(params, 'theme', themeMode || null)
 
+    // Remove milestone IDs parameter if present (not needed for sharing)
+    params.delete('m')
+
     history.replaceState(null, '', '?' + params.toString())
   }
 

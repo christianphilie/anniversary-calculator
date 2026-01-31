@@ -74,7 +74,7 @@ import { useToast } from '../composables/useToast'
 import { useI18n } from '../i18n'
 import { buildICS, downloadICS } from '../utils/ics'
 import { exportToCSV, exportToJSON, exportToPDF, downloadFile } from '../utils/export'
-import { generateShareUrl, shareMilestones, isNativeShareAvailable } from '../utils/share'
+import { isNativeShareAvailable } from '../utils/share'
 import { copyToClipboard } from '../utils/clipboard'
 import { generateFilename } from '../utils/filename'
 import { logError } from '../utils/logger'
@@ -164,19 +164,30 @@ function handleDownloadPDF(): void {
 }
 
 async function handleShare(): Promise<void> {
-  const milestoneIds = state.value.eventsView.map(ev => ev.id)
   const title = state.value.label || 'Jubiläumsrechner'
   const text = `Jubiläen: ${state.value.eventsView.length} Einträge`
   
-  // Update URL with current state for sharing
+  // Update URL with current state for sharing (without milestone IDs)
+  // The milestones can be recalculated from the configuration parameters
   encodeStateToURL()
   
-  const url = generateShareUrl(milestoneIds)
+  // Get the current URL without milestone IDs
+  const url = window.location.origin + window.location.pathname + '?' + new URLSearchParams(window.location.search).toString()
   
   if (isNativeShareAvailable()) {
-    const shared = await shareMilestones(milestoneIds, title, text)
-    if (shared) {
+    try {
+      await navigator.share({
+        title,
+        text,
+        url
+      })
       success(t.value('success.shared'))
+    } catch (err) {
+      // User cancelled or error occurred
+      if ((err as Error).name !== 'AbortError') {
+        logError('Share failed:', err)
+        error(t.value('errors.shareError'))
+      }
     }
   } else {
     // Fallback: Copy URL to clipboard
