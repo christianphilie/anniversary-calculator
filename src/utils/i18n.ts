@@ -1,4 +1,5 @@
 import type { Unit } from '../types'
+import { warn } from './logger'
 
 // German unit labels
 const unitDE: Record<Unit, [string, string, string]> = {
@@ -95,7 +96,7 @@ let currentLocale: Locale = 'de'
 // Update formatters when locale changes
 export function updateFormatters(locale: Locale): void {
   if (locale !== 'de' && locale !== 'en') {
-    console.warn(`Invalid locale: ${locale}, falling back to 'de'`)
+    warn(`Invalid locale: ${locale}, falling back to 'de'`)
     currentLocale = 'de'
     return
   }

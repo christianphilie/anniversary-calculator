@@ -111,7 +111,9 @@ export function exportToPDF(
   const sourceText = locale === 'de'
     ? 'gefunden vom Jubiläumsrechner'
     : 'found by Anniversary Calculator'
-  const domainText = 'anniversary-calculator-eight.vercel.app'
+  const domainText = typeof window !== 'undefined' 
+    ? window.location.hostname 
+    : 'anniversary-calculator-eight.vercel.app'
   
   const countWidth = doc.getTextWidth(countText)
   doc.text(countText, pageWidth - margin - countWidth, margin)
