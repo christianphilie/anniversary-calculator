@@ -1,24 +1,39 @@
 <template>
-  <div class="year-sep" :id="`y-${year}`" :data-year="year" role="separator" :aria-label="`${t('results.year')} ${year}`">
+  <div class="year-sep" :id="`y-${year}`" role="separator" :aria-label="`${t('results.year')} ${year}`">
     <button
-      v-if="hasPreviousYear"
-      class="year-nav-btn year-nav-up"
+      v-if="isFirst && canAddPreviousYears"
+      class="year-nav-btn year-nav-load-more"
+      type="button"
+      @click="$emit('add-previous-years')"
+      :aria-label="t('form.loadMore')"
+    >
+      {{ t('form.loadMore') }}
+    </button>
+    <button
+      v-else-if="hasPreviousYear"
+      class="year-nav-btn"
       type="button"
       @click="$emit('jump-to-year', previousYear)"
       :aria-label="`${t('form.jumpToYear')}: ${previousYear}`"
-      :title="`${previousYear}`"
     >
       ↑
     </button>
     <span v-else class="year-nav-placeholder"></span>
     <span class="y">{{ year }}</span>
     <button
-      v-if="hasNextYear"
-      class="year-nav-btn year-nav-down"
+      v-if="isLast && canAddNextYears"
+      class="year-nav-btn year-nav-load-more"
       type="button"
+      @click="$emit('add-next-years')"
+      :aria-label="t('form.loadMore')"
+    >
+      {{ t('form.loadMore') }}
+    </button>
+    <button
+      v-else-if="hasNextYear"
+      class="year-nav-btn"
       @click="$emit('jump-to-year', nextYear)"
       :aria-label="`${t('form.jumpToYear')}: ${nextYear}`"
-      :title="`${nextYear}`"
     >
       ↓
     </button>
@@ -33,10 +48,14 @@ import { useAppState } from '../composables/useAppState'
 
 const props = defineProps<{
   year: number
+  isFirst?: boolean
+  isLast?: boolean
 }>()
 
 defineEmits<{
   'jump-to-year': [year: number]
+  'add-previous-years': []
+  'add-next-years': []
 }>()
 
 const { t } = useI18n()
@@ -71,14 +90,51 @@ const nextYear = computed(() => {
   if (!hasNextYear.value) return props.year
   return availableYears.value[currentIndex.value + 1]
 })
+
+const startYear = computed(() => {
+  if (!state.value.start) return new Date().getFullYear()
+  return state.value.start.getFullYear()
+})
+
+const canAddPreviousYears = computed(() => {
+  if (!state.value.yearFrom) return false
+  const currentYear = new Date().getFullYear()
+  const dateYear = startYear.value
+  const minPossibleYear = Math.min(dateYear, currentYear)
+  return state.value.yearFrom > minPossibleYear
+})
+
+const canAddNextYears = computed(() => {
+  if (!state.value.yearTo) return false
+  const currentYear = new Date().getFullYear()
+  const maxYearTo = currentYear + 100
+  return state.value.yearTo < maxYearTo
+})
 </script>
 
 <style scoped>
 .year-sep {
-  display: flex !important;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
-  justify-content: center;
+  margin-top: 24px;
+  margin-bottom: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.year-sep:first-child {
+  margin-top: 0;
+}
+
+.year-sep .y {
+  flex: 1;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.05em;
 }
 
 .year-nav-btn {
@@ -111,8 +167,10 @@ const nextYear = computed(() => {
 
 .year-nav-placeholder {
   min-width: 28px;
-  height: 28px;
   flex-shrink: 0;
 }
-</style>
 
+.year-nav-load-more {
+  text-transform: uppercase;
+}
+</style>
