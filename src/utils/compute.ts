@@ -2,7 +2,7 @@ import type { MilestoneEvent, Unit, Patterns } from '../types'
 import { CONFIG } from '../types'
 import { addYears, addMonths, addWeeks, addDays, addHours, addMinutes, addSeconds, diffMonths, yearsBetween, MS } from './date'
 import { buildCandidates, classifyPatterns } from './patterns'
-import { getUnitLabel, humanDiff, fmtNum, fmtFull } from './i18n'
+import { getUnitLabel, humanDiff, getDateFormatter, getNumberFormatter } from './i18n'
 
 type UnitAdder = (date: Date, n: number) => Date
 
@@ -76,16 +76,16 @@ export function computeRangeWindow(
     const locale = opts.locale || 'de'
     const sinceText = locale === 'en' ? 'since' : 'seit'
     const timeSuffix = locale === 'en' ? '' : ' Uhr'
-    const formattedStart = fmtFull().format(start) + timeSuffix
+    const formattedStart = getDateFormatter(locale).format(start) + timeSuffix
     
-    const baseTitle = `${fmtNum().format(n)} ${getUnitLabel(unit, n, locale)}`
+    const baseTitle = `${getNumberFormatter(locale).format(n)} ${getUnitLabel(unit, n, locale)}`
     // If no label, use "seit [Datum] um [Uhrzeit]" instead of "seit Start"
     const since = opts.label 
       ? `${sinceText} ${opts.label}`
       : (locale === 'en' 
         ? `since ${formattedStart}` 
         : `seit ${formattedStart}`)
-    const desc = `${fmtNum().format(n)} ${getUnitLabel(unit, n, locale)} ${sinceText} ${formattedStart}`
+    const desc = `${getNumberFormatter(locale).format(n)} ${getUnitLabel(unit, n, locale)} ${sinceText} ${formattedStart}`
 
     evs.push({
       id: `${unit}-${n}-${date.getTime()}`,

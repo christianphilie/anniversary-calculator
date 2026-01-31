@@ -26,7 +26,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { MilestoneEvent } from '../types'
-import { fmtFull } from '../utils/i18n'
+import { getDateFormatter } from '../utils/i18n'
 import { copyToClipboard, formatMilestoneText } from '../utils/clipboard'
 import { useToast } from '../composables/useToast'
 import { useI18n } from '../i18n'
@@ -42,8 +42,8 @@ const unitLabel = computed(() => {
   return t.value(`units.${props.event.unit}`)
 })
 
-// Cache formatter to avoid recreating on every render
-const dateFormatter = computed(() => fmtFull())
+// Create formatter that reacts to locale changes
+const dateFormatter = computed(() => getDateFormatter(locale.value))
 
 const formatDate = computed(() => {
   return (date: Date): string => {

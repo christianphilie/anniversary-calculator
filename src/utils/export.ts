@@ -1,6 +1,6 @@
 import type { MilestoneEvent, Unit, Patterns } from '../types'
 import { jsPDF } from 'jspdf'
-import { fmtFull } from './i18n'
+import { getDateFormatter } from './i18n'
 
 /**
  * Exports milestones to CSV format
@@ -92,8 +92,8 @@ export function exportToPDF(
   
   // Date and time as subtitle (if start date available)
   if (metadata.start) {
-    const dateFormatter = fmtFull()
-    // fmtFull() already includes time, so we just use it directly
+    const dateFormatter = getDateFormatter(locale)
+    // getDateFormatter() already includes time, so we just use it directly
     const dateTimeStr = dateFormatter.format(metadata.start)
     doc.text(dateTimeStr, margin, yPos)
     yPos += 8
@@ -171,9 +171,9 @@ export function exportToPDF(
       doc.text(title, margin, yPos)
       
       // Date and time (right aligned) - format date without time suffix since it's already in the date
-      const dateFormatter = fmtFull()
+      const dateFormatter = getDateFormatter(locale)
       let dateTimeStr = dateFormatter.format(event.date)
-      // Don't add "Uhr" again, it's already in fmtFull() output for German
+      // Don't add "Uhr" again, it's already in getDateFormatter() output for German
       const dateTimeWidth = doc.getTextWidth(dateTimeStr)
       doc.text(dateTimeStr, pageWidth - margin - dateTimeWidth, yPos)
       

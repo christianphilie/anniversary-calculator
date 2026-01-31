@@ -1,5 +1,5 @@
 import type { MilestoneEvent } from '../types'
-import { fmtFull } from './i18n'
+import { getDateFormatter } from './i18n'
 import { useI18n } from '../i18n'
 import { logError } from './logger'
 
@@ -62,7 +62,7 @@ export async function copyToClipboard(text: string): Promise<boolean> {
  */
 export function formatMilestoneText(event: MilestoneEvent): string {
   const { locale } = useI18n()
-  const formattedDate = fmtFull().format(event.date)
+  const formattedDate = getDateFormatter(locale.value).format(event.date)
   
   // Format date string: add "am"/"on" prefix and replace comma before time with "um"/"at"
   let dateStr: string
