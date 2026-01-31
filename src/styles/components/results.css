@@ -3,7 +3,7 @@
 /* Year Navigation Sticky */
 .year-navigation-sticky {
   position: sticky;
-  top: 152px;
+  top: var(--sticky-header-height-desktop);
   z-index: 19;
   background: var(--panel);
   margin-top: 0;
@@ -11,7 +11,7 @@
 }
 @media (max-width:768px){
   .year-navigation-sticky {
-    top: 52px;
+    top: var(--sticky-header-height-mobile);
   }
 }
 
@@ -40,24 +40,7 @@
 }
 
 /* Year Separator - Styles moved to component scoped styles */
-.year-checkbox{
-  width:18px;
-  height:18px;
-  cursor:pointer;
-  accent-color:var(--brand);
-  margin:0;
-  margin-left:4px;
-  opacity:0;
-  transition:opacity var(--transition);
-  flex-shrink:0;
-  align-self:center;
-}
-.year-sep:hover .year-checkbox{
-  opacity:1;
-}
-@media (max-width:768px){
-  .year-checkbox{opacity:1}
-}
+/* NOTE: .year-checkbox styles removed - not used in YearSeparator component */
 
 /* Milestone Item */
 .item{

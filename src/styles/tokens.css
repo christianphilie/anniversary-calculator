@@ -15,6 +15,9 @@
   --btn-hover-bg:#171717;
   --focus: 0 0 0 3px rgba(0,0,0,0.1);
   --transition:all 0.15s cubic-bezier(0.4,0,0.2,1);
+  /* Sticky header heights */
+  --sticky-header-height-desktop: 152px;
+  --sticky-header-height-mobile: 52px;
 }
 [data-theme="dark"]{
   --bg:#0a0a0a; --panel:#171717; --card:#262626; --text:#fafafa; --muted:#a3a3a3;

@@ -10,6 +10,8 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: process.env.NODE_ENV === 'development'
+    sourcemap: process.env.NODE_ENV === 'development',
+    cssMinify: true, // Explicitly enable CSS minification
+    minify: 'esbuild' // Use esbuild for faster minification
   }
 })
