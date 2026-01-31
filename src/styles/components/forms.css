@@ -1,10 +1,26 @@
 /* ========= Form Components ========= */
 
+/* Input Sections */
+.input-section{
+  margin-bottom:20px;
+  padding-bottom:20px;
+  border-bottom:1px solid var(--border);
+}
+.input-section:last-child{
+  margin-bottom:0;
+  padding-bottom:0;
+  border-bottom:none;
+}
+
 /* Form Fields */
 form .field{
   display:grid;
   gap:8px;
   margin-bottom:20px;
+}
+/* More spacing between units and patterns */
+.input-section .field:nth-child(3){
+  margin-top:24px;
 }
 label{
   font-size:13px;
@@ -101,8 +117,8 @@ input[type="checkbox"]{
   gap:8px;
 }
 .chips-units{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
+  display:flex;
+  flex-direction:column;
   gap:8px;
 }
 .chips-patterns{
@@ -114,21 +130,12 @@ input[type="checkbox"]{
   display:inline-flex;
   align-items:center;
   gap:8px;
-  background:var(--panel);
-  border:1px solid var(--border);
-  padding:8px 14px;
-  border-radius:999px;
   font-size:13px;
   font-weight:500;
   user-select:none;
   cursor:pointer;
   transition:var(--transition);
-}
-.chip:hover{
-  background:var(--card);
-  border-color:var(--brand);
-  transform:translateY(-1px);
-  box-shadow:var(--shadow-sm);
+  position:relative;
 }
 .chip input{
   accent-color:currentColor;
@@ -162,4 +169,26 @@ input[type="checkbox"]{
 .chip.unit.weeks{color:var(--c-weeks)}
 .chip.unit.months{color:var(--c-months)}
 .chip.unit.years{color:var(--c-years)}
-.chip input:checked + span{font-weight:700}
+.chip.unit span{font-weight:700}
+.chip-pattern-label{
+  font-weight:700;
+}
+.chip-pattern-examples{
+  font-weight:400;
+}
+.chip-count{
+  font-size:11px;
+  color:var(--muted);
+  font-weight:700;
+  margin-left:auto;
+  padding-left:8px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:20px;
+  height:20px;
+  padding:0 6px;
+  border-radius:10px;
+  background:var(--panel);
+  border:1px solid var(--border);
+}
