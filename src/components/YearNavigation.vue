@@ -241,15 +241,22 @@ onUnmounted(() => {
   border-bottom: 1px solid var(--border);
   height: 40px;
   box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  position: relative;
 }
 
 .year-navigation-container {
   position: relative;
   flex: 1;
   min-width: 0;
+  width: 100%;
+  max-width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
+  overflow: hidden;
 }
 
 .year-navigation-scroll {
@@ -260,7 +267,12 @@ onUnmounted(() => {
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   width: 100%;
+  max-width: 100%;
   height: 100%;
+  position: relative;
+  box-sizing: border-box;
+  min-width: 0;
+  contain: strict;
 }
 
 .year-navigation-scroll::-webkit-scrollbar {
@@ -275,6 +287,8 @@ onUnmounted(() => {
   margin: 0;
   height: 100%;
   min-width: max-content;
+  flex-shrink: 0;
+  max-width: 100vw;
 }
 
 .year-nav-item {
@@ -368,15 +382,17 @@ onUnmounted(() => {
   box-shadow: var(--focus);
 }
 
-@media (max-width: 768px) {
+/* Show scroll buttons only on devices that don't support horizontal scrolling well */
+/* Hide by default (desktop with mouse can scroll horizontally) */
+.year-nav-scroll-btn {
+  display: none;
+}
+
+/* Show on touch devices where horizontal scrolling might not be intuitive */
+@media (hover: none) and (pointer: coarse) {
   .year-nav-scroll-btn {
     display: flex;
   }
 }
 
-@media (min-width: 769px) {
-  .year-nav-scroll-btn {
-    display: none;
-  }
-}
 </style>

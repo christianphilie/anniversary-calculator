@@ -18,6 +18,7 @@
   /* Sticky header heights */
   --sticky-header-height-desktop: 152px;
   --sticky-header-height-mobile: 52px;
+  --sticky-panel-header-top: 100px;
 }
 [data-theme="dark"]{
   --bg:#0a0a0a; --panel:#171717; --card:#262626; --text:#fafafa; --muted:#a3a3a3;

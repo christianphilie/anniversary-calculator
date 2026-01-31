@@ -192,16 +192,4 @@ onUnmounted(() => {
   border-color: var(--brand);
   color: var(--text);
 }
-
-@media (max-width: 640px) {
-  .shortcut-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-  
-  .shortcut-description {
-    text-align: left;
-  }
-}
 </style>

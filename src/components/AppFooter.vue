@@ -99,15 +99,4 @@ const { t } = useI18n()
   box-shadow: var(--focus);
   border-radius: 4px;
 }
-
-@media (max-width: 768px) {
-  .app-footer {
-    margin-top: 20px;
-    padding: 12px 0;
-  }
-  
-  .footer-content {
-    font-size: 12px;
-  }
-}
 </style>

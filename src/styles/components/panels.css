@@ -7,12 +7,18 @@
   border-radius:var(--radius-lg);
   box-shadow:var(--shadow-sm);
   transition:var(--transition);
-  overflow:visible;
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
 }
 .panel .bd{
   position:relative;
-  overflow:hidden;
+  overflow-x:hidden;
+  overflow-y:visible;
   border-radius:0 0 var(--radius-lg) var(--radius-lg);
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
 }
 .panel:hover{
   box-shadow:var(--shadow-md);
@@ -28,16 +34,12 @@
   height:52px;
   box-sizing:border-box;
   position:sticky;
-  top:100px;
-  overflow:visible;
+  top:var(--sticky-panel-header-top);
   z-index:20;
   margin-top:0;
   border-radius:var(--radius-lg) var(--radius-lg) 0 0;
-}
-@media (max-width:768px){
-  .panel .hd{
-    top:0;
-  }
+  width:100%;
+  max-width:100%;
 }
 .panel .hd strong{
   font-size:16px;
@@ -84,24 +86,6 @@
 }
 .panel .bd{
   padding:24px;
-}
-@media (max-width:768px){
-  .panel .hd{
-    padding:0 20px;
-    flex-wrap:nowrap;
-    gap:12px;
-  }
-  .panel .hd strong{
-    flex:1;
-    min-width:0;
-  }
-  .panel .hd .btn{
-    margin-left:auto;
-  }
-  .milestones-checkbox-label{
-    margin-left:auto;
-  }
-  .panel .bd{padding:20px}
 }
 
 /* Empty State */
@@ -175,28 +159,7 @@
 .share-button-wrapper .btn{
   width:100%;
 }
-@media (max-width:768px){
-  .export-controls{
-    flex-direction:column;
-    align-items:stretch;
-  }
-  .share-button-wrapper{
-    margin-left:0;
-    width:100%;
-  }
-  .share-button-wrapper .btn{
-    width:100%;
-  }
-}
 .milestones-controls{
   display:flex;
   gap:8px;
-}
-@media (max-width:768px){
-  .export-buttons-group{
-    flex-direction:column;
-  }
-  .export-buttons-group .btn{
-    width:100%;
-  }
 }

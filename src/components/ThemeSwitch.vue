@@ -33,6 +33,7 @@ const { t } = useI18n()
   box-shadow: var(--shadow-sm);
   padding: 0;
   line-height: 1;
+  flex-shrink: 0;
 }
 
 .theme-toggle:hover {

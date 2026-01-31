@@ -50,6 +50,7 @@ function toggleLocale(): void {
   box-shadow: var(--shadow-sm);
   padding: 0;
   line-height: 1;
+  flex-shrink: 0;
 }
 
 .lang-toggle:hover {

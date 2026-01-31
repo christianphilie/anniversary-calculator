@@ -54,14 +54,6 @@ function getIcon(type: 'success' | 'error' | 'info'): string {
   pointer-events: none;
 }
 
-@media (max-width: 768px) {
-  .toast-container {
-    top: 16px;
-    right: 16px;
-    left: 16px;
-  }
-}
-
 .toast {
   display: flex;
   align-items: center;
@@ -75,14 +67,6 @@ function getIcon(type: 'success' | 'error' | 'info'): string {
   max-width: 400px;
   pointer-events: auto;
   animation: slideInRight 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@media (max-width: 768px) {
-  .toast {
-    min-width: auto;
-    max-width: none;
-    width: 100%;
-  }
 }
 
 .toast-success {

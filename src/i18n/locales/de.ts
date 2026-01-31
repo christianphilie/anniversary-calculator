@@ -16,7 +16,7 @@ export default {
   },
   ui: {
     title: 'Jubiläumsrechner',
-    description: 'Berechne besondere Jubiläen & exportiere sie als Kalender',
+    description: 'Finde besondere Jubiläen & speichere sie als Kalender',
     inputs: 'Eingaben',
     milestones: 'Jubiläen',
     results: 'Ergebnisse'

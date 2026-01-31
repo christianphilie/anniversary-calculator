@@ -105,10 +105,6 @@ input[type="checkbox"]{
   gap:12px;
 }
 .row>*{flex:1}
-@media (max-width:640px){
-  .row{flex-direction:column;gap:0}
-  .row .field{margin-bottom:20px}
-}
 
 /* Chip Components */
 .chips{

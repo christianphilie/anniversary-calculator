@@ -8,11 +8,9 @@
   background: var(--panel);
   margin-top: 0;
   border-radius: 0;
-}
-@media (max-width:768px){
-  .year-navigation-sticky {
-    top: var(--sticky-header-height-mobile);
-  }
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Milestones Count */
@@ -97,11 +95,6 @@
 .item:hover .item-actions .btn-icon{
   opacity:1;
 }
-@media (max-width:768px){
-  .item-actions .btn-icon{
-    opacity:1;
-  }
-}
 
 /* Tag Component */
 .tag{
@@ -129,15 +122,8 @@
   flex-wrap:wrap;
   align-items:center;
 }
-@media (max-width:640px){
-  .toolbar{width:100%}
-  .toolbar .btn{flex:1;min-width:0}
-}
 .toolbar .push-right{
   margin-left:auto;
-}
-@media (max-width:640px){
-  .toolbar .push-right{margin-left:0;width:100%}
 }
 
 /* Year Range Expand Buttons */

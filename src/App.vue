@@ -7,10 +7,11 @@
         <div class="left-column">
           <InputPanel />
           <ExportPanel />
-          <AppFooter />
+          <AppFooter class="footer-desktop" />
         </div>
         <div class="results-grid">
           <ResultsPanel />
+          <AppFooter class="footer-mobile" />
         </div>
       </main>
       <Toast />
