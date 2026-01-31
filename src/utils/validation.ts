@@ -17,7 +17,7 @@ function defaultT(key: string, params?: Record<string, string | number>): string
     'validation.dateTooOld': `Das Datum muss nach ${params?.year || 1900} sein`,
     'validation.dateTooNew': `Das Datum muss vor ${params?.year || 2200} sein`,
     'validation.timeInvalid': 'Ungültiges Zeitformat (erwartet: HH:MM oder HH:MM:SS)',
-    'validation.labelTooLong': `Der Titel darf maximal ${CONFIG.MAX_LABEL_LENGTH || 100} Zeichen lang sein`,
+    'validation.labelTooLong': 'Der Titel darf maximal 100 Zeichen lang sein',
     'validation.labelInvalidChars': 'Der Titel enthält ungültige Zeichen',
     'validation.labelNotAllowedChars': 'Der Titel enthält nicht erlaubte Zeichen',
     'validation.yearFromTooEarly': `Das Startjahr muss mindestens ${params?.year || 1900} sein`,

@@ -70,13 +70,13 @@ export function useUrlState(state: { value: AppState }) {
 
     // Validate date format (YYYY-MM-DD)
     const dateParam = getUrlParam(q, 'd')
-    if (isValidDateParam(dateParam)) {
+    if (isValidDateParam(dateParam) && dateParam !== null) {
       result.date = dateParam
     }
 
     // Validate time format (HH:MM or HH:MM:SS)
     const timeParam = getUrlParam(q, 't')
-    if (isValidTimeParam(timeParam)) {
+    if (isValidTimeParam(timeParam) && timeParam !== null) {
       result.time = timeParam
     }
 
