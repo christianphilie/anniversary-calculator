@@ -1,4 +1,3 @@
-import { CONFIG } from '../types'
 import { isSafeString } from './sanitize'
 
 export interface ValidationResult {
@@ -138,11 +137,13 @@ export function validateYearRange(
     }
   }
 
-  // Validate against CONFIG.MAX_SPAN
-  if (yearTo > startYear + CONFIG.MAX_SPAN) {
+  // Validate against max 100 years in the future from current year
+  const currentYear = new Date().getFullYear()
+  const maxYearTo = currentYear + 100
+  if (yearTo > maxYearTo) {
     return {
       valid: false,
-      error: t('validation.yearToTooLate', { year: startYear + CONFIG.MAX_SPAN })
+      error: t('validation.yearToTooLate', { year: maxYearTo })
     }
   }
 

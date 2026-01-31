@@ -24,7 +24,7 @@
               id="date"
               v-model="formData.date"
               type="date"
-              required
+              @blur="handleDateBlur"
               :aria-invalid="fieldErrors.date ? 'true' : 'false'"
               :aria-describedby="fieldErrors.date ? 'date-error' : undefined"
             />
@@ -34,18 +34,14 @@
           </div>
           <div class="field">
             <label for="time">{{ t('form.time') }}</label>
-            <div class="time-input-wrapper">
-              <input
-                id="time"
-                v-model="formData.time"
-                type="time"
-                step="1"
-                :class="{ 'time-empty': !formData.time }"
-                :aria-invalid="fieldErrors.time ? 'true' : 'false'"
-                :aria-describedby="fieldErrors.time ? 'time-error' : undefined"
-              />
-              <span v-if="!formData.time" class="time-placeholder">0:00:00</span>
-            </div>
+            <input
+              id="time"
+              v-model="formData.time"
+              type="time"
+              step="1"
+              :aria-invalid="fieldErrors.time ? 'true' : 'false'"
+              :aria-describedby="fieldErrors.time ? 'time-error' : undefined"
+            />
             <span v-if="fieldErrors.time" id="time-error" class="field-error" role="alert">
               {{ fieldErrors.time }}
             </span>
@@ -59,6 +55,7 @@
             v-model="formData.label"
             type="text"
             :placeholder="t('form.labelPlaceholder')"
+            @blur="handleLabelBlur"
             :aria-invalid="fieldErrors.label ? 'true' : 'false'"
             :aria-describedby="fieldErrors.label ? 'label-error' : undefined"
           />
@@ -72,29 +69,29 @@
           <div class="row">
             <div class="field">
               <label for="yearFrom" class="field-label-small">{{ t('form.yearFrom') }}</label>
-              <select
+              <input
                 id="yearFrom"
                 v-model.number="formData.yearFrom"
+                type="number"
+                step="1"
+                @blur="handleYearFromBlur"
+                @keydown.enter="handleYearFromBlur"
                 :aria-invalid="fieldErrors.yearRange ? 'true' : 'false'"
                 :aria-describedby="fieldErrors.yearRange ? 'year-range-error' : undefined"
-              >
-                <option v-for="y in yearFromOptions" :key="y" :value="y">
-                  {{ y }}
-                </option>
-              </select>
+              />
             </div>
             <div class="field">
               <label for="yearTo" class="field-label-small">{{ t('form.yearTo') }}</label>
-              <select
+              <input
                 id="yearTo"
                 v-model.number="formData.yearTo"
+                type="number"
+                step="1"
+                @blur="handleYearToBlur"
+                @keydown.enter="handleYearToBlur"
                 :aria-invalid="fieldErrors.yearRange ? 'true' : 'false'"
                 :aria-describedby="fieldErrors.yearRange ? 'year-range-error' : undefined"
-              >
-                <option v-for="y in yearToOptions" :key="y" :value="y">
-                  {{ y }}
-                </option>
-              </select>
+              />
               <span v-if="fieldErrors.yearRange" id="year-range-error" class="field-error" role="alert">
                 {{ fieldErrors.yearRange }}
               </span>
@@ -164,7 +161,7 @@ import {
 import { sanitizeLabel } from '../utils/sanitize'
 
 const { state, recompute: recomputeState } = useAppState()
-const { loadStateFromURL, encodeStateToURL } = useUrlState(state)
+const { loadStateFromURL } = useUrlState(state)
 const { setError, clearError } = useError()
 const { t } = useI18n()
 
@@ -179,14 +176,17 @@ const fieldErrors = ref<{
 
 // No emit needed - we use composable directly
 
+const today = new Date()
+const todayYear = today.getFullYear()
+
 const formData = ref({
   label: '',
-  date: toLocalDateInputValue(new Date()),
+  date: toLocalDateInputValue(today),
   time: '',
   units: ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds'] as Unit[],
   patterns: { rounded: true, repdigit: true },
-  yearFrom: new Date().getFullYear(),
-  yearTo: new Date().getFullYear() + 10
+  yearFrom: todayYear,
+  yearTo: todayYear + 50
 })
 
 const units = computed((): Array<{ value: Unit; label: string }> => [
@@ -204,22 +204,127 @@ const startYear = computed(() => {
   return new Date(formData.value.date).getFullYear()
 })
 
-const yearFromOptions = computed(() => {
-  const options: number[] = []
-  for (let y = startYear.value; y <= startYear.value + CONFIG.MAX_SPAN; y++) {
-    options.push(y)
-  }
-  return options
+const currentYear = computed(() => new Date().getFullYear())
+const yearFromMin = ref<number>(todayYear)
+const yearToMax = ref<number>(todayYear + 100)
+
+// Min/Max years for input validation
+// Min: Start year (date input) or current year, whichever is earlier (no going back before that)
+// Max: Current year + 100 (reasonable future limit)
+const minYear = computed(() => {
+  const currYear = currentYear.value
+  const dateYear = startYear.value
+  // Allow from start date year or current year, whichever is earlier
+  const minAllowed = Math.min(dateYear, currYear)
+  // But also respect yearFromMin if it was expanded via buttons
+  return Math.min(minAllowed, yearFromMin.value)
 })
 
-const yearToOptions = computed(() => {
-  const options: number[] = []
-  const maxY = startYear.value + CONFIG.MAX_SPAN
-  for (let y = formData.value.yearFrom; y <= maxY; y++) {
-    options.push(y)
-  }
-  return options
+const maxYear = computed(() => {
+  const currYear = currentYear.value
+  // Max 100 years in the future, but also respect yearToMax if it was expanded
+  return Math.max(currYear + 100, yearToMax.value)
 })
+
+// Trim label only on blur, not during typing
+function handleLabelBlur(): void {
+  const trimmed = formData.value.label.trim()
+  if (trimmed !== formData.value.label) {
+    formData.value.label = trimmed
+    // Trigger recompute with trimmed value
+    compute()
+  }
+}
+
+// Handle date blur - validate and adjust year range
+function handleDateBlur(): void {
+  if (!formData.value.date) {
+    // Clear errors if date is empty (user might still be typing)
+    fieldErrors.value.date = undefined
+    return
+  }
+  
+  // Check if date is complete (YYYY-MM-DD format)
+  const dateStr = formData.value.date
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    // Date is incomplete, don't validate yet
+    return
+  }
+  
+  // Validate date and adjust year range
+  const dateYear = new Date(formData.value.date).getFullYear()
+  const todayYear = new Date().getFullYear()
+  const minAllowed = Math.min(dateYear, todayYear)
+  const maxAllowed = todayYear + 100
+  
+  // Always adjust yearFrom to be within valid range based on new date
+  formData.value.yearFrom = minAllowed
+  
+  // Always adjust yearTo to be within valid range
+  formData.value.yearTo = maxAllowed
+  
+  // Update min/max refs to reflect the new range
+  yearFromMin.value = minAllowed
+  yearToMax.value = maxAllowed
+  
+  // Trigger validation and recompute
+  compute()
+}
+
+// Validate and correct year values only on blur - NO automatic adjustments during typing
+function handleYearFromBlur(): void {
+  const value = formData.value.yearFrom
+  if (isNaN(value) || !isFinite(value)) {
+    // Reset to valid value if invalid
+    const dateYear = startYear.value
+    const todayYear = currentYear.value
+    formData.value.yearFrom = Math.min(dateYear, todayYear)
+    compute()
+    return
+  }
+  
+  // Clamp to valid range
+  const clamped = Math.max(minYear.value, Math.min(maxYear.value, value))
+  
+  if (clamped !== formData.value.yearFrom) {
+    formData.value.yearFrom = clamped
+  }
+  
+  // Ensure yearTo is not less than yearFrom
+  if (formData.value.yearTo < formData.value.yearFrom) {
+    formData.value.yearTo = formData.value.yearFrom
+  }
+  
+  // Always trigger recompute when year range changes (even if value was already valid)
+  compute()
+}
+
+function handleYearToBlur(): void {
+  const value = formData.value.yearTo
+  if (isNaN(value) || !isFinite(value)) {
+    // Reset to valid value if invalid
+    const todayYear = currentYear.value
+    formData.value.yearTo = todayYear + 100
+    compute()
+    return
+  }
+  
+  // Clamp to valid range
+  const clamped = Math.max(minYear.value, Math.min(maxYear.value, value))
+  
+  if (clamped !== formData.value.yearTo) {
+    formData.value.yearTo = clamped
+  }
+  
+  // Ensure yearFrom is not greater than yearTo
+  if (formData.value.yearFrom > formData.value.yearTo) {
+    formData.value.yearFrom = formData.value.yearTo
+  }
+  
+  // Always trigger recompute when year range changes (even if value was already valid)
+  compute()
+}
+
 
 function handleSubmit(): void {
   compute()
@@ -234,23 +339,33 @@ function compute(): void {
   const translate = (key: string, params?: Record<string, string | number>) => t.value(key, params)
 
   try {
-    // Sanitize and validate label
-    if (formData.value.label.trim()) {
-      const sanitizedLabel = sanitizeLabel(formData.value.label.trim())
+    // Sanitize and validate label (trim only for validation, don't modify formData during typing)
+    const labelTrimmed = formData.value.label.trim()
+    if (labelTrimmed) {
+      const sanitizedLabel = sanitizeLabel(labelTrimmed)
       const labelValidation = validateLabel(sanitizedLabel, translate)
       if (!labelValidation.valid) {
         fieldErrors.value.label = labelValidation.error
         setError(labelValidation.error || t.value('errors.invalidLabel'))
         return
       }
-      // Update formData with sanitized value
-      formData.value.label = sanitizedLabel
+      // Only update formData if it was actually changed (e.g., sanitization removed something)
+      if (sanitizedLabel !== labelTrimmed) {
+        formData.value.label = sanitizedLabel
+      }
     }
 
-    // Validate date and time
+    // Validate date and time (only validate if date is present and looks complete)
     if (!formData.value.date) {
-      fieldErrors.value.date = t.value('validation.dateRequired')
-      setError(t.value('validation.dateRequired'))
+      // Don't show error if date is empty - user might still be typing
+      return
+    }
+
+    // Check if date looks incomplete (e.g., "1989-03-2" or "1989-03-" would be invalid but user might still be typing)
+    // Only validate if date is a complete date string (YYYY-MM-DD format)
+    const dateStr = formData.value.date
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      // Date is incomplete, don't validate yet
       return
     }
 
@@ -290,8 +405,11 @@ function compute(): void {
     }
 
     // Ensure year range is valid
-    const yearFrom = Math.max(startYear.value, formData.value.yearFrom)
-    const yearTo = Math.max(yearFrom, Math.min(startYear.value + CONFIG.MAX_SPAN, formData.value.yearTo))
+    const todayYear = new Date().getFullYear()
+    const maxYearTo = todayYear + 100 // Max 100 years in the future
+    // yearFrom can be from startYear to currentYear (or expanded range)
+    const yearFrom = Math.max(startYear.value, Math.min(formData.value.yearFrom, Math.max(startYear.value, todayYear)))
+    const yearTo = Math.min(Math.max(yearFrom, formData.value.yearTo), maxYearTo)
 
     // Validate year range
     const yearRangeValidation = validateYearRange(yearFrom, yearTo, startYear.value, translate)
@@ -301,16 +419,16 @@ function compute(): void {
       return
     }
 
+    // Use trimmed label for computation (but formData keeps original for editing)
+    const trimmedLabel = formData.value.label.trim()
     recomputeState(
       start,
-      formData.value.label.trim(),
+      trimmedLabel,
       formData.value.units,
       formData.value.patterns,
       yearFrom,
       yearTo
     )
-
-    encodeStateToURL()
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Ein unerwarteter Fehler ist aufgetreten'
     setError(errorMessage)
@@ -321,24 +439,26 @@ function compute(): void {
 function handleReset(): void {
   clearError()
   fieldErrors.value = {}
-  const today = new Date()
+  const resetToday = new Date()
+  const resetYear = resetToday.getFullYear()
   formData.value = {
     label: '',
-    date: toLocalDateInputValue(today),
+    date: toLocalDateInputValue(resetToday),
     time: '',
     units: ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds'],
     patterns: { rounded: true, repdigit: true },
-    yearFrom: today.getFullYear(),
-    yearTo: today.getFullYear() + 10
+    yearFrom: resetYear,
+    yearTo: resetYear + 100
   }
-  state.value.selected.clear()
+  yearFromMin.value = resetYear
+  yearToMax.value = resetYear + 100
   compute()
 }
 
-// Watch for changes and recompute with debounce
+// Watch for changes and recompute with debounce (but NOT for date/yearFrom/yearTo - those are handled on blur)
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 watch(
-  () => [formData.value.date, formData.value.time, formData.value.units, formData.value.patterns, formData.value.yearFrom, formData.value.yearTo],
+  () => [formData.value.time, formData.value.units, formData.value.patterns],
   () => {
     if (debounceTimer) clearTimeout(debounceTimer)
     debounceTimer = setTimeout(() => {
@@ -348,46 +468,40 @@ watch(
   { deep: true }
 )
 
-// Watch for label changes and auto-submit after 0.5s delay
+// Watch for label changes and auto-submit (but don't trim during typing)
+// Only compute when label actually changes, not on every keystroke
 let labelDebounceTimer: ReturnType<typeof setTimeout> | null = null
 watch(
   () => formData.value.label,
   () => {
+    // Clear any existing timer
     if (labelDebounceTimer) clearTimeout(labelDebounceTimer)
+    // Debounce to avoid computing on every keystroke
     labelDebounceTimer = setTimeout(() => {
       compute()
-    }, 500) // 0.5 seconds delay
+    }, 300)
   }
 )
 
-watch(() => formData.value.yearFrom, () => {
-  if (formData.value.yearTo < formData.value.yearFrom) {
-    formData.value.yearTo = formData.value.yearFrom
+// Sync formData with state when state changes (e.g., from ResultsPanel "Mehr Jahre anzeigen" buttons)
+watch(() => [state.value.yearFrom, state.value.yearTo], ([newYearFrom, newYearTo]) => {
+  if (newYearFrom !== null && newYearFrom !== formData.value.yearFrom) {
+    formData.value.yearFrom = newYearFrom
+    // Update yearFromMin if needed (for expanded range)
+    if (newYearFrom < yearFromMin.value) {
+      yearFromMin.value = newYearFrom
+    }
   }
-})
+  if (newYearTo !== null && newYearTo !== formData.value.yearTo) {
+    formData.value.yearTo = newYearTo
+    // Update yearToMax if needed (for expanded range)
+    if (newYearTo > yearToMax.value) {
+      yearToMax.value = newYearTo
+    }
+  }
+}, { immediate: false })
 
-// Flag to prevent auto-adjustment during initial mount
-let isInitialMount = true
-
-// Auto-adjust year range when date changes (but not during initial mount)
-watch(() => formData.value.date, (newDate) => {
-  if (!newDate) return
-  
-  // Skip auto-adjustment during initial mount (URL state will be loaded first)
-  if (isInitialMount) return
-  
-  const dateYear = new Date(newDate).getFullYear()
-  const todayYear = new Date().getFullYear()
-  
-  // Set yearFrom to the year of the entered date
-  formData.value.yearFrom = dateYear
-  
-  // Set yearTo: max(dateYear + 10, todayYear + 5) to show both past and future milestones
-  // Cap at dateYear + MAX_SPAN to respect maximum range
-  const suggestedYearTo = Math.max(dateYear + 10, todayYear + 5)
-  const cappedYearTo = Math.min(dateYear + CONFIG.MAX_SPAN, suggestedYearTo)
-  formData.value.yearTo = Math.max(formData.value.yearFrom, cappedYearTo)
-})
+// Note: Date changes are handled in handleDateBlur() to avoid validation during typing
 
 onMounted(() => {
   const urlState = loadStateFromURL()
@@ -401,37 +515,21 @@ onMounted(() => {
   if (urlState.yearFrom) formData.value.yearFrom = urlState.yearFrom
   if (urlState.yearTo) formData.value.yearTo = urlState.yearTo
 
-  // Auto-adjust year range if not set from URL (watcher will handle this, but we ensure it's set initially)
+  // Auto-adjust year range if not set from URL
   if (!urlState.yearFrom || !urlState.yearTo) {
-    const dateYear = startYear.value
     const todayYear = new Date().getFullYear()
     
     if (!urlState.yearFrom) {
-      formData.value.yearFrom = dateYear
+      // Default to current year, but allow selection from startYear to currentYear
+      formData.value.yearFrom = Math.min(startYear.value, todayYear)
     }
     
     if (!urlState.yearTo) {
-      const suggestedYearTo = Math.max(dateYear + 10, todayYear + 5)
-      const cappedYearTo = Math.min(dateYear + CONFIG.MAX_SPAN, suggestedYearTo)
-      formData.value.yearTo = Math.max(formData.value.yearFrom, cappedYearTo)
+      // Default to 100 years in the future
+      formData.value.yearTo = todayYear + 100
     }
   }
 
   compute()
-
-  // Mark initial mount as complete (now date changes will trigger auto-adjustment)
-  isInitialMount = false
-
-  // Select milestones from share URL after computation
-  if (urlState.milestoneIds && urlState.milestoneIds.length > 0) {
-    // Wait for next tick to ensure events are computed
-    setTimeout(() => {
-      urlState.milestoneIds!.forEach(id => {
-        if (state.value.eventsAll.some(ev => ev.id === id)) {
-          state.value.selected.add(id)
-        }
-      })
-    }, 100)
-  }
 })
 </script>
