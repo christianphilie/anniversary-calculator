@@ -16,6 +16,8 @@ export default {
   ui: {
     title: 'Anniversary Calculator',
     description: 'Calculate special anniversaries & export them as calendar',
+    metaTitle: 'Anniversary Calculator',
+    metaDescription: 'Find milestones like 10 years, 500 weeks, or 333,333 seconds and export them as a calendar file.',
     inputs: 'Inputs',
     milestones: 'Anniversaries',
     results: 'Results'
@@ -148,6 +150,7 @@ export default {
     dateParseFailed: 'Error parsing date'
   },
   footer: {
-    viewOnGitHub: 'View on GitHub'
+    viewOnGitHub: 'View on GitHub',
+    buyCoffee: 'Buy me a coffee'
   }
 }

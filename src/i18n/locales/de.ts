@@ -16,6 +16,8 @@ export default {
   ui: {
     title: 'Jubiläumsrechner',
     description: 'Finde besondere Jubiläen & speichere sie als Kalender',
+    metaTitle: 'Jubiläumsrechner',
+    metaDescription: 'Berechne besondere Meilensteine wie 10 Jahre, 500 Wochen oder 333.333 Sekunden und exportiere sie als Kalenderdatei.',
     inputs: 'Eingaben',
     milestones: 'Jubiläen',
     results: 'Ergebnisse'
@@ -148,6 +150,7 @@ export default {
     dateParseFailed: 'Fehler beim Parsen des Datums'
   },
   footer: {
-    viewOnGitHub: 'Auf GitHub ansehen'
+    viewOnGitHub: 'Auf GitHub ansehen',
+    buyCoffee: 'Lade mich auf einen Kaffee ein'
   }
 }

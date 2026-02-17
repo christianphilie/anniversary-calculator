@@ -23,6 +23,16 @@
           <span aria-hidden="true">🔗</span> {{ t('footer.viewOnGitHub') }}
         </a>
       </p>
+      <p class="footer-links">
+        <a
+          href="https://www.buymeacoffee.com/christianphilie"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="footer-link coffee-link"
+        >
+          ☕ {{ t('footer.buyCoffee') }}
+        </a>
+      </p>
     </div>
   </footer>
 </template>
@@ -98,5 +108,10 @@ const { t } = useI18n()
   outline: none;
   box-shadow: var(--focus);
   border-radius: 4px;
+}
+
+.coffee-link {
+  font-weight: 600;
+  color: var(--brand);
 }
 </style>
