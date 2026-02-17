@@ -88,6 +88,15 @@
   padding:24px;
 }
 
+@media (max-width:768px){
+  .panel .bd{
+    padding:20px 18px;
+  }
+  .panel .hd{
+    padding:0 18px;
+  }
+}
+
 /* Empty State */
 .empty{
   padding:48px 24px;

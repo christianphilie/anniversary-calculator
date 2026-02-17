@@ -15,8 +15,8 @@
 /* Form Fields */
 form .field{
   display:grid;
-  gap:8px;
-  margin-bottom:20px;
+  gap:10px;
+  margin-bottom:16px;
 }
 /* More spacing between units and patterns */
 .input-section .field:nth-child(3){
@@ -102,9 +102,23 @@ input[type="checkbox"]{
 }
 .row{
   display:flex;
-  gap:12px;
+  gap:16px;
 }
 .row>*{flex:1}
+
+@media (max-width:768px){
+  .input-section{
+    margin-bottom:16px;
+    padding-bottom:16px;
+  }
+  form .field{
+    margin-bottom:14px;
+  }
+  .row{
+    flex-direction:column;
+    gap:12px;
+  }
+}
 
 /* Chip Components */
 .chips{

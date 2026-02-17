@@ -120,7 +120,13 @@ main{
 }
 /* Mobile layout: Everything stacked */
 @media (max-width:768px){
-  .grid{grid-template-columns:1fr}
+  .wrap{
+    padding:24px 16px;
+  }
+  .grid{
+    grid-template-columns:1fr;
+    gap:16px;
+  }
   .footer-desktop{
     display:none;
   }

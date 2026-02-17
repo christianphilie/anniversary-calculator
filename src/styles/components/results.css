@@ -13,6 +13,12 @@
   box-sizing: border-box;
 }
 
+@media (max-width:768px){
+  .year-navigation-sticky{
+    top: var(--sticky-header-height-mobile);
+  }
+}
+
 /* Milestones Count */
 .milestones-count{
   font-size:11px;
