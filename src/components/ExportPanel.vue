@@ -102,7 +102,7 @@ function handleDownloadICS(): void {
 
   try {
     const ics = buildICS(events)
-    downloadICS(ics, generateFilename(state.value.label, 'ics'))
+    downloadICS(generateFilename(state.value.label, 'ics'), ics, true)
     success(t.value('success.exported'))
   } catch (err) {
     logError('ICS export error:', err)
@@ -155,7 +155,8 @@ function handleDownloadPDF(): void {
         patterns: state.value.patterns
       }
     )
-    pdf.save(generateFilename(state.value.label, 'pdf'))
+    const pdfUrl = pdf.output('bloburl')
+    window.open(pdfUrl, '_blank', 'noopener')
     success(t.value('success.exported'))
   } catch (err) {
     logError('PDF export error:', err)

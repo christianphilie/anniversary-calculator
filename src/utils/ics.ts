@@ -64,12 +64,37 @@ export function buildICS(events: MilestoneEvent[]): string {
   return out.join('\r\n')
 }
 
-export function downloadICS(filename: string, content: string): void {
+function isIOS(): boolean {
+  return /iP(ad|hone|od)/i.test(navigator.userAgent)
+}
+
+export function downloadICS(filename: string, content: string, openInNewTab = true): void {
   const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' })
+
+  // iOS Safari does not honor download attribute for blobs; open data URL instead
+  if (isIOS()) {
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      const dataUrl = reader.result as string
+      window.open(dataUrl, '_blank', 'noopener')
+    }
+    reader.readAsDataURL(blob)
+    return
+  }
+
   const url = URL.createObjectURL(blob)
+
+  if (openInNewTab) {
+    window.open(url, '_blank', 'noopener')
+  }
+
   const a = document.createElement('a')
   a.href = url
   a.download = filename
+  a.target = openInNewTab ? '_blank' : '_self'
+  document.body.appendChild(a)
   a.click()
+  document.body.removeChild(a)
+
   setTimeout(() => URL.revokeObjectURL(url), 2000)
 }

@@ -214,14 +214,21 @@ export function exportToPDF(
  * @param content - Content of the file
  * @param mimeType - MIME type of the file
  */
-export function downloadFile(filename: string, content: string, mimeType: string): void {
+export function downloadFile(filename: string, content: string, mimeType: string, openInNewTab = true): void {
   const blob = new Blob([content], { type: mimeType })
   const url = URL.createObjectURL(blob)
+
+  if (openInNewTab) {
+    window.open(url, '_blank', 'noopener')
+  }
+
   const a = document.createElement('a')
   a.href = url
   a.download = filename
+  a.target = openInNewTab ? '_blank' : '_self'
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)
-  URL.revokeObjectURL(url)
+
+  setTimeout(() => URL.revokeObjectURL(url), 2000)
 }
