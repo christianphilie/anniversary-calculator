@@ -1,7 +1,7 @@
 <template>
   <div class="year-navigation-wrapper">
     <button
-      v-if="canScrollLeft"
+      v-if="shouldShowButtons && canScrollLeft"
       class="year-nav-scroll-btn year-nav-scroll-left"
       type="button"
       @click="scrollLeft"
@@ -27,19 +27,19 @@
       </div>
       <Transition name="fade">
         <div 
-          v-if="canScrollLeft" 
+          v-if="hasOverflow" 
           class="year-navigation-fade year-navigation-fade-left"
         ></div>
       </Transition>
       <Transition name="fade">
         <div 
-          v-if="canScrollRight" 
+          v-if="hasOverflow" 
           class="year-navigation-fade year-navigation-fade-right"
         ></div>
       </Transition>
     </div>
     <button
-      v-if="canScrollRight"
+      v-if="shouldShowButtons && canScrollRight"
       class="year-nav-scroll-btn year-nav-scroll-right"
       type="button"
       @click="scrollRight"
@@ -62,7 +62,10 @@ const { state } = useAppState()
 const scrollRef = ref<HTMLElement | null>(null)
 const canScrollLeft = ref(false)
 const canScrollRight = ref(false)
+const hasOverflow = ref(false)
+const shouldShowButtons = ref(false)
 const currentVisibleYear = ref<number | null>(null)
+const supportsSwipe = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window || navigator.maxTouchPoints > 0
 
 const availableYears = computed(() => {
   const years = new Set<number>()
@@ -76,13 +79,22 @@ function checkScrollState(): void {
   if (!scrollRef.value) return
   
   const scroll = scrollRef.value
+  const maxScrollLeft = scroll.scrollWidth - scroll.clientWidth
+  hasOverflow.value = maxScrollLeft > 1
   canScrollLeft.value = scroll.scrollLeft > 1
-  canScrollRight.value = scroll.scrollLeft < scroll.scrollWidth - scroll.clientWidth - 1
+  canScrollRight.value = scroll.scrollLeft < maxScrollLeft - 1
+  shouldShowButtons.value = hasOverflow.value && !supportsSwipe
+}
+
+function getHeaderOffset(): number {
+  const styles = getComputedStyle(document.documentElement)
+  const desktop = parseFloat(styles.getPropertyValue('--sticky-header-height-desktop')) || 192
+  const mobile = parseFloat(styles.getPropertyValue('--sticky-header-height-mobile')) || 92
+  return window.matchMedia('(max-width: 768px)').matches ? mobile : desktop
 }
 
 function updateVisibleYear(): void {
-  const isMobile = window.innerWidth <= 768
-  const headerOffset = isMobile ? 92 : 192
+  const headerOffset = getHeaderOffset()
   
   // Find the year separator that is currently visible in the viewport
   let visibleYear: number | null = null
@@ -177,8 +189,7 @@ function jumpToYear(year: number): void {
     // - Panel Header (sticky at top:100px): 52px
     // - Year Navigation (sticky at top:152px): 40px
     // Total: 192px on desktop, 92px on mobile (header not sticky)
-    const isMobile = window.innerWidth <= 768
-    const headerOffset = isMobile ? 92 : 192
+    const headerOffset = getHeaderOffset()
     
     // Use scrollIntoView with block: 'start' and then adjust for header offset
     // Temporarily set scroll-margin-top to account for sticky headers
@@ -223,11 +234,12 @@ function jumpToYear(year: number): void {
 onMounted(() => {
   if (scrollRef.value) {
     scrollRef.value.addEventListener('scroll', checkScrollState)
-    window.addEventListener('resize', checkScrollState)
-    window.addEventListener('scroll', updateVisibleYear, { passive: true })
-    checkScrollState()
-    updateVisibleYear()
   }
+
+  window.addEventListener('resize', checkScrollState)
+  window.addEventListener('scroll', updateVisibleYear, { passive: true })
+  checkScrollState()
+  updateVisibleYear()
   
   watch(() => availableYears.value.length, () => {
     nextTick(() => {
@@ -402,19 +414,6 @@ onUnmounted(() => {
 .year-nav-scroll-btn:focus-visible {
   outline: none;
   box-shadow: var(--focus);
-}
-
-/* Show scroll buttons only on devices that don't support horizontal scrolling well */
-/* Hide by default (desktop with mouse can scroll horizontally) */
-.year-nav-scroll-btn {
-  display: none;
-}
-
-/* Show on touch devices where horizontal scrolling might not be intuitive */
-@media (hover: none) and (pointer: coarse) {
-  .year-nav-scroll-btn {
-    display: flex;
-  }
 }
 
 </style>
