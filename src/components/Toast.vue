@@ -1,25 +1,30 @@
 <template>
   <Teleport to="body">
-    <div class="toast-container" aria-live="polite" aria-atomic="true">
-      <TransitionGroup name="toast" tag="div">
+    <div class="pointer-events-none fixed top-4 left-4 right-4 z-[100] flex flex-col gap-2 sm:left-auto sm:right-4 sm:w-auto" aria-live="polite" aria-atomic="true">
+      <TransitionGroup
+        tag="div"
+        enter-active-class="transition-all duration-150 ease-out"
+        enter-from-class="opacity-0 -translate-y-1"
+        leave-active-class="transition-all duration-150 ease-in"
+        leave-to-class="opacity-0 -translate-y-1"
+      >
         <div
           v-for="toast in toasts"
           :key="toast.id"
-          :class="['toast', `toast-${toast.type}`]"
+          :class="toastClass(toast.type)"
           role="alert"
         >
-          <span class="toast-icon">{{ getIcon(toast.type) }}</span>
-          <span class="toast-message">{{ toast.message }}</span>
-          <button
-            class="toast-close"
+          <component :is="getIconComponent(toast.type)" :class="iconClass(toast.type)" aria-hidden="true" />
+          <span class="min-w-0 flex-1 text-sm font-medium leading-snug text-popover-foreground">{{ toast.message }}</span>
+          <Button
+            variant="ghost"
+            size="icon"
+            class="h-7 w-7 shrink-0 rounded-sm text-muted-foreground hover:text-foreground"
             aria-label="Schließen"
             @click="remove(toast.id)"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
+            <X class="h-4 w-4" aria-hidden="true" />
+          </Button>
         </div>
       </TransitionGroup>
     </div>
@@ -28,139 +33,36 @@
 
 <script setup lang="ts">
 import { Teleport, TransitionGroup } from 'vue'
+import { Check, CircleAlert, Info, X } from 'lucide-vue-next'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { useToast } from '../composables/useToast'
 
 const { toasts, remove } = useToast()
 
-function getIcon(type: 'success' | 'error' | 'info'): string {
-  const icons = {
-    success: '✓',
-    error: '✕',
-    info: 'ℹ'
-  }
-  return icons[type]
+function getIconComponent(type: 'success' | 'error' | 'info') {
+  return {
+    success: Check,
+    error: CircleAlert,
+    info: Info,
+  }[type]
+}
+
+function iconClass(type: 'success' | 'error' | 'info'): string {
+  return cn(
+    'h-4 w-4 shrink-0',
+    type === 'success' && 'text-emerald-500 dark:text-emerald-400',
+    type === 'error' && 'text-red-500 dark:text-red-400',
+    type === 'info' && 'text-primary'
+  )
+}
+
+function toastClass(type: 'success' | 'error' | 'info'): string {
+  return cn(
+    'pointer-events-auto flex min-w-0 items-center gap-2 rounded-lg border bg-popover p-3 shadow-lg sm:min-w-80 sm:max-w-96',
+    type === 'success' && 'border-l-4 border-l-emerald-500',
+    type === 'error' && 'border-l-4 border-l-red-500',
+    type === 'info' && 'border-l-4 border-l-primary'
+  )
 }
 </script>
-
-<style scoped>
-.toast-container {
-  position: fixed;
-  top: 24px;
-  right: 24px;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  pointer-events: none;
-}
-
-.toast {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 14px 16px;
-  box-shadow: var(--shadow-lg);
-  min-width: 300px;
-  max-width: 400px;
-  pointer-events: auto;
-  animation: slideInRight 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.toast-success {
-  border-left: 3px solid #10b981;
-}
-
-.toast-error {
-  border-left: 3px solid #ef4444;
-}
-
-.toast-info {
-  border-left: 3px solid var(--brand);
-}
-
-.toast-icon {
-  font-size: 18px;
-  font-weight: 600;
-  flex-shrink: 0;
-  width: 20px;
-  text-align: center;
-}
-
-.toast-success .toast-icon {
-  color: #10b981;
-}
-
-.toast-error .toast-icon {
-  color: #ef4444;
-}
-
-.toast-info .toast-icon {
-  color: var(--brand);
-}
-
-.toast-message {
-  flex: 1;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text);
-  line-height: 1.4;
-}
-
-.toast-close {
-  background: transparent;
-  border: none;
-  color: var(--muted);
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius);
-  transition: var(--transition);
-  flex-shrink: 0;
-  width: 24px;
-  height: 24px;
-}
-
-.toast-close:hover {
-  background: var(--panel);
-  color: var(--text);
-}
-
-.toast-enter-active,
-.toast-leave-active {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.toast-enter-from {
-  opacity: 0;
-  transform: translateX(100%);
-}
-
-.toast-leave-to {
-  opacity: 0;
-  transform: translateX(100%);
-}
-
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(100%);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-[data-theme="dark"] .toast-success {
-  border-left-color: #34d399;
-}
-
-[data-theme="dark"] .toast-error {
-  border-left-color: #f87171;
-}
-</style>

@@ -1,35 +1,45 @@
 <template>
-  <div class="item" :data-year="event.date.getFullYear()" role="listitem">
-    <div class="grow">
-      <div class="when">
-        <span class="ttl-num">{{ event.baseTitle }}</span> <span class="since">{{ event.since }}</span>
+  <div
+    class="group flex min-w-0 items-center gap-3 rounded-md border border-border bg-background p-3 transition-colors hover:bg-accent/50"
+    :data-year="event.date.getFullYear()"
+    role="listitem"
+  >
+    <div class="min-w-0 flex-1">
+      <div class="text-[15px] font-semibold leading-tight text-foreground">
+        <span>{{ event.baseTitle }}</span>
+        <span v-if="event.since?.trim()" class="ml-1 font-normal text-muted-foreground">{{ event.since }}</span>
       </div>
-      <div class="sub">{{ formatDate(event.date) }} • {{ event.inHuman }}</div>
+      <div class="mt-0.5 break-words text-xs leading-snug text-muted-foreground">
+        {{ formatDate(event.date) }} • {{ event.inHuman }}
+      </div>
     </div>
-    <div class="item-actions">
-      <button
-        class="btn-icon"
+    <div class="ml-auto inline-flex shrink-0 items-center gap-2">
+      <Button
+        variant="outline"
+        size="icon"
+        class="h-8 w-8"
         :aria-label="`${event.baseTitle} ${t('common.copy')}`"
         :title="`${t('common.copy')} (Strg/Cmd + C)`"
         @click="handleCopy"
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-        </svg>
-      </button>
-      <span :class="['tag', event.unit]">{{ unitLabel }}</span>
+        <Copy />
+      </Button>
+      <Badge variant="outline" :class="unitBadgeClass">{{ unitLabel }}</Badge>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { cn } from '@/lib/utils'
 import type { MilestoneEvent } from '../types'
 import { getDateFormatter } from '../utils/i18n'
 import { copyToClipboard, formatMilestoneText } from '../utils/clipboard'
 import { useToast } from '../composables/useToast'
 import { useI18n } from '../i18n'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Copy } from 'lucide-vue-next'
 
 const props = defineProps<{
   event: MilestoneEvent
@@ -41,6 +51,17 @@ const { locale, t } = useI18n()
 const unitLabel = computed(() => {
   return t.value(`units.${props.event.unit}`)
 })
+
+const unitBadgeClass = computed(() => cn(
+  'uppercase tracking-wide',
+  props.event.unit === 'years' && 'border-red-500/20 text-red-600 dark:border-red-400/30 dark:text-red-300',
+  props.event.unit === 'months' && 'border-orange-500/20 text-orange-600 dark:border-orange-400/30 dark:text-orange-300',
+  props.event.unit === 'weeks' && 'border-amber-500/20 text-amber-600 dark:border-amber-400/30 dark:text-amber-300',
+  props.event.unit === 'days' && 'border-lime-500/20 text-lime-700 dark:border-lime-400/30 dark:text-lime-300',
+  props.event.unit === 'hours' && 'border-emerald-500/20 text-emerald-600 dark:border-emerald-400/30 dark:text-emerald-300',
+  props.event.unit === 'minutes' && 'border-cyan-500/20 text-cyan-600 dark:border-cyan-400/30 dark:text-cyan-300',
+  props.event.unit === 'seconds' && 'border-blue-500/20 text-blue-600 dark:border-blue-400/30 dark:text-blue-300'
+))
 
 // Create formatter that reacts to locale changes
 const dateFormatter = computed(() => getDateFormatter(locale.value))

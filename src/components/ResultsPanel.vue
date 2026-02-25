@@ -1,22 +1,42 @@
 <template>
   <!-- Milestones Section -->
-  <section class="panel">
-    <div class="hd">
-      <strong>📊 {{ t('export.milestonesTitle') }}</strong>
-      <span class="milestones-count">{{ state.eventsView.length }}</span>
-    </div>
+  <Card data-panel-shell>
+    <CardHeader
+      data-panel-header
+      class="sticky top-[var(--sticky-panel-header-top)] z-20 h-12 flex flex-row items-center justify-between gap-3 space-y-0 border-b border-border bg-card/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-card/80"
+    >
+      <div class="inline-flex min-w-0 items-center gap-2">
+        <BarChart3 class="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+        <span class="text-sm font-semibold tracking-tight text-foreground">{{ t('export.milestonesTitle') }}</span>
+      </div>
+      <Badge variant="secondary" class="h-5 min-w-5 px-1.5 text-[11px]">{{ state.eventsView.length }}</Badge>
+    </CardHeader>
     <div class="year-navigation-sticky" v-if="!isLoading && state.eventsView.length">
       <YearNavigation />
     </div>
-    <div class="bd">
-      <div v-if="isLoading" class="empty" role="status" aria-live="polite" aria-busy="true">
-        <div class="loading" aria-hidden="true"></div> {{ t('results.loading') }}
+    <CardContent class="p-4">
+      <div
+        v-if="isLoading"
+        class="grid min-h-32 place-items-center gap-2 rounded-md border border-dashed border-border bg-muted/70 px-4 py-6 text-center text-sm text-muted-foreground"
+        role="status"
+        aria-live="polite"
+        aria-busy="true"
+      >
+        <div class="inline-flex items-center gap-2">
+          <LoaderCircle class="h-4 w-4 animate-spin" aria-hidden="true" />
+          <span>{{ t('results.loading') }}</span>
+        </div>
       </div>
-      <div v-else-if="!state.eventsView.length" class="empty" role="status" aria-live="polite">
+      <div
+        v-else-if="!state.eventsView.length"
+        class="grid min-h-32 place-items-center rounded-md border border-dashed border-border bg-muted/70 px-4 py-6 text-center text-sm text-muted-foreground"
+        role="status"
+        aria-live="polite"
+      >
         {{ t('results.empty') }}
       </div>
       <div v-else>
-        <div class="list" role="list" aria-label="Jubiläen">
+        <div class="space-y-2" role="list" aria-label="Jubiläen">
         <template v-for="(ev, idx) in state.eventsView" :key="ev.id">
           <YearSeparator
             v-if="shouldShowYearSeparator(idx, ev.date.getFullYear())"
@@ -33,12 +53,15 @@
         </template>
         </div>
       </div>
-    </div>
-  </section>
+    </CardContent>
+  </Card>
 </template>
 
 <script setup lang="ts">
 import { computed, nextTick } from 'vue'
+import { BarChart3, LoaderCircle } from 'lucide-vue-next'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { useAppState } from '../composables/useAppState'
 import { useI18n } from '../i18n'
 import { CONFIG } from '../types'

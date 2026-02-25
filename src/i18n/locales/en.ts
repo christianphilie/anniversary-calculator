@@ -39,6 +39,7 @@ export default {
     showMoreYears: 'Show more years',
     jumpToYear: 'Jump to year',
     jumpToYears: 'Jump to years',
+    goToToday: 'Go to today',
     scrollLeft: 'Scroll left',
     scrollRight: 'Scroll right',
     loadMore: 'Load more',

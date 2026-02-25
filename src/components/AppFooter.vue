@@ -1,36 +1,25 @@
 <template>
-  <footer class="app-footer">
-    <div class="footer-content">
-      <p class="footer-text">
-        Made with <span class="heart">❤️</span> by
+  <footer class="mt-1 border-t border-border pt-3">
+    <div class="flex flex-col items-center gap-1 text-center text-xs leading-relaxed text-muted-foreground">
+      <p class="m-0">
+        Made with <Heart class="mx-0.5 inline h-3.5 w-3.5 text-red-500" aria-hidden="true" /> by
         <a
           href="https://github.com/christianphilie"
           target="_blank"
           rel="noopener noreferrer"
-          class="footer-link"
+          class="ml-1 inline-flex items-center gap-1 font-medium text-foreground underline decoration-transparent underline-offset-2 transition hover:decoration-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
         >
-          christianphilie
+          <Github class="h-3.5 w-3.5" aria-hidden="true" /> christianphilie
         </a>
       </p>
-      <p class="footer-links">
-        <a
-          href="https://github.com/christianphilie/anniversary-calculator"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="footer-link"
-          :aria-label="t('footer.viewOnGitHub')"
-        >
-          <span aria-hidden="true">🔗</span> {{ t('footer.viewOnGitHub') }}
-        </a>
-      </p>
-      <p class="footer-links">
+      <p class="m-0">
         <a
           href="https://www.buymeacoffee.com/christianphilie"
           target="_blank"
           rel="noopener noreferrer"
-          class="footer-link coffee-link"
+          class="inline-flex items-center gap-1 font-medium text-muted-foreground underline decoration-transparent underline-offset-2 transition hover:text-foreground hover:decoration-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
         >
-          ☕ {{ t('footer.buyCoffee') }}
+          <Coffee class="h-3.5 w-3.5" aria-hidden="true" /> Buy me a coffee
         </a>
       </p>
     </div>
@@ -38,80 +27,5 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from '../i18n'
-
-const { t } = useI18n()
+import { Coffee, Github, Heart } from 'lucide-vue-next'
 </script>
-
-<style scoped>
-.app-footer {
-  margin-top: 24px;
-  padding: 16px 0;
-  border-top: 1px solid var(--border);
-}
-
-.footer-content {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-size: 13px;
-  color: var(--muted);
-  line-height: 1.5;
-  text-align: center;
-  align-items: center;
-}
-
-.footer-text {
-  margin: 0;
-  padding: 0;
-}
-
-.footer-links {
-  margin: 0;
-  padding: 0;
-}
-
-.heart {
-  display: inline-block;
-  animation: heartbeat 1.5s ease-in-out infinite;
-}
-
-@keyframes heartbeat {
-  0%, 100% {
-    transform: scale(1);
-  }
-  10%, 30% {
-    transform: scale(1.1);
-  }
-  20%, 40% {
-    transform: scale(1);
-  }
-}
-
-.footer-link {
-  color: var(--text);
-  text-decoration: none;
-  font-weight: 500;
-  transition: var(--transition);
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  border-bottom: 1px solid transparent;
-}
-
-.footer-link:hover {
-  color: var(--brand);
-  border-bottom-color: var(--brand);
-}
-
-.footer-link:focus-visible {
-  outline: none;
-  box-shadow: var(--focus);
-  border-radius: 4px;
-}
-
-.coffee-link {
-  font-weight: 600;
-  color: var(--brand);
-}
-</style>

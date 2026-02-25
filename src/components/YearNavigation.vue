@@ -1,58 +1,79 @@
 <template>
-  <div class="year-navigation-wrapper">
-    <button
+  <div class="flex items-center gap-2 border-b border-border bg-card px-4 py-2">
+    <Button
+      v-if="availableYears.length"
+      variant="ghost"
+      size="sm"
+      class="h-7 shrink-0 px-2 text-xs"
+      @click="jumpToToday"
+      :aria-label="t('form.goToToday')"
+      :title="t('form.goToToday')"
+    >
+      {{ t('form.goToToday') }}
+    </Button>
+    <Button
       v-if="shouldShowButtons && canScrollLeft"
-      class="year-nav-scroll-btn year-nav-scroll-left"
-      type="button"
+      variant="outline"
+      size="icon"
+      class="h-7 w-7 shrink-0"
       @click="scrollLeft"
       :aria-label="t('form.scrollLeft')"
       :title="t('form.scrollLeft')"
     >
-      ←
-    </button>
-    <div class="year-navigation-container">
-      <div class="year-navigation-scroll" ref="scrollRef">
-        <div class="year-navigation-list">
-          <span
+      <ChevronLeft class="h-3.5 w-3.5" aria-hidden="true" />
+    </Button>
+    <div class="relative flex min-w-0 flex-1 items-center overflow-hidden">
+      <div
+        class="year-navigation-scroll w-full min-w-0 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none]"
+        ref="scrollRef"
+      >
+        <div class="inline-flex min-w-max items-center gap-1">
+          <button
             v-for="year in availableYears"
             :key="year"
-            :class="['year-nav-item', { 'year-nav-item-active': currentVisibleYear === year }]"
+            type="button"
+            :class="cn(
+              'year-nav-item inline-flex h-7 min-w-9 shrink-0 items-center justify-center rounded-md border px-2 text-xs font-medium transition-colors',
+              currentVisibleYear === year
+                ? 'border-border bg-secondary text-secondary-foreground shadow-sm'
+                : 'border-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+            )"
             @click="jumpToYear(year)"
             :aria-label="`${t('form.jumpToYear')}: ${year}`"
             :title="year.toString()"
           >
             {{ year }}
-          </span>
+          </button>
         </div>
       </div>
-      <Transition name="fade">
-        <div 
-          v-if="hasOverflow" 
-          class="year-navigation-fade year-navigation-fade-left"
-        ></div>
-      </Transition>
-      <Transition name="fade">
-        <div 
-          v-if="hasOverflow" 
-          class="year-navigation-fade year-navigation-fade-right"
-        ></div>
-      </Transition>
+      <div
+        v-if="hasOverflow && canScrollLeft"
+        class="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-card to-transparent"
+      />
+      <div
+        v-if="hasOverflow && canScrollRight"
+        class="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-card to-transparent"
+      />
     </div>
-    <button
+    <Button
       v-if="shouldShowButtons && canScrollRight"
-      class="year-nav-scroll-btn year-nav-scroll-right"
-      type="button"
+      variant="outline"
+      size="icon"
+      class="h-7 w-7 shrink-0"
       @click="scrollRight"
       :aria-label="t('form.scrollRight')"
       :title="t('form.scrollRight')"
     >
-      →
-    </button>
+      <ChevronRight class="h-3.5 w-3.5" aria-hidden="true" />
+    </Button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { useI18n } from '../i18n'
 import { useAppState } from '../composables/useAppState'
 
@@ -120,6 +141,10 @@ function updateVisibleYear(): void {
       visibleYear = year
     }
   }
+
+  if (visibleYear === null && availableYears.value.length > 0) {
+    visibleYear = availableYears.value[0]
+  }
   
   // If the visible year changed, scroll the navigation to center it
   if (visibleYear !== null && visibleYear !== currentVisibleYear.value) {
@@ -127,6 +152,19 @@ function updateVisibleYear(): void {
   }
   
   currentVisibleYear.value = visibleYear
+}
+
+function jumpToToday(): void {
+  if (!availableYears.value.length) return
+
+  const todayYear = new Date().getFullYear()
+  const targetYear = availableYears.value.includes(todayYear)
+    ? todayYear
+    : availableYears.value.reduce((closest, year) => {
+      return Math.abs(year - todayYear) < Math.abs(closest - todayYear) ? year : closest
+    }, availableYears.value[0])
+
+  jumpToYear(targetYear)
 }
 
 function scrollToYearInNavigation(year: number): void {
@@ -266,154 +304,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.year-navigation-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 24px;
-  background: var(--panel);
-  border-bottom: 1px solid var(--border);
-  height: 40px;
-  box-sizing: border-box;
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
-  position: relative;
-}
-
-.year-navigation-container {
-  position: relative;
-  flex: 1;
-  min-width: 0;
-  width: 100%;
-  max-width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-}
-
-.year-navigation-scroll {
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  width: 100%;
-  max-width: 100%;
-  height: 100%;
-  position: relative;
-  box-sizing: border-box;
-  min-width: 0;
-  contain: strict;
-}
-
 .year-navigation-scroll::-webkit-scrollbar {
   display: none;
 }
-
-.year-navigation-list {
-  display: inline-flex;
-  align-items: center;
-  gap: 20px;
-  padding: 0;
-  margin: 0;
-  height: 100%;
-  min-width: max-content;
-  flex-shrink: 0;
-  max-width: 100vw;
-}
-
-.year-nav-item {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  cursor: pointer;
-  transition: var(--transition);
-  white-space: nowrap;
-  flex-shrink: 0;
-  padding: 0;
-  margin: 0;
-  line-height: 20px;
-  display: inline-block;
-  vertical-align: middle;
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-.year-nav-item:hover {
-  color: var(--text);
-}
-
-.year-nav-item-active {
-  color: var(--text);
-  font-weight: 700;
-}
-
-.year-navigation-fade {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 40px;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.year-navigation-fade-left {
-  left: 0;
-  background: linear-gradient(to right, var(--panel) 0%, var(--panel) 50%, transparent 100%);
-}
-
-.year-navigation-fade-right {
-  right: 0;
-  background: linear-gradient(to left, var(--panel) 0%, var(--panel) 50%, transparent 100%);
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease-in-out;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-.fade-enter-to,
-.fade-leave-from {
-  opacity: 1;
-}
-
-.year-nav-scroll-btn {
-  background: var(--card);
-  border: 1px solid var(--border);
-  color: var(--muted);
-  border-radius: var(--radius);
-  padding: 0;
-  font-size: 16px;
-  cursor: pointer;
-  transition: var(--transition);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 36px;
-  height: 20px;
-  line-height: 1;
-}
-
-.year-nav-scroll-btn:hover {
-  background: var(--panel);
-  border-color: var(--brand);
-  color: var(--text);
-}
-
-.year-nav-scroll-btn:focus-visible {
-  outline: none;
-  box-shadow: var(--focus);
-}
-
 </style>

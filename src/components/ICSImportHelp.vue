@@ -1,20 +1,33 @@
 <template>
-  <div class="ics-help-wrapper">
-    <button
+  <div class="relative inline-block">
+    <Button
       ref="triggerRef"
-      class="ics-help-trigger"
+      variant="outline"
+      size="icon"
+      class="h-7 w-7 rounded-md text-muted-foreground"
       :aria-label="t('export.icsHelpTitle')"
       :title="t('export.icsHelpTitle')"
-      @click="(e) => toggleHelp(e)"
+      @click="(e: MouseEvent) => toggleHelp(e)"
     >
-      <span aria-hidden="true" class="help-icon">?</span>
-    </button>
-    <div v-if="showHelp" ref="contentRef" class="ics-help-content">
-      <button class="ics-help-close" @click.stop="toggleHelp" :aria-label="t('common.close')" type="button">
-        ×
-      </button>
-      <h3>{{ t('export.icsHelpTitle') }}</h3>
-      <ol>
+      <CircleHelp aria-hidden="true" class="h-4 w-4" />
+    </Button>
+    <div
+      v-if="showHelp"
+      ref="contentRef"
+      class="fixed z-[100000] w-[min(22rem,calc(100vw-2rem))] rounded-lg border border-border bg-popover p-3 text-popover-foreground shadow-lg"
+    >
+      <Button
+        variant="ghost"
+        size="icon"
+        class="absolute top-2 right-2 h-7 w-7 rounded-sm text-muted-foreground"
+        @click.stop="toggleHelp"
+        :aria-label="t('common.close')"
+        type="button"
+      >
+        <X aria-hidden="true" class="h-4 w-4" />
+      </Button>
+      <h3 class="mb-2 pr-8 text-sm font-semibold leading-none tracking-tight">{{ t('export.icsHelpTitle') }}</h3>
+      <ol class="list-decimal space-y-1 pl-4 text-xs leading-relaxed text-muted-foreground">
         <li>{{ t('export.icsHelpStep1') }}</li>
         <li>{{ t('export.icsHelpStep2') }}</li>
         <li>{{ t('export.icsHelpStep3') }}</li>
@@ -26,57 +39,60 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import type { ComponentPublicInstance } from 'vue'
+import { CircleHelp, X } from 'lucide-vue-next'
+import { Button } from '@/components/ui/button'
 import { useI18n } from '../i18n'
 
 const { t } = useI18n()
 const showHelp = ref(false)
-const triggerRef = ref<HTMLElement | null>(null)
+const triggerRef = ref<HTMLElement | ComponentPublicInstance | null>(null)
 const contentRef = ref<HTMLElement | null>(null)
 
-function updatePosition(): void {
-  if (!showHelp.value || !triggerRef.value || !contentRef.value) return
-  
+function getTriggerElement(): HTMLElement | null {
   const trigger = triggerRef.value
+  if (!trigger) return null
+  if (trigger instanceof HTMLElement) return trigger
+  const el = trigger.$el
+  return el instanceof HTMLElement ? el : null
+}
+
+function updatePosition(): void {
+  if (!showHelp.value || !contentRef.value) return
+
+  const trigger = getTriggerElement()
+  if (!trigger) return
+
   const content = contentRef.value
   const rect = trigger.getBoundingClientRect()
-  
-  // Wait for content to be rendered to get accurate dimensions
+
   requestAnimationFrame(() => {
     if (!contentRef.value) return
-    
-    // Position relative to viewport - try to position below trigger, centered over export panel
+
     let top = rect.bottom + 8
-    
-    // Find the export panel to center the help over it
-    const exportPanel = trigger.closest('.panel')
     let left = 0
-    
-    if (exportPanel) {
-      const panelRect = exportPanel.getBoundingClientRect()
-      // Center the help content over the panel, extending equally on both sides
+
+    const panelShell = trigger.closest('[data-panel-shell], .panel')
+
+    if (panelShell) {
+      const panelRect = panelShell.getBoundingClientRect()
       left = panelRect.left + (panelRect.width / 2) - (content.offsetWidth / 2)
     } else {
-      // Fallback: align to right of trigger
       left = rect.right - content.offsetWidth
     }
-    
-    // Ensure it doesn't go off-screen horizontally
-    if (left < 16) {
-      left = 16
-    }
+
+    if (left < 16) left = 16
     if (left + content.offsetWidth > window.innerWidth - 16) {
       left = window.innerWidth - content.offsetWidth - 16
     }
-    
-    // Ensure it doesn't go off-screen vertically - prefer above if not enough space below
+
     if (top + content.offsetHeight > window.innerHeight - 16) {
       top = rect.top - content.offsetHeight - 8
-      // If still doesn't fit above, position it in the middle of the viewport
       if (top < 16) {
         top = Math.max(16, (window.innerHeight - content.offsetHeight) / 2)
       }
     }
-    
+
     content.style.top = `${top}px`
     content.style.left = `${left}px`
   })
@@ -96,10 +112,9 @@ onUnmounted(() => {
 })
 
 function toggleHelp(e?: Event): void {
-  if (e) {
-    e.stopPropagation()
-  }
+  if (e) e.stopPropagation()
   showHelp.value = !showHelp.value
+
   if (showHelp.value) {
     setTimeout(() => {
       updatePosition()
@@ -112,99 +127,3 @@ function toggleHelp(e?: Event): void {
   }
 }
 </script>
-
-<style scoped>
-.ics-help-wrapper {
-  position: relative;
-  display: inline-block;
-}
-
-.ics-help-trigger {
-  background: transparent;
-  border: 1px solid var(--border);
-  cursor: pointer;
-  font-size: 14px;
-  padding: 0;
-  color: var(--muted);
-  transition: var(--transition);
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 500;
-  line-height: 1;
-}
-
-.help-icon {
-  display: inline-block;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.ics-help-trigger:hover {
-  background: var(--panel);
-  color: var(--text);
-}
-
-.ics-help-content {
-  position: fixed;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  box-shadow: var(--shadow-lg);
-  z-index: 100000;
-  min-width: 280px;
-  max-width: 400px;
-}
-
-.ics-help-wrapper {
-  position: relative;
-  display: inline-block;
-}
-
-.ics-help-close {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: transparent;
-  border: none;
-  color: var(--muted);
-  font-size: 24px;
-  font-weight: 300;
-  line-height: 1;
-  cursor: pointer;
-  transition: var(--transition);
-  padding: 4px 8px;
-  width: auto;
-  height: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.ics-help-close:hover {
-  color: var(--text);
-}
-
-.ics-help-content h3 {
-  margin: 0 0 12px 0;
-  font-size: 16px;
-  font-weight: 600;
-  padding-right: 32px;
-}
-
-.ics-help-content ol {
-  margin: 0;
-  padding-left: 20px;
-}
-
-.ics-help-content li {
-  margin-bottom: 8px;
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--text);
-}
-</style>

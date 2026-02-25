@@ -3,9 +3,9 @@
     <div class="error-boundary-content">
       <h2>⚠️ Ein Fehler ist aufgetreten</h2>
       <p>{{ errorMessage }}</p>
-      <button class="btn primary" @click="handleReset">
+      <Button @click="handleReset">
         Seite neu laden
-      </button>
+      </Button>
     </div>
   </div>
   <slot v-else />
@@ -14,6 +14,7 @@
 <script setup lang="ts">
 import { ref, onErrorCaptured } from 'vue'
 import { useError } from '../composables/useError'
+import { Button } from '@/components/ui/button'
 
 const hasError = ref(false)
 const errorMessage = ref('Ein unerwarteter Fehler ist aufgetreten')
@@ -48,21 +49,28 @@ function handleReset(): void {
   align-items: center;
   justify-content: center;
   min-height: 50vh;
-  padding: 2rem;
+  padding: 1rem;
 }
 
 .error-boundary-content {
+  width: min(100%, 32rem);
   text-align: center;
-  max-width: 500px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
 }
 
 .error-boundary-content h2 {
-  margin-bottom: 1rem;
-  color: var(--c-years); /* Use error color from design tokens */
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: var(--destructive);
 }
 
 .error-boundary-content p {
-  margin-bottom: 1.5rem;
-  color: var(--muted);
+  margin: 0 0 1rem;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
 }
 </style>

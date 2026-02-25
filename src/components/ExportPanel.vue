@@ -1,73 +1,110 @@
 <template>
-  <section class="panel">
-    <div class="hd">
-      <strong>📤 {{ t('export.title') }}</strong>
+  <Card data-panel-shell>
+    <CardHeader
+      data-panel-header
+      class="sticky top-[var(--sticky-panel-header-top)] z-20 h-12 flex flex-row items-center justify-between gap-3 space-y-0 border-b border-border bg-card/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-card/80"
+    >
+      <div class="inline-flex min-w-0 items-center gap-2">
+        <Download class="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+        <span class="text-sm font-semibold tracking-tight text-foreground">{{ t('export.title') }}</span>
+      </div>
       <ICSImportHelp />
-    </div>
-    <div class="bd export-section">
-      <p class="export-description">
+    </CardHeader>
+    <CardContent class="grid gap-4 p-4">
+      <p class="m-0 text-sm leading-relaxed text-muted-foreground">
         {{ t('export.description') }}
       </p>
-      <div class="export-controls">
-        <div class="export-buttons-group">
-          <button
-            class="btn primary export-format-btn"
+      <Separator />
+      <div class="grid grid-cols-2 gap-2">
+          <Button
+            variant="outline"
+            class="h-auto min-h-13 justify-start gap-2.5 bg-muted/40 px-3 py-2.5 text-left hover:bg-accent"
             :title="`${downloadTooltip} (Strg/Cmd + D)`"
             :aria-label="downloadTooltip"
             :disabled="state.eventsView.length === 0"
             @click="handleDownloadICS"
           >
-            <span class="export-icon">📅</span>
-            <span class="export-label">ICS</span>
-          </button>
-          <button
-            class="btn primary export-format-btn"
+            <span
+              class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground"
+              aria-hidden="true"
+            >
+              <Calendar />
+            </span>
+            <span class="text-xs font-medium">ICS</span>
+          </Button>
+          <Button
+            variant="outline"
+            class="h-auto min-h-13 justify-start gap-2.5 bg-muted/40 px-3 py-2.5 text-left hover:bg-accent"
             :title="`${t('export.exportPDF')} (${state.eventsView.length} ${t('common.selectAll').toLowerCase()})`"
             :aria-label="t('export.exportPDF')"
             :disabled="state.eventsView.length === 0"
             @click="handleDownloadPDF"
           >
-            <span class="export-icon">📑</span>
-            <span class="export-label">PDF</span>
-          </button>
-          <button
-            class="btn primary export-format-btn"
+            <span
+              class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground"
+              aria-hidden="true"
+            >
+              <FileText />
+            </span>
+            <span class="text-xs font-medium">PDF</span>
+          </Button>
+          <Button
+            variant="outline"
+            class="h-auto min-h-13 justify-start gap-2.5 bg-muted/40 px-3 py-2.5 text-left hover:bg-accent"
             :title="`${t('export.exportCSV')} (${state.eventsView.length} ${t('common.selectAll').toLowerCase()})`"
             :aria-label="t('export.exportCSV')"
             :disabled="state.eventsView.length === 0"
             @click="handleDownloadCSV"
           >
-            <span class="export-icon">📊</span>
-            <span class="export-label">CSV</span>
-          </button>
-          <button
-            class="btn primary export-format-btn"
+            <span
+              class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground"
+              aria-hidden="true"
+            >
+              <Table />
+            </span>
+            <span class="text-xs font-medium">CSV</span>
+          </Button>
+          <Button
+            variant="outline"
+            class="h-auto min-h-13 justify-start gap-2.5 bg-muted/40 px-3 py-2.5 text-left hover:bg-accent"
             :title="`${t('export.exportJSON')} (${state.eventsView.length} ${t('common.selectAll').toLowerCase()})`"
             :aria-label="t('export.exportJSON')"
             :disabled="state.eventsView.length === 0"
             @click="handleDownloadJSON"
           >
-            <span class="export-icon">📄</span>
-            <span class="export-label">JSON</span>
-          </button>
-        </div>
+            <span
+              class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground"
+              aria-hidden="true"
+            >
+              <Braces />
+            </span>
+            <span class="text-xs font-medium">JSON</span>
+          </Button>
       </div>
-      <div class="share-button-wrapper">
-        <button
-          class="btn secondary"
+      <div class="w-full">
+        <Button
+          variant="secondary"
+          class="w-full justify-center"
           :title="t('export.shareViewTitle')"
           :aria-label="t('export.shareViewTitle')"
           @click="handleShare"
         >
-          🔗 {{ t('export.shareView') }}
-        </button>
+          <span class="inline-flex items-center justify-center" aria-hidden="true">
+            <Link />
+          </span>
+          {{ t('export.shareView') }}
+        </Button>
       </div>
-    </div>
-  </section>
+    </CardContent>
+  </Card>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
+import { Braces, Calendar, Download, FileText, Link, Table } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 import { useUrlState } from '../composables/useUrlState'
 import { useToast } from '../composables/useToast'

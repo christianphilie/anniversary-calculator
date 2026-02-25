@@ -1,54 +1,38 @@
 <template>
-  <button
-    class="theme-toggle"
+  <Button
+    variant="outline"
+    size="icon"
+    class="h-9 w-9 rounded-md"
     :aria-label="`${t('theme.switch')}: ${currentTheme === 'light' ? t('theme.dark') : t('theme.light')}`"
     :title="`${t('theme.switch')}: ${currentTheme === 'light' ? t('theme.dark') : t('theme.light')}`"
     @click="toggleTheme"
   >
-    <span aria-hidden="true">{{ currentTheme === 'light' ? '🌙' : '☀️' }}</span>
-  </button>
+    <span class="theme-toggle-icon" aria-hidden="true">
+      <Moon v-if="currentTheme === 'light'" />
+      <Sun v-else />
+    </span>
+  </Button>
 </template>
 
 <script setup lang="ts">
 import { useTheme } from '../composables/useTheme'
 import { useI18n } from '../i18n'
+import { Button } from '@/components/ui/button'
+import { Moon, Sun } from 'lucide-vue-next'
 
 const { currentTheme, toggleTheme } = useTheme()
 const { t } = useI18n()
 </script>
 
 <style scoped>
-.theme-toggle {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1px solid var(--border);
-  background: var(--card);
-  display: flex;
+.theme-toggle-icon {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  font-size: 18px;
-  transition: var(--transition);
-  box-shadow: var(--shadow-sm);
-  padding: 0;
-  line-height: 1;
-  flex-shrink: 0;
 }
 
-.theme-toggle:hover {
-  background: var(--panel);
-  border-color: var(--brand);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
-}
-
-.theme-toggle:focus-visible {
-  outline: none;
-  box-shadow: var(--focus);
-}
-
-.theme-toggle:active {
-  transform: translateY(0);
+.theme-toggle-icon svg {
+  width: 0.95rem;
+  height: 0.95rem;
 }
 </style>

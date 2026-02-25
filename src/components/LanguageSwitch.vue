@@ -1,18 +1,21 @@
 <template>
-  <button
-    class="lang-toggle"
+  <Button
+    variant="outline"
+    size="icon"
+    class="h-9 w-9 rounded-md"
     :aria-label="`Sprache: ${currentLang.label}`"
     :title="currentLang.label"
     @click="toggleLocale"
   >
-    <span aria-hidden="true">{{ currentLang.flag }}</span>
-  </button>
+    <span class="lang-code" aria-hidden="true">{{ currentLang.value.toUpperCase() }}</span>
+  </Button>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from '../i18n'
 import type { Locale } from '../i18n'
+import { Button } from '@/components/ui/button'
 
 const { locale, setLocale } = useI18n()
 
@@ -35,37 +38,9 @@ function toggleLocale(): void {
 </script>
 
 <style scoped>
-.lang-toggle {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1px solid var(--border);
-  background: var(--card);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 20px;
-  transition: var(--transition);
-  box-shadow: var(--shadow-sm);
-  padding: 0;
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.lang-toggle:hover {
-  background: var(--panel);
-  border-color: var(--brand);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
-}
-
-.lang-toggle:focus-visible {
-  outline: none;
-  box-shadow: var(--focus);
-}
-
-.lang-toggle:active {
-  transform: translateY(0);
+.lang-code {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
 }
 </style>

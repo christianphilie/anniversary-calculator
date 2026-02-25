@@ -39,6 +39,7 @@ export default {
     showMoreYears: 'Mehr Jahre anzeigen',
     jumpToYear: 'Zu Jahr springen',
     jumpToYears: 'Zu Jahren springen',
+    goToToday: 'Zu heute',
     scrollLeft: 'Nach links scrollen',
     scrollRight: 'Nach rechts scrollen',
     loadMore: 'Mehr laden',

@@ -1,12 +1,26 @@
 <template>
   <ErrorBoundary>
-    <div class="wrap">
+    <div class="wrap app-shell">
       <a href="#main-content" class="skip-link">Zum Hauptinhalt springen</a>
       <AppHeader />
-      <main id="main-content" class="grid">
+      <main id="main-content" class="app-grid">
         <div class="left-column">
-          <InputPanel />
-          <ExportPanel />
+          <Card class="sidebar-tabs-shell" aria-label="Konfiguration und Export">
+            <CardContent class="p-3">
+              <Tabs v-model="activeSidebarTab" class="sidebar-tabs">
+                <TabsList class="sidebar-tabs-list">
+                  <TabsTrigger value="inputs">{{ t('ui.inputs') }}</TabsTrigger>
+                  <TabsTrigger value="export">{{ t('export.title') }}</TabsTrigger>
+                </TabsList>
+                <TabsContent value="inputs" class="sidebar-tabs-content">
+                  <InputPanel />
+                </TabsContent>
+                <TabsContent value="export" class="sidebar-tabs-content">
+                  <ExportPanel />
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
           <AppFooter class="footer-desktop" />
         </div>
         <div class="results-grid">
@@ -20,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { watch, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { provideError } from './composables/useError'
 import { provideAppState } from './composables/useAppState'
 import { useI18n } from './i18n'
@@ -31,6 +45,8 @@ import ExportPanel from './components/ExportPanel.vue'
 import ResultsPanel from './components/ResultsPanel.vue'
 import AppFooter from './components/AppFooter.vue'
 import Toast from './components/Toast.vue'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs'
+import { Card, CardContent } from './components/ui/card'
 
 // Provide error state to all components
 provideError()
@@ -39,6 +55,7 @@ provideError()
 provideAppState()
 
 const { locale, t } = useI18n()
+const activeSidebarTab = ref<'inputs' | 'export'>('inputs')
 
 function updateMeta(): void {
   const title = t.value('ui.metaTitle')

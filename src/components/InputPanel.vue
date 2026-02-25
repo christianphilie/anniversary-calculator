@@ -1,27 +1,37 @@
 <template>
-  <section class="panel">
-    <div class="hd">
-      <strong>🎯 {{ t('ui.inputs') }}</strong>
-      <button
-        class="btn ghost"
+  <Card data-panel-shell>
+    <CardHeader
+      data-panel-header
+      class="sticky top-[var(--sticky-panel-header-top)] z-20 h-12 flex flex-row items-center justify-between gap-3 space-y-0 border-b border-border bg-card/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-card/80"
+    >
+      <div class="inline-flex min-w-0 items-center gap-2">
+        <Target class="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+        <span class="text-sm font-semibold tracking-tight text-foreground">{{ t('ui.inputs') }}</span>
+      </div>
+      <Button
+        variant="ghost"
+        size="sm"
+        class="h-8"
         :title="t('common.reset')"
         :aria-label="t('common.reset')"
         @click="handleReset"
       >
+        <RotateCcw />
         {{ t('common.reset') }}
-      </button>
-    </div>
-    <div class="bd">
+      </Button>
+    </CardHeader>
+    <CardContent class="min-w-0 overflow-x-hidden p-4">
       <ErrorAlert />
-      <form @submit.prevent="handleSubmit">
-        <div class="input-section">
-          <div class="row">
-            <div class="field">
-              <label for="date">{{ t('form.date') }}</label>
-              <input
+      <form class="min-w-0 space-y-4" @submit.prevent="handleSubmit">
+        <div class="space-y-3">
+          <div class="flex min-w-0 flex-col gap-3">
+            <div class="space-y-2 min-w-0">
+              <Label for="date">{{ t('form.date') }}</Label>
+              <Input
                 id="date"
                 v-model="formData.date"
                 type="date"
+                class="min-w-0"
                 @blur="handleDateBlur"
                 :aria-invalid="fieldErrors.date ? 'true' : 'false'"
                 :aria-describedby="fieldErrors.date ? 'date-error' : undefined"
@@ -30,13 +40,14 @@
                 {{ fieldErrors.date }}
               </span>
             </div>
-            <div class="field">
-              <label for="time">{{ t('form.time') }}</label>
-              <input
+            <div class="space-y-2 min-w-0">
+              <Label for="time">{{ t('form.time') }}</Label>
+              <Input
                 id="time"
                 v-model="formData.time"
                 type="time"
                 step="1"
+                class="min-w-0"
                 :aria-invalid="fieldErrors.time ? 'true' : 'false'"
                 :aria-describedby="fieldErrors.time ? 'time-error' : undefined"
               />
@@ -47,10 +58,12 @@
           </div>
         </div>
 
-        <div class="input-section">
-          <div class="field">
-            <label for="label">{{ t('form.label') }}</label>
-            <input
+        <Separator />
+
+        <div class="space-y-3">
+          <div class="space-y-2">
+            <Label for="label">{{ t('form.label') }}</Label>
+            <Input
               id="label"
               v-model="formData.label"
               type="text"
@@ -65,30 +78,34 @@
           </div>
         </div>
 
-        <div class="input-section">
-          <div class="field">
-            <label>{{ t('form.yearRange') }}</label>
-            <div class="row">
-              <div class="field">
-                <label for="yearFrom" class="field-label-small">{{ t('form.yearFrom') }}</label>
-                <input
+        <Separator />
+
+        <div class="space-y-4">
+          <div class="space-y-2">
+            <Label>{{ t('form.yearRange') }}</Label>
+            <div class="flex min-w-0 flex-col gap-3">
+              <div class="space-y-2 min-w-0">
+                <Label for="yearFrom" class="text-xs text-muted-foreground">{{ t('form.yearFrom') }}</Label>
+                <Input
                   id="yearFrom"
                   v-model.number="formData.yearFrom"
                   type="number"
                   step="1"
+                  class="min-w-0"
                   @blur="handleYearFromBlur"
                   @keydown.enter="handleYearFromBlur"
                   :aria-invalid="fieldErrors.yearRange ? 'true' : 'false'"
                   :aria-describedby="fieldErrors.yearRange ? 'year-range-error' : undefined"
                 />
               </div>
-              <div class="field">
-                <label for="yearTo" class="field-label-small">{{ t('form.yearTo') }}</label>
-                <input
+              <div class="space-y-2 min-w-0">
+                <Label for="yearTo" class="text-xs text-muted-foreground">{{ t('form.yearTo') }}</Label>
+                <Input
                   id="yearTo"
                   v-model.number="formData.yearTo"
                   type="number"
                   step="1"
+                  class="min-w-0"
                   @blur="handleYearToBlur"
                   @keydown.enter="handleYearToBlur"
                   :aria-invalid="fieldErrors.yearRange ? 'true' : 'false'"
@@ -101,54 +118,104 @@
             </div>
           </div>
 
-          <div class="field">
-            <label>{{ t('form.units') }}</label>
-            <div class="chips chips-units">
-              <label
+          <div class="space-y-2">
+            <Label>{{ t('form.units') }}</Label>
+            <div class="grid gap-2">
+              <div
                 v-for="unit in units"
                 :key="unit.value"
-                :class="['chip', 'unit', unit.value]"
+                :class="cn(
+                  'flex items-center gap-3 rounded-lg border border-input border-l-4 bg-background px-3 py-2',
+                  getUnitFilterRowClass(unit.value)
+                )"
               >
-                <input
-                  v-model="formData.units"
-                  type="checkbox"
-                  :value="unit.value"
+                <Checkbox
+                  :id="`unit-${unit.value}`"
+                  :model-value="formData.units.includes(unit.value)"
+                  @update:model-value="(checked) => toggleUnit(unit.value, checked)"
                 />
-                <span>{{ unit.label }}</span>
-                <span v-if="getUnitCount(unit.value) > 0" class="chip-count">{{ getUnitCount(unit.value) }}</span>
-              </label>
+                <Label
+                  :for="`unit-${unit.value}`"
+                  class="flex min-w-0 flex-1 items-center justify-between gap-3 leading-normal"
+                >
+                  <span class="truncate">{{ unit.label }}</span>
+                  <Badge
+                    v-if="getUnitCount(unit.value) > 0"
+                    variant="outline"
+                    :class="cn(
+                      'h-5 min-w-5 rounded-full px-1.5 text-[11px] tabular-nums',
+                      getUnitFilterCountClass(unit.value)
+                    )"
+                  >
+                    {{ getUnitCount(unit.value) }}
+                  </Badge>
+                </Label>
+              </div>
             </div>
+            <span v-if="fieldErrors.units" class="field-error" role="alert">{{ fieldErrors.units }}</span>
           </div>
 
-          <div class="field">
-            <label>{{ t('form.patterns') }}</label>
-            <div class="chips chips-patterns">
-              <label class="chip chip-pattern">
-                <input v-model="formData.patterns.rounded" type="checkbox" />
-                <span class="chip-pattern-content">
-                  <span class="chip-pattern-label">{{ t('form.roundedMultiples') }}</span>
-                  <span class="chip-pattern-examples">{{ t('form.roundedMultiplesExamples') }}</span>
-                </span>
-                <span v-if="getPatternCount('rounded') > 0" class="chip-count">{{ getPatternCount('rounded') }}</span>
-              </label>
-              <label class="chip chip-pattern">
-                <input v-model="formData.patterns.repdigit" type="checkbox" />
-                <span class="chip-pattern-content">
-                  <span class="chip-pattern-label">{{ t('form.repdigits') }}</span>
-                  <span class="chip-pattern-examples">{{ t('form.repdigitsExamples') }}</span>
-                </span>
-                <span v-if="getPatternCount('repdigit') > 0" class="chip-count">{{ getPatternCount('repdigit') }}</span>
-              </label>
+          <div class="space-y-2">
+            <Label>{{ t('form.patterns') }}</Label>
+            <div class="grid gap-2">
+              <div class="flex items-start gap-3 rounded-lg border border-input bg-background px-3 py-2.5">
+                <Checkbox id="pattern-rounded" v-model="formData.patterns.rounded" class="mt-0.5" />
+                <Label
+                  for="pattern-rounded"
+                  class="flex min-w-0 flex-1 items-start justify-between gap-3 leading-normal"
+                >
+                  <span class="grid min-w-0 gap-0.5">
+                    <span class="text-sm font-medium text-foreground">{{ t('form.roundedMultiples') }}</span>
+                    <span class="text-xs text-muted-foreground">{{ t('form.roundedMultiplesExamples') }}</span>
+                  </span>
+                  <Badge
+                    v-if="getPatternCount('rounded') > 0"
+                    variant="secondary"
+                    class="mt-0.5 h-5 min-w-5 rounded-full px-1.5 text-[11px] tabular-nums"
+                  >
+                    {{ getPatternCount('rounded') }}
+                  </Badge>
+                </Label>
+              </div>
+              <div class="flex items-start gap-3 rounded-lg border border-input bg-background px-3 py-2.5">
+                <Checkbox id="pattern-repdigit" v-model="formData.patterns.repdigit" class="mt-0.5" />
+                <Label
+                  for="pattern-repdigit"
+                  class="flex min-w-0 flex-1 items-start justify-between gap-3 leading-normal"
+                >
+                  <span class="grid min-w-0 gap-0.5">
+                    <span class="text-sm font-medium text-foreground">{{ t('form.repdigits') }}</span>
+                    <span class="text-xs text-muted-foreground">{{ t('form.repdigitsExamples') }}</span>
+                  </span>
+                  <Badge
+                    v-if="getPatternCount('repdigit') > 0"
+                    variant="secondary"
+                    class="mt-0.5 h-5 min-w-5 rounded-full px-1.5 text-[11px] tabular-nums"
+                  >
+                    {{ getPatternCount('repdigit') }}
+                  </Badge>
+                </Label>
+              </div>
             </div>
+            <span v-if="fieldErrors.patterns" class="field-error" role="alert">{{ fieldErrors.patterns }}</span>
           </div>
         </div>
       </form>
-    </div>
-  </section>
+    </CardContent>
+  </Card>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
+import { cn } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
+import { RotateCcw, Target } from 'lucide-vue-next'
 import type { Unit } from '../types'
 import { CONFIG } from '../types'
 
@@ -560,6 +627,44 @@ function getUnitCount(unit: Unit): number {
 
 function getPatternCount(pattern: 'rounded' | 'repdigit'): number {
   return patternCounts.value[pattern] || 0
+}
+
+function getUnitFilterRowClass(unit: Unit): string {
+  return cn(
+    unit === 'years' && 'border-l-red-500/60',
+    unit === 'months' && 'border-l-orange-500/60',
+    unit === 'weeks' && 'border-l-amber-500/60',
+    unit === 'days' && 'border-l-lime-500/60',
+    unit === 'hours' && 'border-l-emerald-500/60',
+    unit === 'minutes' && 'border-l-cyan-500/60',
+    unit === 'seconds' && 'border-l-blue-500/60'
+  )
+}
+
+function getUnitFilterCountClass(unit: Unit): string {
+  return cn(
+    unit === 'years' && 'border-red-500/20 text-red-600 dark:border-red-400/30 dark:text-red-300',
+    unit === 'months' && 'border-orange-500/20 text-orange-600 dark:border-orange-400/30 dark:text-orange-300',
+    unit === 'weeks' && 'border-amber-500/20 text-amber-600 dark:border-amber-400/30 dark:text-amber-300',
+    unit === 'days' && 'border-lime-500/20 text-lime-700 dark:border-lime-400/30 dark:text-lime-300',
+    unit === 'hours' && 'border-emerald-500/20 text-emerald-600 dark:border-emerald-400/30 dark:text-emerald-300',
+    unit === 'minutes' && 'border-cyan-500/20 text-cyan-600 dark:border-cyan-400/30 dark:text-cyan-300',
+    unit === 'seconds' && 'border-blue-500/20 text-blue-600 dark:border-blue-400/30 dark:text-blue-300'
+  )
+}
+
+function toggleUnit(unit: Unit, checked: boolean | 'indeterminate'): void {
+  const next = new Set(formData.value.units)
+
+  if (checked === true) {
+    next.add(unit)
+  } else {
+    next.delete(unit)
+  }
+
+  formData.value.units = units.value
+    .map((entry) => entry.value)
+    .filter((value) => next.has(value))
 }
 
 // Watch for changes and recompute with debounce (but NOT for date/yearFrom/yearTo - those are handled on blur)
