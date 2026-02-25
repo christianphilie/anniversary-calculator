@@ -129,7 +129,8 @@ The project is built with **Vue 3**, **TypeScript**, and **Vite** for a modern, 
 *   **Vue 3** - Progressive JavaScript framework with Composition API
 *   **TypeScript** - Type-safe JavaScript for better developer experience
 *   **Vite** - Fast build tool and development server
-*   **CSS Variables** - Theming system supporting light and dark modes
+*   **Tailwind CSS v4** - Utility-first styling with CSS variable-based theming
+*   **shadcn/ui-style Vue primitives** - Reusable UI building blocks powered by `reka-ui`
 
 ### 📁 Project Structure
 
@@ -139,6 +140,7 @@ src/
 │   ├── AppHeader.vue    # Application header with title and controls
 │   ├── InputPanel.vue   # Input form for date, units, patterns
 │   ├── ResultsPanel.vue # Results display and export controls
+│   ├── ui/              # shadcn-style UI primitives (Button, Card, Tabs, ...)
 │   ├── MilestoneItem.vue # Individual milestone display
 │   ├── YearSeparator.vue # Year grouping separator
 │   ├── ThemeSwitch.vue  # Theme selection component
@@ -170,6 +172,8 @@ src/
 │       └── en.ts        # English translations
 ├── types/               # TypeScript type definitions
 │   └── index.ts         # Type definitions and config
+├── lib/                 # Shared helpers for UI/component composition
+│   └── utils.ts         # cn() utility (clsx + tailwind-merge)
 ├── styles/              # CSS styles (modular)
 │   ├── tokens.css       # Design tokens (colors, spacing)
 │   ├── base.css         # Base styles and layout
