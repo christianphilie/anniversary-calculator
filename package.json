@@ -23,19 +23,26 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@tailwindcss/vite": "^4.2.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/vue": "^8.1.0",
     "@vitejs/plugin-vue": "^6.0.3",
     "@vitest/ui": "^4.0.18",
     "@vue/test-utils": "^2.4.6",
     "jsdom": "^27.4.0",
+    "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vitest": "^4.0.18",
     "vue-tsc": "^3.2.4"
   },
   "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "jspdf": "^4.0.0",
+    "lucide-vue-next": "^0.575.0",
+    "reka-ui": "^2.8.2",
+    "tailwind-merge": "^3.5.0",
     "vue": "^3.5.27"
   }
 }
