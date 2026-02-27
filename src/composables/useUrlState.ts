@@ -1,5 +1,5 @@
 import type { AppState } from '../types'
-import { toLocalDateInputValue } from '../utils/date'
+import { toLocalDateInputValue, toLocalTimeInputValue } from '../utils/date'
 import { sanitizeUrlParam, sanitizeLabel } from '../utils/sanitize'
 import { parseShareUrl } from '../utils/share'
 import { safeLocalStorageGet } from '../utils/storage'
@@ -25,6 +25,7 @@ export function useUrlState(state: { value: AppState }) {
 
     if (state.value.start) {
       setUrlParam(params, 'd', toLocalDateInputValue(state.value.start))
+      setUrlParam(params, 't', toLocalTimeInputValue(state.value.start))
       setUrlParam(params, 'yf', state.value.yearFrom)
       setUrlParam(params, 'yt', state.value.yearTo)
     }

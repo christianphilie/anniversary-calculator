@@ -36,37 +36,39 @@
           </span>
           <span class="text-xs font-medium">ICS</span>
         </Button>
-        <span
-          role="button"
-          tabindex="0"
-          :aria-label="t('export.icsHelpTitle')"
-          :title="t('export.icsHelpTitle')"
-          class="absolute right-2.5 top-1/2 z-10 inline-flex h-4 w-4 -translate-y-1/2 cursor-pointer items-center justify-center text-muted-foreground/60 transition-colors hover:text-muted-foreground focus-visible:outline-none"
-          @click.stop="toggleIcsHelp"
-          @keydown.enter.prevent.stop="toggleIcsHelp"
-          @keydown.space.prevent.stop="toggleIcsHelp"
-        >
-          <CircleHelp class="h-4 w-4" aria-hidden="true" />
-        </span>
-        <div
-          v-if="showIcsHelp"
-          class="absolute right-0 top-[calc(100%+0.5rem)] z-[100000] w-[min(22rem,calc(100vw-2rem))] rounded-lg border border-border bg-popover p-3 text-popover-foreground shadow-lg"
-        >
-          <button
-            type="button"
-            class="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-sm text-muted-foreground hover:bg-accent"
-            :aria-label="t('common.close')"
-            @click.stop="showIcsHelp = false"
+        <div class="absolute right-2.5 top-1/2 z-10 -translate-y-1/2">
+          <span
+            role="button"
+            tabindex="0"
+            :aria-label="t('export.icsHelpTitle')"
+            :title="t('export.icsHelpTitle')"
+            class="inline-flex h-4 w-4 cursor-pointer items-center justify-center text-muted-foreground/60 transition-colors hover:text-muted-foreground focus-visible:outline-none"
+            @click.stop="toggleIcsHelp"
+            @keydown.enter.prevent.stop="toggleIcsHelp"
+            @keydown.space.prevent.stop="toggleIcsHelp"
           >
-            <X class="h-4 w-4" aria-hidden="true" />
-          </button>
-          <h3 class="mb-2 pr-8 text-sm font-semibold leading-none tracking-tight">{{ t('export.icsHelpTitle') }}</h3>
-          <ol class="list-decimal space-y-1 pl-4 text-xs leading-relaxed text-muted-foreground">
-            <li>{{ t('export.icsHelpStep1') }}</li>
-            <li>{{ t('export.icsHelpStep2') }}</li>
-            <li>{{ t('export.icsHelpStep3') }}</li>
-            <li>{{ t('export.icsHelpStep4') }}</li>
-          </ol>
+            <CircleHelp class="h-4 w-4" aria-hidden="true" />
+          </span>
+          <div
+            v-if="showIcsHelp"
+            class="absolute left-0 top-[calc(100%+0.5rem)] z-[100000] w-[min(22rem,calc(100vw-2rem))] rounded-lg border border-border bg-popover p-3 text-popover-foreground shadow-lg"
+          >
+            <button
+              type="button"
+              class="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-sm text-muted-foreground hover:bg-accent"
+              :aria-label="t('common.close')"
+              @click.stop="showIcsHelp = false"
+            >
+              <X class="h-4 w-4" aria-hidden="true" />
+            </button>
+            <h3 class="mb-2 pr-8 text-sm font-semibold leading-none tracking-tight">{{ t('export.icsHelpTitle') }}</h3>
+            <ol class="list-decimal space-y-1 pl-4 text-xs leading-relaxed text-muted-foreground">
+              <li>{{ t('export.icsHelpStep1') }}</li>
+              <li>{{ t('export.icsHelpStep2') }}</li>
+              <li>{{ t('export.icsHelpStep3') }}</li>
+              <li>{{ t('export.icsHelpStep4') }}</li>
+            </ol>
+          </div>
         </div>
       </div>
       <Button
@@ -119,29 +121,38 @@
       </Button>
     </div>
     <div class="flex items-center justify-between gap-3 rounded-md border border-border/70 bg-muted/35 px-3 py-2">
-      <span class="text-xs font-medium text-muted-foreground">
-        {{ t('export.onlyFavorites') }}
-      </span>
-      <button
-        type="button"
-        role="switch"
-        :aria-checked="exportOnlyFavorites"
-        :aria-label="t('export.onlyFavorites')"
-        class="relative inline-flex h-6 w-11 items-center rounded-full border border-border/70 bg-muted transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
-        :class="exportOnlyFavorites ? 'bg-primary/25 border-primary/40' : 'bg-muted'"
-        @click="exportOnlyFavorites = !exportOnlyFavorites"
+      <div class="inline-flex items-center gap-2">
+        <button
+          type="button"
+          role="switch"
+          :aria-checked="exportOnlyFavorites"
+          :aria-label="t('export.onlyFavorites')"
+          class="relative inline-flex h-6 w-11 items-center rounded-full border border-border/70 bg-muted transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+          :class="exportOnlyFavorites ? 'bg-black border-black' : 'bg-muted'"
+          @click="exportOnlyFavorites = !exportOnlyFavorites"
+        >
+          <span
+            class="inline-block h-4 w-4 rounded-full bg-background shadow-sm transition-transform duration-200"
+            :class="exportOnlyFavorites ? 'translate-x-5' : 'translate-x-1'"
+          />
+        </button>
+        <span class="text-xs font-medium text-muted-foreground">
+          {{ t('export.onlyFavorites') }}
+        </span>
+      </div>
+      <Badge
+        variant="outline"
+        class="h-5 min-w-5 rounded-full px-1.5 text-[11px] tabular-nums text-muted-foreground"
       >
-        <span
-          class="inline-block h-4 w-4 rounded-full bg-background shadow-sm transition-transform duration-200"
-          :class="exportOnlyFavorites ? 'translate-x-5' : 'translate-x-1'"
-        />
-      </button>
+        {{ favoriteEvents.length }}
+      </Badge>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Braces, Calendar, CircleHelp, FileText, Link, Table, X } from 'lucide-vue-next'

@@ -159,11 +159,11 @@
                     <span>{{ t('form.patterns') }}</span>
                   </Label>
                   <div class="grid gap-2">
-                    <div class="flex items-start gap-3 rounded-lg border border-input bg-background px-3 py-2.5">
-                      <Checkbox id="pattern-rounded" v-model="formData.patterns.rounded" class="mt-0.5" />
+                    <div class="flex items-center gap-3 rounded-lg border border-input bg-background px-3 py-2.5">
+                      <Checkbox id="pattern-rounded" v-model="formData.patterns.rounded" />
                       <Label
                         for="pattern-rounded"
-                        class="flex min-w-0 flex-1 items-start justify-between gap-3 leading-normal"
+                        class="flex min-w-0 flex-1 items-center justify-between gap-3 leading-normal"
                       >
                         <span class="grid min-w-0 gap-0.5">
                           <span class="text-sm font-medium text-foreground">{{ t('form.roundedMultiples') }}</span>
@@ -172,17 +172,17 @@
                         <Badge
                           v-if="getPatternCount('rounded') > 0"
                           variant="secondary"
-                          class="mt-0.5 h-5 min-w-5 rounded-full px-1.5 text-[11px] tabular-nums"
+                          class="h-5 min-w-5 rounded-full px-1.5 text-[11px] tabular-nums"
                         >
                           {{ getPatternCount('rounded') }}
                         </Badge>
                       </Label>
                     </div>
-                    <div class="flex items-start gap-3 rounded-lg border border-input bg-background px-3 py-2.5">
-                      <Checkbox id="pattern-repdigit" v-model="formData.patterns.repdigit" class="mt-0.5" />
+                    <div class="flex items-center gap-3 rounded-lg border border-input bg-background px-3 py-2.5">
+                      <Checkbox id="pattern-repdigit" v-model="formData.patterns.repdigit" />
                       <Label
                         for="pattern-repdigit"
-                        class="flex min-w-0 flex-1 items-start justify-between gap-3 leading-normal"
+                        class="flex min-w-0 flex-1 items-center justify-between gap-3 leading-normal"
                       >
                         <span class="grid min-w-0 gap-0.5">
                           <span class="text-sm font-medium text-foreground">{{ t('form.repdigits') }}</span>
@@ -191,7 +191,7 @@
                         <Badge
                           v-if="getPatternCount('repdigit') > 0"
                           variant="secondary"
-                          class="mt-0.5 h-5 min-w-5 rounded-full px-1.5 text-[11px] tabular-nums"
+                          class="h-5 min-w-5 rounded-full px-1.5 text-[11px] tabular-nums"
                         >
                           {{ getPatternCount('repdigit') }}
                         </Badge>
@@ -220,10 +220,11 @@ import { ChevronDown, Funnel } from 'lucide-vue-next'
 import type { Unit } from '../types'
 import { CONFIG } from '../types'
 import { UNIT_COLOR_CLASSES } from '../constants/unitColors'
+import { toLocalDateInputValue, toLocalTimeInputValue } from '../utils/date'
 
 // Constants for year range
 const MAX_YEARS_IN_FUTURE = CONFIG.MAX_YEARS_IN_FUTURE
-import { toLocalDateInputValue } from '../utils/date'
+const DEFAULT_TIME = CONFIG.DEFAULT_TIME
 import { useUrlState } from '../composables/useUrlState'
 import { useAppState } from '../composables/useAppState'
 import { useError } from '../composables/useError'
@@ -252,15 +253,25 @@ const fieldErrors = ref<{
   yearRange?: string
 }>({})
 
+interface InputFormData {
+  label: string
+  date: string
+  time: string
+  units: Unit[]
+  patterns: { rounded: boolean; repdigit: boolean }
+  yearFrom: number
+  yearTo: number
+}
+
 // No emit needed - we use composable directly
 
 const today = new Date()
 const todayYear = today.getFullYear()
 
-const formData = ref({
+const formData = ref<InputFormData>({
   label: '',
   date: toLocalDateInputValue(today),
-  time: '12:00:00',
+  time: DEFAULT_TIME,
   units: ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds'] as Unit[],
   patterns: { rounded: true, repdigit: true },
   yearFrom: todayYear,
@@ -702,27 +713,64 @@ watch(() => [state.value.yearFrom, state.value.yearTo], ([newYearFrom, newYearTo
 
 onMounted(() => {
   const urlState = loadStateFromURL()
-  if (urlState.label) formData.value.label = urlState.label
-  if (urlState.date) formData.value.date = urlState.date
-  if (urlState.time) formData.value.time = urlState.time
-  else formData.value.time = '12:00:00'
-  if (urlState.units) formData.value.units = urlState.units as Unit[]
-  if (urlState.patterns) formData.value.patterns = urlState.patterns
-  
-  // If yearFrom/yearTo are in URL, use them; otherwise auto-adjust will happen via watcher
-  if (urlState.yearFrom) formData.value.yearFrom = urlState.yearFrom
-  if (urlState.yearTo) formData.value.yearTo = urlState.yearTo
 
-  // Auto-adjust year range if not set from URL
-  if (!urlState.yearFrom || !urlState.yearTo) {
+  if (urlState.label !== undefined) {
+    formData.value.label = urlState.label
+  } else if (state.value.label) {
+    formData.value.label = state.value.label
+  }
+
+  if (urlState.date) {
+    formData.value.date = urlState.date
+  } else if (state.value.start) {
+    formData.value.date = toLocalDateInputValue(state.value.start)
+  }
+
+  if (urlState.time) {
+    formData.value.time = urlState.time
+  } else if (state.value.start) {
+    formData.value.time = toLocalTimeInputValue(state.value.start)
+  } else {
+    formData.value.time = DEFAULT_TIME
+  }
+
+  if (urlState.units) {
+    formData.value.units = urlState.units as Unit[]
+  } else if (state.value.units.length > 0) {
+    formData.value.units = [...state.value.units]
+  }
+
+  if (urlState.patterns) {
+    formData.value.patterns = { ...urlState.patterns }
+  } else {
+    formData.value.patterns = { ...state.value.patterns }
+  }
+
+  const hasUrlYearFrom = urlState.yearFrom !== undefined
+  const hasUrlYearTo = urlState.yearTo !== undefined
+
+  if (hasUrlYearFrom) {
+    formData.value.yearFrom = urlState.yearFrom!
+  } else if (state.value.yearFrom !== null) {
+    formData.value.yearFrom = state.value.yearFrom
+  }
+
+  if (hasUrlYearTo) {
+    formData.value.yearTo = urlState.yearTo!
+  } else if (state.value.yearTo !== null) {
+    formData.value.yearTo = state.value.yearTo
+  }
+
+  // Auto-adjust year range if not set from URL or current app state
+  if (!hasUrlYearFrom || !hasUrlYearTo) {
     const todayYear = new Date().getFullYear()
-    
-    if (!urlState.yearFrom) {
+
+    if (!hasUrlYearFrom && state.value.yearFrom === null) {
       // Default to current year, but allow selection from startYear to currentYear
       formData.value.yearFrom = Math.min(startYear.value, todayYear)
     }
-    
-    if (!urlState.yearTo) {
+
+    if (!hasUrlYearTo && state.value.yearTo === null) {
       // Default to MAX_YEARS_IN_FUTURE years in the future
       formData.value.yearTo = todayYear + MAX_YEARS_IN_FUTURE
     }
@@ -733,6 +781,8 @@ onMounted(() => {
 
 // Cleanup timers on unmount to prevent memory leaks
 onUnmounted(() => {
+  const hasPendingCompute = debounceTimer !== null || labelDebounceTimer !== null
+
   if (debounceTimer) {
     clearTimeout(debounceTimer)
     debounceTimer = null
@@ -740,6 +790,11 @@ onUnmounted(() => {
   if (labelDebounceTimer) {
     clearTimeout(labelDebounceTimer)
     labelDebounceTimer = null
+  }
+
+  // Flush pending debounced input changes (e.g. time) before leaving the tab.
+  if (hasPendingCompute) {
+    compute()
   }
 })
 </script>

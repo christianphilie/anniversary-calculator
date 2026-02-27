@@ -107,3 +107,10 @@ export function toLocalDateInputValue(date: Date): string {
   const z = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
   return z.toISOString().slice(0, 10)
 }
+
+export function toLocalTimeInputValue(date: Date): string {
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+  return `${hours}:${minutes}:${seconds}`
+}
