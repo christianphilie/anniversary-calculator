@@ -66,7 +66,7 @@ function onInput(event: Event): void {
     :disabled="props.disabled"
     :aria-invalid="props.ariaInvalid"
     :aria-describedby="props.ariaDescribedby"
-    :class="cn('ui-input flex h-9 w-full min-w-0 max-w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-[color,box-shadow,border-color] outline-none file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background', props.class)"
+    :class="cn('ui-input block h-9 w-full min-w-0 max-w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-[color,box-shadow,border-color] outline-none file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background', props.class)"
     @input="onInput"
     @blur="(e) => emit('blur', e)"
     @keydown="(e) => emit('keydown', e)"

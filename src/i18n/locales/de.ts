@@ -19,14 +19,19 @@ export default {
     metaTitle: 'Jubiläumsrechner',
     metaDescription: 'Berechne besondere Meilensteine wie 10 Jahre, 500 Wochen oder 333.333 Sekunden und exportiere sie als Kalenderdatei.',
     inputs: 'Eingaben',
+    favorites: 'Favoriten',
     milestones: 'Jubiläen',
     results: 'Ergebnisse'
   },
   form: {
-    label: 'Titel (optional)',
+    label: 'Titel',
+    optional: 'optional',
     labelPlaceholder: 'Geburtstag, Kennenlernen, Hochzeit …',
     date: 'Datum',
     time: 'Uhrzeit',
+    inputsHint: 'Datum, Uhrzeit und Titel bestimmen die Berechnung.',
+    settings: 'Einstellungen',
+    settingsHint: 'Jahresbereich, Einheiten und Muster filtern die Anzeige.',
     units: 'Einheiten',
     patterns: 'Muster',
     yearRange: 'Jahresbereich',
@@ -42,6 +47,7 @@ export default {
     goToToday: 'Zu heute',
     scrollLeft: 'Nach links scrollen',
     scrollRight: 'Nach rechts scrollen',
+    moreFilters: 'Filter',
     loadMore: 'Mehr laden',
     roundedMultiples: 'Runde Vielfache',
     roundedMultiplesExamples: '500, 2.000, 10.000, 1.000.000 …',
@@ -93,6 +99,7 @@ export default {
   export: {
     title: 'Exportieren',
     description: 'Exportiere alle sichtbaren Jubiläen in verschiedenen Formaten oder teile die aktuelle Ansicht mit anderen.',
+    onlyFavorites: 'Nur Favoriten exportieren',
     exportCSV: 'Als CSV exportieren',
     exportJSON: 'Als JSON exportieren',
     exportPDF: 'Als PDF exportieren',
@@ -105,6 +112,12 @@ export default {
     icsHelpStep2: 'Öffne die Datei auf deinem iPhone',
     icsHelpStep3: 'Tippe auf "In Kalender hinzufügen"',
     icsHelpStep4: 'Die Jubiläen werden zu deinem Kalender hinzugefügt'
+  },
+  favorites: {
+    emptyPrefix: 'Noch keine',
+    emptySuffix: 'Favoriten gespeichert',
+    add: 'Zu Favoriten hinzufügen',
+    remove: 'Aus Favoriten entfernen'
   },
   inputs: {
     descriptionDate: 'Gib dein Datum ein',

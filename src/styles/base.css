@@ -65,14 +65,60 @@ header {
 .logo {
   display: grid;
   place-items: center;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 3rem;
+  height: 3rem;
   line-height: 1;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--muted);
   color: var(--foreground);
   flex-shrink: 0;
+}
+
+.logo-icon-stack {
+  position: relative;
+  width: 2.0125rem;
+  height: 2.0125rem;
+}
+
+.logo-icon-stack > svg {
+  position: absolute;
+  inset: 0;
+  width: 2.0125rem;
+  height: 2.0125rem;
+}
+
+.logo-icon-base {
+  color: color-mix(in srgb, var(--foreground) 65%, var(--muted) 35%);
+  opacity: 0.45;
+}
+
+.logo-party-icon {
+  color: #3b82f6;
+  stroke: currentColor;
+  opacity: 0.95;
+  animation: logo-rainbow-cycle 20s linear infinite;
+}
+
+@keyframes logo-rainbow-cycle {
+  0% {
+    color: #3b82f6;
+  }
+  16% {
+    color: #22c55e;
+  }
+  32% {
+    color: #eab308;
+  }
+  48% {
+    color: #f97316;
+  }
+  64% {
+    color: #ef4444;
+  }
+  80% {
+    color: #a855f7;
+  }
+  100% {
+    color: #3b82f6;
+  }
 }
 
 h1 {
@@ -95,7 +141,7 @@ main {
 
 .app-grid {
   display: grid;
-  grid-template-columns: minmax(330px, 430px) minmax(0, 1fr);
+  grid-template-columns: minmax(380px, 500px) minmax(0, 1fr);
   gap: 1rem;
   align-items: start;
 }
@@ -120,19 +166,45 @@ main {
 .sidebar-tabs-list {
   width: 100%;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .sidebar-tabs-list > * {
   width: 100%;
 }
 
+.sidebar-tabs-list > [data-slot='tabs-trigger'] {
+  padding-inline: 0.5rem;
+  font-size: 0.8125rem;
+}
+
 .sidebar-tabs-content {
-  margin-top: 0.75rem;
+  margin-top: 1rem;
 }
 
 .sidebar-tabs-content :deep(.panel) {
   box-shadow: none;
+}
+
+[data-panel-shell] > [data-panel-header] {
+  border-top-left-radius: calc(var(--radius-lg) - 1px);
+  border-top-right-radius: calc(var(--radius-lg) - 1px);
+}
+
+.ui-input[type='date'],
+.ui-input[type='time'] {
+  position: relative;
+  padding-right: 2.25rem;
+}
+
+.ui-input[type='date']::-webkit-calendar-picker-indicator,
+.ui-input[type='time']::-webkit-calendar-picker-indicator {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  margin: 0;
+  transform: translateY(-50%);
+  cursor: pointer;
 }
 
 .footer-mobile {
@@ -213,5 +285,9 @@ main {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  .logo-party-icon {
+    animation: none;
   }
 }

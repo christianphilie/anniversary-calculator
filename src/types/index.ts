@@ -30,6 +30,8 @@ export interface AppState {
   eventsAll: MilestoneEvent[]
   eventsView: MilestoneEvent[]
   selected: Set<string>
+  favoriteIds: Set<string>
+  exportOnlyFavorites: boolean
   yearFrom: number | null
   yearTo: number | null
 }

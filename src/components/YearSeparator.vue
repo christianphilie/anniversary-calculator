@@ -9,7 +9,7 @@
       v-if="isFirst && canAddPreviousYears"
       variant="ghost"
       size="sm"
-      class="h-7 px-2 text-xs"
+      class="h-8 px-2 text-xs text-muted-foreground/80 hover:text-foreground"
       @click="$emit('add-previous-years')"
       :aria-label="t('form.loadMore')"
     >
@@ -17,21 +17,21 @@
     </Button>
     <Button
       v-else-if="hasPreviousYear"
-      variant="outline"
+      variant="ghost"
       size="icon"
-      class="h-7 w-7"
+      class="h-8 w-8 text-muted-foreground/80 hover:text-foreground"
       @click="$emit('jump-to-year', previousYear)"
       :aria-label="`${t('form.jumpToYear')}: ${previousYear}`"
     >
-      <ChevronUp class="h-3.5 w-3.5" aria-hidden="true" />
+      <ArrowDownToDot class="h-3.5 w-3.5 rotate-180" aria-hidden="true" />
     </Button>
-    <span v-else class="h-7 w-7 shrink-0" />
+    <span v-else class="h-8 w-8 shrink-0" />
     <span class="flex-1 text-center text-sm font-semibold text-muted-foreground">{{ year }}</span>
     <Button
       v-if="isLast && canAddNextYears"
       variant="ghost"
       size="sm"
-      class="h-7 px-2 text-xs"
+      class="h-8 px-2 text-xs text-muted-foreground/80 hover:text-foreground"
       @click="$emit('add-next-years')"
       :aria-label="t('form.loadMore')"
     >
@@ -39,21 +39,21 @@
     </Button>
     <Button
       v-else-if="hasNextYear"
-      variant="outline"
+      variant="ghost"
       size="icon"
-      class="h-7 w-7"
+      class="h-8 w-8 text-muted-foreground/80 hover:text-foreground"
       @click="$emit('jump-to-year', nextYear)"
       :aria-label="`${t('form.jumpToYear')}: ${nextYear}`"
     >
-      <ChevronDown class="h-3.5 w-3.5" aria-hidden="true" />
+      <ArrowDownToDot class="h-3.5 w-3.5" aria-hidden="true" />
     </Button>
-    <span v-else class="h-7 w-7 shrink-0" />
+    <span v-else class="h-8 w-8 shrink-0" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ChevronDown, ChevronUp } from 'lucide-vue-next'
+import { ArrowDownToDot } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { useI18n } from '../i18n'
 import { useAppState } from '../composables/useAppState'

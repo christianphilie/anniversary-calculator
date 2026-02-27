@@ -19,14 +19,19 @@ export default {
     metaTitle: 'Anniversary Calculator',
     metaDescription: 'Find milestones like 10 years, 500 weeks, or 333,333 seconds and export them as a calendar file.',
     inputs: 'Inputs',
+    favorites: 'Favorites',
     milestones: 'Anniversaries',
     results: 'Results'
   },
   form: {
-    label: 'Title (optional)',
+    label: 'Title',
+    optional: 'optional',
     labelPlaceholder: 'Birthday, Meeting, Wedding …',
     date: 'Date',
     time: 'Time',
+    inputsHint: 'Date, time, and title define the calculation.',
+    settings: 'Settings',
+    settingsHint: 'Year range, units, and patterns filter what is shown.',
     units: 'Units',
     patterns: 'Patterns',
     yearRange: 'Year Range',
@@ -42,6 +47,7 @@ export default {
     goToToday: 'Go to today',
     scrollLeft: 'Scroll left',
     scrollRight: 'Scroll right',
+    moreFilters: 'Filters',
     loadMore: 'Load more',
     roundedMultiples: 'Rounded multiples',
     roundedMultiplesExamples: '500, 2,000, 10,000, 1,000,000 …',
@@ -93,6 +99,7 @@ export default {
   export: {
     title: 'Export',
     description: 'Export all visible anniversaries in various formats or share the current view with others.',
+    onlyFavorites: 'Export favorites only',
     exportCSV: 'Export as CSV',
     exportJSON: 'Export as JSON',
     exportPDF: 'Export as PDF',
@@ -105,6 +112,12 @@ export default {
     icsHelpStep2: 'Open the file on your iPhone',
     icsHelpStep3: 'Tap "Add to Calendar"',
     icsHelpStep4: 'The anniversaries will be added to your calendar'
+  },
+  favorites: {
+    emptyPrefix: 'No',
+    emptySuffix: 'favorites saved yet',
+    add: 'Add to favorites',
+    remove: 'Remove from favorites'
   },
   inputs: {
     descriptionDate: 'Enter your date',

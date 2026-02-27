@@ -1,110 +1,150 @@
 <template>
-  <Card data-panel-shell>
-    <CardHeader
-      data-panel-header
-      class="sticky top-[var(--sticky-panel-header-top)] z-20 h-12 flex flex-row items-center justify-between gap-3 space-y-0 border-b border-border bg-card/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-card/80"
-    >
-      <div class="inline-flex min-w-0 items-center gap-2">
-        <Download class="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-        <span class="text-sm font-semibold tracking-tight text-foreground">{{ t('export.title') }}</span>
-      </div>
-      <ICSImportHelp />
-    </CardHeader>
-    <CardContent class="grid gap-4 p-4">
-      <p class="m-0 text-sm leading-relaxed text-muted-foreground">
-        {{ t('export.description') }}
-      </p>
-      <Separator />
-      <div class="grid grid-cols-2 gap-2">
-          <Button
-            variant="outline"
-            class="h-auto min-h-13 justify-start gap-2.5 bg-muted/40 px-3 py-2.5 text-left hover:bg-accent"
-            :title="`${downloadTooltip} (Strg/Cmd + D)`"
-            :aria-label="downloadTooltip"
-            :disabled="state.eventsView.length === 0"
-            @click="handleDownloadICS"
-          >
-            <span
-              class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground"
-              aria-hidden="true"
-            >
-              <Calendar />
-            </span>
-            <span class="text-xs font-medium">ICS</span>
-          </Button>
-          <Button
-            variant="outline"
-            class="h-auto min-h-13 justify-start gap-2.5 bg-muted/40 px-3 py-2.5 text-left hover:bg-accent"
-            :title="`${t('export.exportPDF')} (${state.eventsView.length} ${t('common.selectAll').toLowerCase()})`"
-            :aria-label="t('export.exportPDF')"
-            :disabled="state.eventsView.length === 0"
-            @click="handleDownloadPDF"
-          >
-            <span
-              class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground"
-              aria-hidden="true"
-            >
-              <FileText />
-            </span>
-            <span class="text-xs font-medium">PDF</span>
-          </Button>
-          <Button
-            variant="outline"
-            class="h-auto min-h-13 justify-start gap-2.5 bg-muted/40 px-3 py-2.5 text-left hover:bg-accent"
-            :title="`${t('export.exportCSV')} (${state.eventsView.length} ${t('common.selectAll').toLowerCase()})`"
-            :aria-label="t('export.exportCSV')"
-            :disabled="state.eventsView.length === 0"
-            @click="handleDownloadCSV"
-          >
-            <span
-              class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground"
-              aria-hidden="true"
-            >
-              <Table />
-            </span>
-            <span class="text-xs font-medium">CSV</span>
-          </Button>
-          <Button
-            variant="outline"
-            class="h-auto min-h-13 justify-start gap-2.5 bg-muted/40 px-3 py-2.5 text-left hover:bg-accent"
-            :title="`${t('export.exportJSON')} (${state.eventsView.length} ${t('common.selectAll').toLowerCase()})`"
-            :aria-label="t('export.exportJSON')"
-            :disabled="state.eventsView.length === 0"
-            @click="handleDownloadJSON"
-          >
-            <span
-              class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground"
-              aria-hidden="true"
-            >
-              <Braces />
-            </span>
-            <span class="text-xs font-medium">JSON</span>
-          </Button>
-      </div>
-      <div class="w-full">
+  <div class="grid gap-4 px-1 pb-1">
+    <p class="m-0 text-sm leading-relaxed text-muted-foreground">
+      {{ t('export.description') }}
+    </p>
+    <div class="w-full">
+      <Button
+        variant="secondary"
+        class="w-full justify-center"
+        :title="t('export.shareViewTitle')"
+        :aria-label="t('export.shareViewTitle')"
+        @click="handleShare"
+      >
+        <span class="inline-flex items-center justify-center" aria-hidden="true">
+          <Link />
+        </span>
+        {{ t('export.shareView') }}
+      </Button>
+    </div>
+    <Separator />
+    <div class="grid grid-cols-2 gap-2">
+      <div ref="icsHelpContainerRef" class="relative">
         <Button
-          variant="secondary"
-          class="w-full justify-center"
-          :title="t('export.shareViewTitle')"
-          :aria-label="t('export.shareViewTitle')"
-          @click="handleShare"
+          variant="outline"
+          class="relative w-full h-auto min-h-13 justify-start gap-2.5 bg-muted/40 px-3 py-2.5 pr-10 text-left hover:bg-accent"
+          :title="`${downloadTooltip} (Strg/Cmd + D)`"
+          :aria-label="downloadTooltip"
+          :disabled="exportCount === 0"
+          @click="handleDownloadICS"
         >
-          <span class="inline-flex items-center justify-center" aria-hidden="true">
-            <Link />
+          <span
+            class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground"
+            aria-hidden="true"
+          >
+            <Calendar />
           </span>
-          {{ t('export.shareView') }}
+          <span class="text-xs font-medium">ICS</span>
         </Button>
+        <span
+          role="button"
+          tabindex="0"
+          :aria-label="t('export.icsHelpTitle')"
+          :title="t('export.icsHelpTitle')"
+          class="absolute right-2.5 top-1/2 z-10 inline-flex h-4 w-4 -translate-y-1/2 cursor-pointer items-center justify-center text-muted-foreground/60 transition-colors hover:text-muted-foreground focus-visible:outline-none"
+          @click.stop="toggleIcsHelp"
+          @keydown.enter.prevent.stop="toggleIcsHelp"
+          @keydown.space.prevent.stop="toggleIcsHelp"
+        >
+          <CircleHelp class="h-4 w-4" aria-hidden="true" />
+        </span>
+        <div
+          v-if="showIcsHelp"
+          class="absolute right-0 top-[calc(100%+0.5rem)] z-[100000] w-[min(22rem,calc(100vw-2rem))] rounded-lg border border-border bg-popover p-3 text-popover-foreground shadow-lg"
+        >
+          <button
+            type="button"
+            class="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-sm text-muted-foreground hover:bg-accent"
+            :aria-label="t('common.close')"
+            @click.stop="showIcsHelp = false"
+          >
+            <X class="h-4 w-4" aria-hidden="true" />
+          </button>
+          <h3 class="mb-2 pr-8 text-sm font-semibold leading-none tracking-tight">{{ t('export.icsHelpTitle') }}</h3>
+          <ol class="list-decimal space-y-1 pl-4 text-xs leading-relaxed text-muted-foreground">
+            <li>{{ t('export.icsHelpStep1') }}</li>
+            <li>{{ t('export.icsHelpStep2') }}</li>
+            <li>{{ t('export.icsHelpStep3') }}</li>
+            <li>{{ t('export.icsHelpStep4') }}</li>
+          </ol>
+        </div>
       </div>
-    </CardContent>
-  </Card>
+      <Button
+        variant="outline"
+        class="w-full h-auto min-h-13 justify-start gap-2.5 bg-muted/40 px-3 py-2.5 text-left hover:bg-accent"
+        :title="`${t('export.exportPDF')} (${exportCount} ${t('common.selectAll').toLowerCase()})`"
+        :aria-label="t('export.exportPDF')"
+        :disabled="exportCount === 0"
+        @click="handleDownloadPDF"
+      >
+        <span
+          class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground"
+          aria-hidden="true"
+        >
+          <FileText />
+        </span>
+        <span class="text-xs font-medium">PDF</span>
+      </Button>
+      <Button
+        variant="outline"
+        class="w-full h-auto min-h-13 justify-start gap-2.5 bg-muted/40 px-3 py-2.5 text-left hover:bg-accent"
+        :title="`${t('export.exportCSV')} (${exportCount} ${t('common.selectAll').toLowerCase()})`"
+        :aria-label="t('export.exportCSV')"
+        :disabled="exportCount === 0"
+        @click="handleDownloadCSV"
+      >
+        <span
+          class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground"
+          aria-hidden="true"
+        >
+          <Table />
+        </span>
+        <span class="text-xs font-medium">CSV</span>
+      </Button>
+      <Button
+        variant="outline"
+        class="w-full h-auto min-h-13 justify-start gap-2.5 bg-muted/40 px-3 py-2.5 text-left hover:bg-accent"
+        :title="`${t('export.exportJSON')} (${exportCount} ${t('common.selectAll').toLowerCase()})`"
+        :aria-label="t('export.exportJSON')"
+        :disabled="exportCount === 0"
+        @click="handleDownloadJSON"
+      >
+        <span
+          class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground"
+          aria-hidden="true"
+        >
+          <Braces />
+        </span>
+        <span class="text-xs font-medium">JSON</span>
+      </Button>
+    </div>
+    <div class="flex items-center justify-between gap-3 rounded-md border border-border/70 bg-muted/35 px-3 py-2">
+      <span class="text-xs font-medium text-muted-foreground">
+        {{ t('export.onlyFavorites') }}
+      </span>
+      <button
+        type="button"
+        role="switch"
+        :aria-checked="exportOnlyFavorites"
+        :aria-label="t('export.onlyFavorites')"
+        class="relative inline-flex h-6 w-11 items-center rounded-full border border-border/70 bg-muted transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+        :class="exportOnlyFavorites ? 'bg-primary/25 border-primary/40' : 'bg-muted'"
+        @click="exportOnlyFavorites = !exportOnlyFavorites"
+      >
+        <span
+          class="inline-block h-4 w-4 rounded-full bg-background shadow-sm transition-transform duration-200"
+          :class="exportOnlyFavorites ? 'translate-x-5' : 'translate-x-1'"
+        />
+      </button>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { Braces, Calendar, Download, FileText, Link, Table } from 'lucide-vue-next'
+import { Braces, Calendar, CircleHelp, FileText, Link, Table, X } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 import { useUrlState } from '../composables/useUrlState'
 import { useToast } from '../composables/useToast'
@@ -115,15 +155,48 @@ import { isNativeShareAvailable } from '../utils/share'
 import { copyToClipboard } from '../utils/clipboard'
 import { generateFilename } from '../utils/filename'
 import { logError } from '../utils/logger'
-import ICSImportHelp from './ICSImportHelp.vue'
 
-const { state } = useAppState()
+const { state, favoriteEvents } = useAppState()
 const { encodeStateToURL } = useUrlState(state)
 const { success, error } = useToast()
 const { locale, t } = useI18n()
+const showIcsHelp = ref(false)
+const icsHelpContainerRef = ref<HTMLElement | null>(null)
+
+function toggleIcsHelp(): void {
+  showIcsHelp.value = !showIcsHelp.value
+}
+
+function handleDocumentClick(event: MouseEvent): void {
+  const target = event.target
+  if (!(target instanceof Node)) return
+  if (!icsHelpContainerRef.value?.contains(target)) {
+    showIcsHelp.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleDocumentClick)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleDocumentClick)
+})
+const exportOnlyFavorites = computed({
+  get: () => state.value.exportOnlyFavorites,
+  set: (value: boolean) => {
+    state.value.exportOnlyFavorites = value
+  }
+})
+
+const exportEvents = computed(() => {
+  return exportOnlyFavorites.value ? favoriteEvents.value : state.value.eventsView
+})
+
+const exportCount = computed(() => exportEvents.value.length)
 
 const downloadTooltip = computed(() => {
-  const n = state.value.eventsView.length
+  const n = exportCount.value
   if (n === 0) {
     return t.value('results.downloadTooltipNone')
   }
@@ -134,7 +207,7 @@ const downloadTooltip = computed(() => {
 })
 
 function handleDownloadICS(): void {
-  const events = state.value.eventsView
+  const events = exportEvents.value
   if (!events.length) return
 
   try {
@@ -148,7 +221,7 @@ function handleDownloadICS(): void {
 }
 
 function handleDownloadCSV(): void {
-  const events = state.value.eventsView
+  const events = exportEvents.value
   if (!events.length) return
 
   try {
@@ -162,7 +235,7 @@ function handleDownloadCSV(): void {
 }
 
 function handleDownloadJSON(): void {
-  const events = state.value.eventsView
+  const events = exportEvents.value
   if (!events.length) return
 
   try {
@@ -176,7 +249,7 @@ function handleDownloadJSON(): void {
 }
 
 function handleDownloadPDF(): void {
-  const events = state.value.eventsView
+  const events = exportEvents.value
   if (!events.length) return
 
   try {

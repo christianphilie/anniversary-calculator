@@ -1,21 +1,10 @@
 <template>
   <div class="flex items-center gap-2 border-b border-border bg-card px-4 py-2">
     <Button
-      v-if="availableYears.length"
-      variant="ghost"
-      size="sm"
-      class="h-7 shrink-0 px-2 text-xs"
-      @click="jumpToToday"
-      :aria-label="t('form.goToToday')"
-      :title="t('form.goToToday')"
-    >
-      {{ t('form.goToToday') }}
-    </Button>
-    <Button
       v-if="shouldShowButtons && canScrollLeft"
-      variant="outline"
+      variant="ghost"
       size="icon"
-      class="h-7 w-7 shrink-0"
+      class="h-7 w-7 shrink-0 text-muted-foreground/80 hover:text-foreground"
       @click="scrollLeft"
       :aria-label="t('form.scrollLeft')"
       :title="t('form.scrollLeft')"
@@ -57,9 +46,9 @@
     </div>
     <Button
       v-if="shouldShowButtons && canScrollRight"
-      variant="outline"
+      variant="ghost"
       size="icon"
-      class="h-7 w-7 shrink-0"
+      class="h-7 w-7 shrink-0 text-muted-foreground/80 hover:text-foreground"
       @click="scrollRight"
       :aria-label="t('form.scrollRight')"
       :title="t('form.scrollRight')"
@@ -76,6 +65,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useI18n } from '../i18n'
 import { useAppState } from '../composables/useAppState'
+import { CONFIG } from '../types'
 
 const { t } = useI18n()
 const { state } = useAppState()
@@ -109,9 +99,11 @@ function checkScrollState(): void {
 
 function getHeaderOffset(): number {
   const styles = getComputedStyle(document.documentElement)
-  const desktop = parseFloat(styles.getPropertyValue('--sticky-header-height-desktop')) || 192
-  const mobile = parseFloat(styles.getPropertyValue('--sticky-header-height-mobile')) || 92
-  return window.matchMedia('(max-width: 768px)').matches ? mobile : desktop
+  const baseOffset = window.matchMedia('(max-width: 768px)').matches
+    ? parseFloat(styles.getPropertyValue('--sticky-header-height-mobile')) || CONFIG.STICKY_HEADER_OFFSET_MOBILE
+    : parseFloat(styles.getPropertyValue('--sticky-header-height-desktop')) || CONFIG.STICKY_HEADER_OFFSET_DESKTOP
+  const yearNavigationHeight = document.querySelector<HTMLElement>('.year-navigation-sticky')?.offsetHeight || 0
+  return baseOffset + yearNavigationHeight + 8
 }
 
 function updateVisibleYear(): void {
@@ -152,19 +144,6 @@ function updateVisibleYear(): void {
   }
   
   currentVisibleYear.value = visibleYear
-}
-
-function jumpToToday(): void {
-  if (!availableYears.value.length) return
-
-  const todayYear = new Date().getFullYear()
-  const targetYear = availableYears.value.includes(todayYear)
-    ? todayYear
-    : availableYears.value.reduce((closest, year) => {
-      return Math.abs(year - todayYear) < Math.abs(closest - todayYear) ? year : closest
-    }, availableYears.value[0])
-
-  jumpToYear(targetYear)
 }
 
 function scrollToYearInNavigation(year: number): void {
@@ -222,11 +201,6 @@ function jumpToYear(year: number): void {
       return
     }
     
-    // Calculate total height of sticky elements:
-    // - App Header (sticky at top:0): ~100px
-    // - Panel Header (sticky at top:100px): 52px
-    // - Year Navigation (sticky at top:152px): 40px
-    // Total: 192px on desktop, 92px on mobile (header not sticky)
     const headerOffset = getHeaderOffset()
     
     // Use scrollIntoView with block: 'start' and then adjust for header offset

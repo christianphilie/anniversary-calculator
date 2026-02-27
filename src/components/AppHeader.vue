@@ -2,7 +2,10 @@
   <header ref="headerRef">
     <div class="title">
       <div class="logo" aria-hidden="true">
-        <Sparkles class="h-4 w-4" />
+        <span class="logo-icon-stack">
+          <PartyPopper class="logo-icon-base" />
+          <PartyPopper class="logo-party-icon" />
+        </span>
       </div>
       <div>
         <h1>{{ t('ui.title') }}</h1>
@@ -18,7 +21,7 @@
 
 <script setup lang="ts">
 import { watch, onMounted, onUnmounted, ref } from 'vue'
-import { Sparkles } from 'lucide-vue-next'
+import { PartyPopper } from 'lucide-vue-next'
 import ThemeSwitch from './ThemeSwitch.vue'
 import LanguageSwitch from './LanguageSwitch.vue'
 import { useI18n } from '../i18n'

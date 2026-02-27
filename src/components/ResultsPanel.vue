@@ -3,13 +3,24 @@
   <Card data-panel-shell>
     <CardHeader
       data-panel-header
-      class="sticky top-[var(--sticky-panel-header-top)] z-20 h-12 flex flex-row items-center justify-between gap-3 space-y-0 border-b border-border bg-card/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-card/80"
+      class="sticky top-[var(--sticky-panel-header-top)] z-20 h-12 rounded-t-[calc(var(--radius-lg)-1px)] flex flex-row items-center justify-between gap-3 space-y-0 border-b border-border bg-card/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-card/80"
     >
       <div class="inline-flex min-w-0 items-center gap-2">
         <BarChart3 class="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
         <span class="text-sm font-semibold tracking-tight text-foreground">{{ t('export.milestonesTitle') }}</span>
       </div>
-      <Badge variant="secondary" class="h-5 min-w-5 px-1.5 text-[11px]">{{ state.eventsView.length }}</Badge>
+      <Button
+        variant="ghost"
+        size="sm"
+        class="-mt-0.5 h-8 text-muted-foreground/80 hover:text-foreground"
+        :title="t('form.goToToday')"
+        :aria-label="t('form.goToToday')"
+        :disabled="!state.eventsView.length"
+        @click="jumpToToday"
+      >
+        <CalendarFold />
+        Heute
+      </Button>
     </CardHeader>
     <div class="year-navigation-sticky" v-if="!isLoading && state.eventsView.length">
       <YearNavigation />
@@ -59,8 +70,8 @@
 
 <script setup lang="ts">
 import { computed, nextTick } from 'vue'
-import { BarChart3, LoaderCircle } from 'lucide-vue-next'
-import { Badge } from '@/components/ui/badge'
+import { BarChart3, CalendarFold, LoaderCircle } from 'lucide-vue-next'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { useAppState } from '../composables/useAppState'
 import { useI18n } from '../i18n'
@@ -80,19 +91,12 @@ const startYear = computed(() => {
   return state.value.start.getFullYear()
 })
 
-// Optimized year separator info: calculate once and cache
-const yearSeparatorInfo = computed(() => {
-  const info = new Map<number, { first: number; last: number }>()
-  state.value.eventsView.forEach((ev, idx) => {
-    const year = ev.date.getFullYear()
-    if (!info.has(year)) {
-      info.set(year, { first: idx, last: idx })
-    } else {
-      const existing = info.get(year)!
-      existing.last = idx
-    }
+const availableYears = computed(() => {
+  const years = new Set<number>()
+  state.value.eventsView.forEach((ev) => {
+    years.add(ev.date.getFullYear())
   })
-  return info
+  return Array.from(years).sort((a, b) => a - b)
 })
 
 /**
@@ -136,6 +140,19 @@ function addNextYears(): void {
   )
 }
 
+function jumpToToday(): void {
+  if (!availableYears.value.length) return
+
+  const todayYear = new Date().getFullYear()
+  const targetYear = availableYears.value.includes(todayYear)
+    ? todayYear
+    : availableYears.value.reduce((closest, year) => {
+      return Math.abs(year - todayYear) < Math.abs(closest - todayYear) ? year : closest
+    }, availableYears.value[0])
+
+  handleJumpToYear(targetYear)
+}
+
 /**
  * Scrolls to a specific year in the results list
  * @param year - The year to scroll to
@@ -149,9 +166,13 @@ function handleJumpToYear(year: number): void {
       return
     }
     
-    // Calculate total height of sticky elements
-    const isMobile = window.innerWidth <= 768
-    const headerOffset = isMobile ? 92 : 192
+    // Keep year separators visible below both sticky rows.
+    const styles = getComputedStyle(document.documentElement)
+    const baseOffset = window.matchMedia('(max-width: 768px)').matches
+      ? parseFloat(styles.getPropertyValue('--sticky-header-height-mobile')) || CONFIG.STICKY_HEADER_OFFSET_MOBILE
+      : parseFloat(styles.getPropertyValue('--sticky-header-height-desktop')) || CONFIG.STICKY_HEADER_OFFSET_DESKTOP
+    const yearNavigationHeight = document.querySelector<HTMLElement>('.year-navigation-sticky')?.offsetHeight || 0
+    const headerOffset = baseOffset + yearNavigationHeight + 8
     
     // Use scrollIntoView with block: 'start' and then adjust for header offset
     // Temporarily set scroll-margin-top to account for sticky headers
@@ -190,9 +211,7 @@ function shouldShowYearSeparator(index: number, year: number): boolean {
 function isFirstYearSeparator(index: number): boolean {
   if (index === 0) return true
   const year = state.value.eventsView[index]?.date.getFullYear()
-  if (year === undefined) return false
-  const info = yearSeparatorInfo.value.get(year)
-  return info?.first === index
+  return year !== undefined && year === availableYears.value[0]
 }
 
 /**
@@ -202,8 +221,6 @@ function isFirstYearSeparator(index: number): boolean {
  */
 function isLastYearSeparator(index: number): boolean {
   const year = state.value.eventsView[index]?.date.getFullYear()
-  if (year === undefined) return false
-  const info = yearSeparatorInfo.value.get(year)
-  return info?.last === index
+  return year !== undefined && year === availableYears.value[availableYears.value.length - 1]
 }
 </script>

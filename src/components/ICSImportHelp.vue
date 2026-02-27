@@ -1,20 +1,23 @@
 <template>
-  <div class="relative inline-block">
+  <div ref="containerRef" class="relative inline-flex">
     <Button
-      ref="triggerRef"
-      variant="outline"
+      variant="ghost"
       size="icon"
-      class="h-7 w-7 rounded-md text-muted-foreground"
+      :class="cn('h-7 w-7 rounded-md text-muted-foreground', props.triggerClass)"
       :aria-label="t('export.icsHelpTitle')"
       :title="t('export.icsHelpTitle')"
+      type="button"
       @click="(e: MouseEvent) => toggleHelp(e)"
     >
       <CircleHelp aria-hidden="true" class="h-4 w-4" />
     </Button>
     <div
       v-if="showHelp"
-      ref="contentRef"
-      class="fixed z-[100000] w-[min(22rem,calc(100vw-2rem))] rounded-lg border border-border bg-popover p-3 text-popover-foreground shadow-lg"
+      :class="cn(
+        'absolute top-full z-[100000] mt-2 w-[min(22rem,calc(100vw-2rem))] rounded-lg border border-border bg-popover p-3 text-popover-foreground shadow-lg',
+        props.align === 'left' ? 'left-0' : 'right-0',
+        props.panelClass
+      )"
     >
       <Button
         variant="ghost"
@@ -39,91 +42,43 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import type { ComponentPublicInstance } from 'vue'
 import { CircleHelp, X } from 'lucide-vue-next'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useI18n } from '../i18n'
 
+const props = withDefaults(defineProps<{
+  triggerClass?: string
+  panelClass?: string
+  align?: 'left' | 'right'
+}>(), {
+  triggerClass: '',
+  panelClass: '',
+  align: 'right'
+})
+
 const { t } = useI18n()
 const showHelp = ref(false)
-const triggerRef = ref<HTMLElement | ComponentPublicInstance | null>(null)
-const contentRef = ref<HTMLElement | null>(null)
-
-function getTriggerElement(): HTMLElement | null {
-  const trigger = triggerRef.value
-  if (!trigger) return null
-  if (trigger instanceof HTMLElement) return trigger
-  const el = trigger.$el
-  return el instanceof HTMLElement ? el : null
-}
-
-function updatePosition(): void {
-  if (!showHelp.value || !contentRef.value) return
-
-  const trigger = getTriggerElement()
-  if (!trigger) return
-
-  const content = contentRef.value
-  const rect = trigger.getBoundingClientRect()
-
-  requestAnimationFrame(() => {
-    if (!contentRef.value) return
-
-    let top = rect.bottom + 8
-    let left = 0
-
-    const panelShell = trigger.closest('[data-panel-shell], .panel')
-
-    if (panelShell) {
-      const panelRect = panelShell.getBoundingClientRect()
-      left = panelRect.left + (panelRect.width / 2) - (content.offsetWidth / 2)
-    } else {
-      left = rect.right - content.offsetWidth
-    }
-
-    if (left < 16) left = 16
-    if (left + content.offsetWidth > window.innerWidth - 16) {
-      left = window.innerWidth - content.offsetWidth - 16
-    }
-
-    if (top + content.offsetHeight > window.innerHeight - 16) {
-      top = rect.top - content.offsetHeight - 8
-      if (top < 16) {
-        top = Math.max(16, (window.innerHeight - content.offsetHeight) / 2)
-      }
-    }
-
-    content.style.top = `${top}px`
-    content.style.left = `${left}px`
-  })
-}
-
-onMounted(() => {
-  if (showHelp.value) {
-    updatePosition()
-    window.addEventListener('scroll', updatePosition, true)
-    window.addEventListener('resize', updatePosition)
-  }
-})
-
-onUnmounted(() => {
-  window.removeEventListener('scroll', updatePosition, true)
-  window.removeEventListener('resize', updatePosition)
-})
+const containerRef = ref<HTMLElement | null>(null)
 
 function toggleHelp(e?: Event): void {
   if (e) e.stopPropagation()
   showHelp.value = !showHelp.value
+}
 
-  if (showHelp.value) {
-    setTimeout(() => {
-      updatePosition()
-      window.addEventListener('scroll', updatePosition, true)
-      window.addEventListener('resize', updatePosition)
-    }, 0)
-  } else {
-    window.removeEventListener('scroll', updatePosition, true)
-    window.removeEventListener('resize', updatePosition)
+function handleDocumentClick(event: MouseEvent): void {
+  const target = event.target
+  if (!(target instanceof Node)) return
+  if (!containerRef.value?.contains(target)) {
+    showHelp.value = false
   }
 }
+
+onMounted(() => {
+  document.addEventListener('click', handleDocumentClick)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleDocumentClick)
+})
 </script>

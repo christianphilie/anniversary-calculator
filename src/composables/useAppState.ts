@@ -18,6 +18,8 @@ interface AppStateComposable {
   isLoading: Ref<boolean>
   /** Computed array of currently selected visible milestones */
   visibleSelected: ComputedRef<MilestoneEvent[]>
+  /** Computed array of currently favorited milestones in active result set */
+  favoriteEvents: ComputedRef<MilestoneEvent[]>
   /**
    * Recomputes milestones based on input parameters.
    * @param start - The starting date for milestone calculations
@@ -38,13 +40,21 @@ interface AppStateComposable {
    */
   toggleSelection: (id: string) => void
   /**
+   * Toggles favorite state of a milestone.
+   * @param id - The milestone ID to toggle
+   */
+  toggleFavorite: (id: string) => void
+  /**
+   * Checks whether a milestone is currently marked as favorite.
+   * @param id - The milestone ID to check
+   */
+  isFavorite: (id: string) => boolean
+  /**
    * Selects or deselects all milestones for a specific year.
    * @param year - The year to select/deselect
    * @param select - Whether to select (true) or deselect (false)
    */
   selectYear: (year: number, select: boolean) => void
-  /** Resets the application state to initial values */
-  reset: () => void
 }
 
 /**
@@ -64,6 +74,8 @@ function createAppState(): AppStateComposable {
     eventsAll: [],
     eventsView: [],
     selected: new Set<string>(),
+    favoriteIds: new Set<string>(),
+    exportOnlyFavorites: false,
     yearFrom: null,
     yearTo: null
   })
@@ -76,6 +88,10 @@ function createAppState(): AppStateComposable {
     return state.value.eventsAll.filter(
       ev => visSet.has(ev.id) && state.value.selected.has(ev.id)
     )
+  })
+
+  const favoriteEvents: ComputedRef<MilestoneEvent[]> = computed(() => {
+    return state.value.eventsAll.filter((ev) => state.value.favoriteIds.has(ev.id))
   })
 
   async function recompute(
@@ -183,12 +199,16 @@ function createAppState(): AppStateComposable {
     }
   }
 
-  function reset(): void {
-    state.value.selected.clear()
-    state.value.label = ''
-    state.value.start = null
-    state.value.eventsAll = []
-    state.value.eventsView = []
+  function toggleFavorite(id: string): void {
+    if (state.value.favoriteIds.has(id)) {
+      state.value.favoriteIds.delete(id)
+    } else {
+      state.value.favoriteIds.add(id)
+    }
+  }
+
+  function isFavorite(id: string): boolean {
+    return state.value.favoriteIds.has(id)
   }
 
   // Recompute events when locale changes to update humanDiff strings
@@ -209,12 +229,14 @@ function createAppState(): AppStateComposable {
     state,
     isLoading,
     visibleSelected,
+    favoriteEvents,
     recompute,
     selectAll,
     selectNone,
     toggleSelection,
-    selectYear,
-    reset
+    toggleFavorite,
+    isFavorite,
+    selectYear
   }
 }
 
