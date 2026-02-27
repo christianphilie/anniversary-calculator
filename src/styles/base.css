@@ -207,6 +207,33 @@ main {
   cursor: pointer;
 }
 
+/* iOS Safari tends to inflate native date/time controls unless explicitly constrained. */
+@supports (-webkit-touch-callout: none) {
+  .ui-input[type='date'],
+  .ui-input[type='time'] {
+    -webkit-appearance: none;
+    appearance: none;
+    inline-size: 100%;
+    min-inline-size: 0;
+    block-size: 2.25rem;
+    min-block-size: 2.25rem;
+    line-height: 1.25rem;
+    font-size: 1rem;
+  }
+
+  .ui-input[type='date']::-webkit-date-and-time-value,
+  .ui-input[type='time']::-webkit-date-and-time-value {
+    min-block-size: 1.25rem;
+    padding: 0;
+  }
+
+  .ui-input[type='date']::-webkit-datetime-edit,
+  .ui-input[type='time']::-webkit-datetime-edit {
+    padding: 0;
+    line-height: 1.25rem;
+  }
+}
+
 .footer-mobile {
   display: none;
 }
