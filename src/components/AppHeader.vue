@@ -40,10 +40,11 @@ function updateStickyHeaderHeight(): void {
 
   const headerHeight = headerRef.value.offsetHeight
   const panelHeaderHeight = 48
+  const stackedHeaderOffset = headerHeight + panelHeaderHeight
 
   document.documentElement.style.setProperty('--sticky-panel-header-top', `${headerHeight}px`)
-  document.documentElement.style.setProperty('--sticky-header-height-desktop', `${headerHeight + panelHeaderHeight}px`)
-  document.documentElement.style.setProperty('--sticky-header-height-mobile', `${panelHeaderHeight}px`)
+  document.documentElement.style.setProperty('--sticky-header-height-desktop', `${stackedHeaderOffset}px`)
+  document.documentElement.style.setProperty('--sticky-header-height-mobile', `${stackedHeaderOffset}px`)
 }
 
 onMounted(() => {

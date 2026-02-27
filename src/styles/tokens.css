@@ -35,7 +35,7 @@
 
   /* sticky header offsets (updated at runtime in AppHeader) */
   --sticky-header-height-desktop: 152px;
-  --sticky-header-height-mobile: 52px;
+  --sticky-header-height-mobile: 152px;
   --sticky-panel-header-top: 96px;
 }
 

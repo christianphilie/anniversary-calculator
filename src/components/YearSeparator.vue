@@ -23,7 +23,7 @@
       @click="$emit('jump-to-year', previousYear)"
       :aria-label="`${t('form.jumpToYear')}: ${previousYear}`"
     >
-      <ArrowDownToDot class="h-3.5 w-3.5 rotate-180" aria-hidden="true" />
+      <ArrowDownToLine class="h-3.5 w-3.5 rotate-180" aria-hidden="true" />
     </Button>
     <span v-else class="h-8 w-8 shrink-0" />
     <span class="flex-1 text-center text-sm font-semibold text-muted-foreground">{{ year }}</span>
@@ -45,7 +45,7 @@
       @click="$emit('jump-to-year', nextYear)"
       :aria-label="`${t('form.jumpToYear')}: ${nextYear}`"
     >
-      <ArrowDownToDot class="h-3.5 w-3.5" aria-hidden="true" />
+      <ArrowDownToLine class="h-3.5 w-3.5" aria-hidden="true" />
     </Button>
     <span v-else class="h-8 w-8 shrink-0" />
   </div>
@@ -53,7 +53,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ArrowDownToDot } from 'lucide-vue-next'
+import { ArrowDownToLine } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { useI18n } from '../i18n'
 import { useAppState } from '../composables/useAppState'

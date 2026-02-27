@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center gap-2 border-b border-border bg-card px-4 py-2">
+  <div class="flex items-center gap-2 bg-transparent px-4 py-2">
     <Button
       v-if="shouldShowButtons && canScrollLeft"
       variant="ghost"
@@ -65,7 +65,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useI18n } from '../i18n'
 import { useAppState } from '../composables/useAppState'
-import { CONFIG } from '../types'
+import { getStickyHeaderOffset, scrollElementBelowStickyHeaders } from '../utils/sticky'
 
 const { t } = useI18n()
 const { state } = useAppState()
@@ -97,17 +97,8 @@ function checkScrollState(): void {
   shouldShowButtons.value = hasOverflow.value && !supportsSwipe
 }
 
-function getHeaderOffset(): number {
-  const styles = getComputedStyle(document.documentElement)
-  const baseOffset = window.matchMedia('(max-width: 768px)').matches
-    ? parseFloat(styles.getPropertyValue('--sticky-header-height-mobile')) || CONFIG.STICKY_HEADER_OFFSET_MOBILE
-    : parseFloat(styles.getPropertyValue('--sticky-header-height-desktop')) || CONFIG.STICKY_HEADER_OFFSET_DESKTOP
-  const yearNavigationHeight = document.querySelector<HTMLElement>('.year-navigation-sticky')?.offsetHeight || 0
-  return baseOffset + yearNavigationHeight + 8
-}
-
 function updateVisibleYear(): void {
-  const headerOffset = getHeaderOffset()
+  const headerOffset = getStickyHeaderOffset()
   
   // Find the year separator that is currently visible in the viewport
   let visibleYear: number | null = null
@@ -195,28 +186,12 @@ function scrollRight(): void {
 function jumpToYear(year: number): void {
   // Wait for next tick to ensure DOM is ready
   nextTick(() => {
-    const element = document.getElementById(`y-${year}`)
+    const element = document.getElementById(`y-${year}`) as HTMLElement | null
     if (!element) {
       console.warn(`Year separator not found: y-${year}`)
       return
     }
-    
-    const headerOffset = getHeaderOffset()
-    
-    // Use scrollIntoView with block: 'start' and then adjust for header offset
-    // Temporarily set scroll-margin-top to account for sticky headers
-    const originalScrollMarginTop = (element as HTMLElement).style.scrollMarginTop
-    ;(element as HTMLElement).style.scrollMarginTop = `${headerOffset}px`
-    
-    // Use requestAnimationFrame to ensure scroll-margin-top is applied before scrollIntoView
-    requestAnimationFrame(() => {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      
-      // Restore original scroll-margin-top after scroll starts
-      setTimeout(() => {
-        ;(element as HTMLElement).style.scrollMarginTop = originalScrollMarginTop
-      }, 200)
-    })
+    scrollElementBelowStickyHeaders(element)
     
     // Update visible year after scroll completes
     setTimeout(() => {

@@ -8,6 +8,12 @@
       <div class="inline-flex min-w-0 items-center gap-2">
         <BarChart3 class="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
         <span class="text-sm font-semibold tracking-tight text-foreground">{{ t('export.milestonesTitle') }}</span>
+        <Badge
+          variant="outline"
+          class="h-5 min-w-5 rounded-full px-1.5 text-[11px] tabular-nums text-muted-foreground"
+        >
+          {{ state.eventsView.length }}
+        </Badge>
       </div>
       <Button
         variant="ghost"
@@ -71,11 +77,13 @@
 <script setup lang="ts">
 import { computed, nextTick } from 'vue'
 import { BarChart3, CalendarFold, LoaderCircle } from 'lucide-vue-next'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { useAppState } from '../composables/useAppState'
 import { useI18n } from '../i18n'
 import { CONFIG } from '../types'
+import { scrollElementBelowStickyHeaders } from '../utils/sticky'
 import YearSeparator from './YearSeparator.vue'
 import MilestoneItem from './MilestoneItem.vue'
 import YearNavigation from './YearNavigation.vue'
@@ -160,34 +168,12 @@ function jumpToToday(): void {
 function handleJumpToYear(year: number): void {
   // Wait for next tick to ensure DOM is ready
   nextTick(() => {
-    const element = document.getElementById(`y-${year}`)
+    const element = document.getElementById(`y-${year}`) as HTMLElement | null
     if (!element) {
       console.warn(`Year separator not found: y-${year}`)
       return
     }
-    
-    // Keep year separators visible below both sticky rows.
-    const styles = getComputedStyle(document.documentElement)
-    const baseOffset = window.matchMedia('(max-width: 768px)').matches
-      ? parseFloat(styles.getPropertyValue('--sticky-header-height-mobile')) || CONFIG.STICKY_HEADER_OFFSET_MOBILE
-      : parseFloat(styles.getPropertyValue('--sticky-header-height-desktop')) || CONFIG.STICKY_HEADER_OFFSET_DESKTOP
-    const yearNavigationHeight = document.querySelector<HTMLElement>('.year-navigation-sticky')?.offsetHeight || 0
-    const headerOffset = baseOffset + yearNavigationHeight + 8
-    
-    // Use scrollIntoView with block: 'start' and then adjust for header offset
-    // Temporarily set scroll-margin-top to account for sticky headers
-    const originalScrollMarginTop = (element as HTMLElement).style.scrollMarginTop
-    ;(element as HTMLElement).style.scrollMarginTop = `${headerOffset}px`
-    
-    // Use requestAnimationFrame to ensure scroll-margin-top is applied before scrollIntoView
-    requestAnimationFrame(() => {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      
-      // Restore original scroll-margin-top after scroll starts
-      setTimeout(() => {
-        ;(element as HTMLElement).style.scrollMarginTop = originalScrollMarginTop
-      }, 200)
-    })
+    scrollElementBelowStickyHeaders(element)
   })
 }
 
