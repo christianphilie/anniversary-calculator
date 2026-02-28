@@ -76,7 +76,17 @@ export function downloadICS(filename: string, content: string, openInNewTab = tr
     const reader = new FileReader()
     reader.onloadend = () => {
       const dataUrl = reader.result as string
-      window.open(dataUrl, '_blank', 'noopener')
+      if (!dataUrl) return
+
+      if (openInNewTab) {
+        const popup = window.open(dataUrl, '_blank', 'noopener')
+        if (!popup) {
+          // Fallback when Safari blocks async popups.
+          window.location.href = dataUrl
+        }
+      } else {
+        window.location.href = dataUrl
+      }
     }
     reader.readAsDataURL(blob)
     return
