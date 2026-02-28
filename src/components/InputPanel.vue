@@ -59,7 +59,7 @@
 
         <Separator class="my-6" />
 
-        <details class="group rounded-lg border border-border/70 bg-muted/20">
+        <details ref="filtersDetailsRef" class="group rounded-lg border border-border/70 bg-muted/20">
           <summary
             class="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground [&::-webkit-details-marker]:hidden"
           >
@@ -267,6 +267,7 @@ interface InputFormData {
 
 const today = new Date()
 const todayYear = today.getFullYear()
+const filtersDetailsRef = ref<HTMLDetailsElement | null>(null)
 
 const formData = ref<InputFormData>({
   label: '',
@@ -712,6 +713,10 @@ watch(() => [state.value.yearFrom, state.value.yearTo], ([newYearFrom, newYearTo
 // Note: Date changes are handled in handleDateBlur() to avoid validation during typing
 
 onMounted(() => {
+  if (filtersDetailsRef.value) {
+    filtersDetailsRef.value.open = window.matchMedia('(min-width: 1025px)').matches
+  }
+
   const urlState = loadStateFromURL()
 
   if (urlState.label !== undefined) {
