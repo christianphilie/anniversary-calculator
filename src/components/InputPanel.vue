@@ -2,7 +2,40 @@
   <div class="min-w-0 overflow-x-hidden px-1 pb-1">
     <ErrorAlert />
     <form class="min-w-0 space-y-4" @submit.prevent="handleSubmit">
-        <div class="space-y-4">
+        <div class="rounded-xl border border-primary/25 bg-linear-to-br from-primary/12 via-primary/6 to-transparent p-3 shadow-sm">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary">
+                <BookOpen class="h-3.5 w-3.5" aria-hidden="true" />
+                <span>{{ t('form.quickStartTitle') }}</span>
+              </p>
+              <ul class="mt-2 grid gap-1.5 text-xs text-muted-foreground">
+                <li class="inline-flex items-start gap-2">
+                  <span class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/16 text-[10px] font-semibold text-primary">1</span>
+                  <span>{{ t('form.quickStartStepDate') }}</span>
+                </li>
+                <li class="inline-flex items-start gap-2">
+                  <span class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/16 text-[10px] font-semibold text-primary">2</span>
+                  <span>{{ t('form.quickStartStepTitle') }}</span>
+                </li>
+                <li class="inline-flex items-start gap-2">
+                  <span class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/16 text-[10px] font-semibold text-primary">3</span>
+                  <span class="hidden min-[1025px]:inline">{{ t('form.quickStartStepResultsRight') }}</span>
+                  <span class="min-[1025px]:hidden">{{ t('form.quickStartStepResultsBelow') }}</span>
+                </li>
+              </ul>
+            </div>
+            <a
+              href="#results-panel"
+              class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border border-primary/35 bg-primary/12 px-2.5 text-xs font-medium text-primary transition-colors hover:bg-primary/18 md:hidden"
+            >
+              <span>{{ t('form.jumpToResults') }}</span>
+              <ArrowDown class="h-3.5 w-3.5" aria-hidden="true" />
+            </a>
+          </div>
+        </div>
+
+        <div class="space-y-4 rounded-xl border border-primary/20 bg-primary/4 p-3">
           <div class="space-y-2 min-w-0">
             <Label for="date" class="inline-flex items-baseline gap-1 pb-0.5">
               <span>{{ t('form.date') }}</span>
@@ -197,6 +230,25 @@
                         </Badge>
                       </Label>
                     </div>
+                    <div class="flex items-center gap-3 rounded-lg border border-input bg-background px-3 py-2.5">
+                      <Checkbox id="pattern-ascending" v-model="formData.patterns.ascending" />
+                      <Label
+                        for="pattern-ascending"
+                        class="flex min-w-0 flex-1 items-center justify-between gap-3 leading-normal"
+                      >
+                        <span class="grid min-w-0 gap-0.5">
+                          <span class="text-sm font-medium text-foreground">{{ t('form.ascendingNumbers') }}</span>
+                          <span class="text-xs text-muted-foreground">{{ t('form.ascendingNumbersExamples') }}</span>
+                        </span>
+                        <Badge
+                          v-if="getPatternCount('ascending') > 0"
+                          variant="secondary"
+                          class="h-5 min-w-5 rounded-full px-1.5 text-[11px] tabular-nums"
+                        >
+                          {{ getPatternCount('ascending') }}
+                        </Badge>
+                      </Label>
+                    </div>
                   </div>
                   <span v-if="fieldErrors.patterns" class="field-error" role="alert">{{ fieldErrors.patterns }}</span>
                 </div>
@@ -204,6 +256,11 @@
             </div>
           </div>
         </details>
+
+        <p class="inline-flex items-center gap-1.5 text-xs text-muted-foreground md:hidden">
+          <ArrowDown class="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+          <span>{{ t('form.mobileResultsHint') }}</span>
+        </p>
     </form>
   </div>
 </template>
@@ -216,7 +273,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import { ChevronDown, Funnel } from 'lucide-vue-next'
+import { ArrowDown, BookOpen, ChevronDown, Funnel } from 'lucide-vue-next'
 import type { Unit } from '../types'
 import { CONFIG } from '../types'
 import { UNIT_COLOR_CLASSES } from '../constants/unitColors'
@@ -258,7 +315,7 @@ interface InputFormData {
   date: string
   time: string
   units: Unit[]
-  patterns: { rounded: boolean; repdigit: boolean }
+  patterns: { rounded: boolean; repdigit: boolean; ascending: boolean }
   yearFrom: number
   yearTo: number
 }
@@ -274,7 +331,7 @@ const formData = ref<InputFormData>({
   date: toLocalDateInputValue(today),
   time: DEFAULT_TIME,
   units: ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds'] as Unit[],
-  patterns: { rounded: true, repdigit: true },
+  patterns: { rounded: true, repdigit: true, ascending: true },
   yearFrom: todayYear,
   yearTo: todayYear + 50
 })
@@ -612,7 +669,8 @@ const unitCounts = computed(() => {
 const patternCounts = computed(() => {
   return {
     rounded: state.value.eventsView.filter(ev => ev.patterns.rounded).length,
-    repdigit: state.value.eventsView.filter(ev => ev.patterns.repdigit).length
+    repdigit: state.value.eventsView.filter(ev => ev.patterns.repdigit).length,
+    ascending: state.value.eventsView.filter(ev => ev.patterns.ascending).length
   }
 })
 
@@ -620,7 +678,7 @@ function getUnitCount(unit: Unit): number {
   return unitCounts.value[unit] || 0
 }
 
-function getPatternCount(pattern: 'rounded' | 'repdigit'): number {
+function getPatternCount(pattern: 'rounded' | 'repdigit' | 'ascending'): number {
   return patternCounts.value[pattern] || 0
 }
 
@@ -666,7 +724,8 @@ watch(
     formData.value.time,
     ...formData.value.units,
     formData.value.patterns.rounded,
-    formData.value.patterns.repdigit
+    formData.value.patterns.repdigit,
+    formData.value.patterns.ascending
   ],
   () => {
     if (debounceTimer) clearTimeout(debounceTimer)

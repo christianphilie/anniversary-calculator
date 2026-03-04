@@ -19,7 +19,10 @@ body {
   color: var(--foreground);
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   line-height: 1.5;
-  background: color-mix(in srgb, var(--muted) 55%, var(--background));
+  background:
+    radial-gradient(1200px 700px at 12% -8%, color-mix(in srgb, var(--primary) 18%, transparent) 0%, transparent 62%),
+    radial-gradient(900px 580px at 100% 0%, color-mix(in srgb, var(--ring) 12%, transparent) 0%, transparent 62%),
+    color-mix(in srgb, var(--muted) 48%, var(--background));
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -91,33 +94,24 @@ header {
 }
 
 .logo-party-icon {
-  color: #3b82f6;
+  color: var(--primary);
   stroke: currentColor;
   opacity: 0.95;
-  animation: logo-rainbow-cycle 20s linear infinite;
+  animation: logo-blue-pulse 2.8s ease-in-out infinite;
 }
 
-@keyframes logo-rainbow-cycle {
+@keyframes logo-blue-pulse {
   0% {
-    color: #3b82f6;
+    opacity: 0.8;
+    transform: scale(0.98);
   }
-  16% {
-    color: #22c55e;
-  }
-  32% {
-    color: #eab308;
-  }
-  48% {
-    color: #f97316;
-  }
-  64% {
-    color: #ef4444;
-  }
-  80% {
-    color: #a855f7;
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
   }
   100% {
-    color: #3b82f6;
+    opacity: 0.8;
+    transform: scale(0.98);
   }
 }
 

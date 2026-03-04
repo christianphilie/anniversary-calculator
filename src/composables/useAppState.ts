@@ -25,7 +25,7 @@ interface AppStateComposable {
    * @param start - The starting date for milestone calculations
    * @param label - Label/title for the milestones
    * @param units - Array of units to calculate (years, months, weeks, etc.)
-   * @param patterns - Pattern options (rounded, repdigit)
+   * @param patterns - Pattern options (rounded, repdigit, ascending)
    * @param yearFrom - Start year for the calculation window
    * @param yearTo - End year for the calculation window
    */
@@ -70,7 +70,7 @@ function createAppState(): AppStateComposable {
     start: null,
     label: '',
     units: ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds'],
-    patterns: { rounded: true, repdigit: true },
+    patterns: { rounded: true, repdigit: true, ascending: true },
     eventsAll: [],
     eventsView: [],
     selected: new Set<string>(),
@@ -248,7 +248,7 @@ function createAppState(): AppStateComposable {
  * @example
  * ```typescript
  * const { state, recompute, selectAll } = useAppState()
- * await recompute(startDate, 'Birthday', ['years'], { rounded: true }, 2020, 2030)
+ * await recompute(startDate, 'Birthday', ['years'], { rounded: true, repdigit: false, ascending: false }, 2020, 2030)
  * ```
  */
 export function useAppState(): AppStateComposable {

@@ -12,7 +12,7 @@
         <div class="muted">{{ t('ui.description') }}</div>
       </div>
     </div>
-    <div class="flex shrink-0 items-center gap-2 rounded-lg border border-border bg-muted p-1">
+    <div class="flex shrink-0 items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 p-1">
       <LanguageSwitch />
       <ThemeSwitch />
     </div>

@@ -54,7 +54,7 @@ export function useUrlState(state: { value: AppState }) {
     date?: string
     time?: string
     units?: string[]
-    patterns?: { rounded: boolean; repdigit: boolean }
+    patterns?: { rounded: boolean; repdigit: boolean; ascending: boolean }
     theme?: string
     yearFrom?: number
     yearTo?: number

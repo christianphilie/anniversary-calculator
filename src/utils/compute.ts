@@ -44,7 +44,7 @@ export interface ComputeOptions {
  * ```ts
  * const events = computeRangeWindow(
  *   new Date('2020-01-01'),
- *   { label: 'Birthday', units: ['years'], patterns: { rounded: true, repdigit: false } },
+ *   { label: 'Birthday', units: ['years'], patterns: { rounded: true, repdigit: false, ascending: false } },
  *   new Date('2020-01-01'),
  *   new Date('2030-01-01')
  * )
@@ -60,16 +60,16 @@ export function computeRangeWindow(
 
   // Pre-classify patterns for all candidates to avoid redundant calculations
   // Build candidates once per unit and cache pattern classification
-  const patternCache = new Map<number, { rounded: boolean; repdigit: boolean }>()
+  const patternCache = new Map<number, { rounded: boolean; repdigit: boolean; ascending: boolean }>()
 
-  function getPatterns(n: number): { rounded: boolean; repdigit: boolean } {
+  function getPatterns(n: number): { rounded: boolean; repdigit: boolean; ascending: boolean } {
     if (!patternCache.has(n)) {
       patternCache.set(n, classifyPatterns(n))
     }
     return patternCache.get(n)!
   }
 
-  function push(date: Date, n: number, unit: Unit, patterns: { rounded: boolean; repdigit: boolean }): void {
+  function push(date: Date, n: number, unit: Unit, patterns: { rounded: boolean; repdigit: boolean; ascending: boolean }): void {
     if (date < from || date > to) return
     if (n < CONFIG.MIN_N[unit]) return
 

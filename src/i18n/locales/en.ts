@@ -47,12 +47,21 @@ export default {
     goToToday: 'Go to today',
     scrollLeft: 'Scroll left',
     scrollRight: 'Scroll right',
+    quickStartTitle: "How it works",
+    quickStartStepDate: 'Enter date and time for your anniversary calculation',
+    quickStartStepTitle: 'Add a title (e.g. "Christian\'s birthday")',
+    quickStartStepResultsRight: 'Your calculated anniversaries appear directly on the right',
+    quickStartStepResultsBelow: 'Your calculated anniversaries appear directly below',
+    jumpToResults: 'To anniversaries',
+    mobileResultsHint: 'Your anniversaries are shown directly below this section.',
     moreFilters: 'Filters',
     loadMore: 'Load more',
     roundedMultiples: 'Rounded multiples',
     roundedMultiplesExamples: '500, 2,000, 10,000, 1,000,000 …',
     repdigits: 'Repdigits',
-    repdigitsExamples: '11, 2,222, 333, 444,444,444 …'
+    repdigitsExamples: '11, 2,222, 333, 444,444,444 …',
+    ascendingNumbers: 'Ascending sequences',
+    ascendingNumbersExamples: '123, 12345, 123456789 …'
   },
   units: {
     years: 'Years',
@@ -72,7 +81,8 @@ export default {
   },
   patterns: {
     rounded: 'Rounded Multiples',
-    repdigit: 'Repdigits'
+    repdigit: 'Repdigits',
+    ascending: 'Ascending sequences'
   },
   theme: {
     light: 'Light',
@@ -83,6 +93,10 @@ export default {
   results: {
     empty: 'No entries in time range. Adjust units/patterns or year range.',
     loading: 'Calculating anniversaries...',
+    currentValuesTitle: 'Current values',
+    currentValuesHintPast: 'As of now since the entered time',
+    currentValuesHintFuture: 'As of now until the entered time',
+    live: 'Live',
     downloadTooltip: 'Download calendar file for {{count}} event{{plural}} in .ics format',
     downloadTooltipNone: 'No selected visible entries',
     selectAll: 'Select all',

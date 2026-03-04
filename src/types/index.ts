@@ -1,10 +1,11 @@
 export type Unit = 'years' | 'months' | 'weeks' | 'days' | 'hours' | 'minutes' | 'seconds'
 
-export type PatternType = 'rounded' | 'repdigit'
+export type PatternType = 'rounded' | 'repdigit' | 'ascending'
 
 export interface Patterns {
   rounded: boolean
   repdigit: boolean
+  ascending: boolean
 }
 
 export interface MilestoneEvent {
@@ -19,6 +20,7 @@ export interface MilestoneEvent {
   patterns: {
     rounded: boolean
     repdigit: boolean
+    ascending: boolean
   }
 }
 

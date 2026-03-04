@@ -77,12 +77,13 @@ export function parseUnitsParam(value: string | null, validUnits: string[]): str
  * @param value - Comma-separated patterns string
  * @returns Patterns object or null if invalid
  */
-export function parsePatternsParam(value: string | null): { rounded: boolean; repdigit: boolean } | null {
+export function parsePatternsParam(value: string | null): { rounded: boolean; repdigit: boolean; ascending: boolean } | null {
   if (!value) return null
   const set = new Set(value.split(',').filter(Boolean))
   return {
     rounded: set.has('rounded'),
-    repdigit: set.has('repdigit')
+    repdigit: set.has('repdigit'),
+    ascending: set.has('ascending')
   }
 }
 

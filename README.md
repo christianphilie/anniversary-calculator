@@ -12,6 +12,7 @@ A modern, feature-rich web application for calculating and exploring special dat
 *   🔢 **Pattern-Based Milestone Generation:**
     *   **Rounded Multiples:** Find milestones like 10, 100, 500, 1,000, 10,000, etc. Perfect for celebrating round numbers.
     *   **Repdigits (Schnapszahlen):** Identify milestones such as 11, 222, 3,333, etc. Special numbers with repeating digits.
+    *   **Ascending Sequences:** Discover milestones like 123, 12345, or 123456789.
 
 ### Export & Sharing
 
@@ -26,6 +27,7 @@ A modern, feature-rich web application for calculating and exploring special dat
 ### User Experience
 
 *   ⚡ **Real-time Updates:** Automatic recalculation as you modify inputs, with optimized performance for large date ranges. No need to click "Calculate".
+*   📈 **Current Values Panel:** Live counters show current years, months, weeks, days, hours, minutes, and seconds since the selected date/time.
 *   🌍 **Internationalization:** Full support for German and English with locale-aware date/number formatting. Switch languages instantly.
 *   🎨 **Theming:** Switch between light, dark, or system-preferred color schemes. Preferences are saved automatically.
 *   🔗 **URL Persistence:** Share or bookmark your specific calculations as the application state is reflected in the URL. Reload the page to restore your state.
@@ -38,7 +40,7 @@ A modern, feature-rich web application for calculating and exploring special dat
 
 1. **Enter your start date and time** (optional title)
 2. **Select units** you want to calculate (years, months, weeks, days, hours, minutes, seconds)
-3. **Choose patterns** (Rounded Multiples, Repdigits)
+3. **Choose patterns** (Rounded Multiples, Repdigits, Ascending Sequences)
 4. **View results** - milestones are automatically calculated and displayed
 5. **Select milestones** using checkboxes (all selected by default)
 6. **Export or share** your milestones using the export buttons or share functionality

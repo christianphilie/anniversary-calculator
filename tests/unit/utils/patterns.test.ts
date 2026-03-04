@@ -4,6 +4,7 @@ import {
   isKTimesPow10,
   isRounded,
   isRepdigit,
+  isAscending,
   buildCandidates,
   classifyPatterns
 } from '@/utils/patterns'
@@ -78,9 +79,26 @@ describe('pattern utilities', () => {
     })
   })
 
+  describe('isAscending', () => {
+    it('should identify ascending numbers', () => {
+      expect(isAscending(123)).toBe(true)
+      expect(isAscending(12345)).toBe(true)
+      expect(isAscending(123456789)).toBe(true)
+      expect(isAscending(4567)).toBe(true)
+    })
+
+    it('should reject non-ascending numbers', () => {
+      expect(isAscending(12)).toBe(false) // too short
+      expect(isAscending(1123)).toBe(false)
+      expect(isAscending(124)).toBe(false)
+      expect(isAscending(987)).toBe(false)
+      expect(isAscending(123456790)).toBe(false)
+    })
+  })
+
   describe('buildCandidates', () => {
     it('should build rounded candidates', () => {
-      const result = buildCandidates(1000, { rounded: true, repdigit: false })
+      const result = buildCandidates(1000, { rounded: true, repdigit: false, ascending: false })
       expect(result).toContain(10)
       expect(result).toContain(100)
       expect(result).toContain(1000)
@@ -88,22 +106,30 @@ describe('pattern utilities', () => {
     })
 
     it('should build repdigit candidates', () => {
-      const result = buildCandidates(1000, { rounded: false, repdigit: true })
+      const result = buildCandidates(1000, { rounded: false, repdigit: true, ascending: false })
       expect(result).toContain(11)
       expect(result).toContain(222)
       expect(result).toContain(333)
     })
 
+    it('should build ascending candidates', () => {
+      const result = buildCandidates(200000, { rounded: false, repdigit: false, ascending: true })
+      expect(result).toContain(123)
+      expect(result).toContain(12345)
+      expect(result).toContain(4567)
+    })
+
     it('should build both types when both enabled', () => {
-      const result = buildCandidates(1000, { rounded: true, repdigit: true })
+      const result = buildCandidates(1000, { rounded: true, repdigit: true, ascending: true })
       expect(result).toContain(10) // rounded
       expect(result).toContain(11) // repdigit
       expect(result).toContain(100) // rounded
       expect(result).toContain(222) // repdigit
+      expect(result).toContain(123) // ascending
     })
 
     it('should return sorted array', () => {
-      const result = buildCandidates(1000, { rounded: true, repdigit: true })
+      const result = buildCandidates(1000, { rounded: true, repdigit: true, ascending: true })
       for (let i = 1; i < result.length; i++) {
         expect(result[i]).toBeGreaterThanOrEqual(result[i - 1])
       }
@@ -115,12 +141,21 @@ describe('pattern utilities', () => {
       const result = classifyPatterns(100)
       expect(result.rounded).toBe(true)
       expect(result.repdigit).toBe(false)
+      expect(result.ascending).toBe(false)
     })
 
     it('should classify repdigits', () => {
       const result = classifyPatterns(222)
       expect(result.rounded).toBe(false)
       expect(result.repdigit).toBe(true)
+      expect(result.ascending).toBe(false)
+    })
+
+    it('should classify ascending numbers', () => {
+      const result = classifyPatterns(12345)
+      expect(result.rounded).toBe(false)
+      expect(result.repdigit).toBe(false)
+      expect(result.ascending).toBe(true)
     })
 
     it('should classify numbers that are both', () => {
@@ -134,9 +169,10 @@ describe('pattern utilities', () => {
     })
 
     it('should classify numbers that are neither', () => {
-      const result = classifyPatterns(123)
+      const result = classifyPatterns(314)
       expect(result.rounded).toBe(false)
       expect(result.repdigit).toBe(false)
+      expect(result.ascending).toBe(false)
     })
   })
 })

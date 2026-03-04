@@ -24,6 +24,19 @@ export function isRepdigit(n: number): boolean {
   return s.length > 1 && /^([1-9])\1+$/.test(s)
 }
 
+export function isAscending(n: number): boolean {
+  const s = String(n)
+  if (!/^\d+$/.test(s) || s.length < 3) return false
+
+  for (let i = 1; i < s.length; i++) {
+    const prev = Number(s[i - 1])
+    const curr = Number(s[i])
+    if (curr !== prev + 1) return false
+  }
+
+  return true
+}
+
 function makePowersOf10(max: number): Set<number> {
   const set = new Set<number>()
   for (let k = 1; 10 ** k <= max; k++) {
@@ -55,9 +68,27 @@ function makeRepdigits(max: number): Set<number> {
   return set
 }
 
+function makeAscending(max: number): Set<number> {
+  const set = new Set<number>()
+
+  for (let start = 1; start <= 7; start++) {
+    let value = 0
+    for (let digit = start; digit <= 9; digit++) {
+      value = value * 10 + digit
+      if (value > max) break
+      if (digit - start + 1 >= 3) {
+        set.add(value)
+      }
+    }
+  }
+
+  return set
+}
+
 export interface PatternOptions {
   rounded: boolean
   repdigit: boolean
+  ascending: boolean
 }
 
 export function buildCandidates(maxN: number, patterns: PatternOptions): number[] {
@@ -69,12 +100,16 @@ export function buildCandidates(maxN: number, patterns: PatternOptions): number[
   if (patterns.repdigit) {
     for (const v of makeRepdigits(maxN)) s.add(v)
   }
+  if (patterns.ascending) {
+    for (const v of makeAscending(maxN)) s.add(v)
+  }
   return Array.from(s).sort((a, b) => a - b)
 }
 
-export function classifyPatterns(n: number): { rounded: boolean; repdigit: boolean } {
+export function classifyPatterns(n: number): { rounded: boolean; repdigit: boolean; ascending: boolean } {
   return {
     rounded: isRounded(n),
-    repdigit: isRepdigit(n)
+    repdigit: isRepdigit(n),
+    ascending: isAscending(n)
   }
 }

@@ -128,7 +128,7 @@
           :aria-checked="exportOnlyFavorites"
           :aria-label="t('export.onlyFavorites')"
           class="relative inline-flex h-6 w-11 items-center rounded-full border border-border/70 bg-muted transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
-          :class="exportOnlyFavorites ? 'bg-black border-black' : 'bg-muted'"
+          :class="exportOnlyFavorites ? 'border-primary bg-primary' : 'bg-muted'"
           @click="exportOnlyFavorites = !exportOnlyFavorites"
         >
           <span

@@ -18,7 +18,7 @@ const triggerProps = computed(() => {
     v-bind="triggerProps"
     data-slot="tabs-trigger"
     :class="cn(
-      'inline-flex h-8 items-center justify-center whitespace-nowrap rounded-md border border-transparent px-3 text-sm font-medium ring-offset-background transition-all outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm',
+      'inline-flex h-8 items-center justify-center whitespace-nowrap rounded-md border border-transparent px-3 text-sm font-medium ring-offset-background transition-all outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-primary/35 data-[state=active]:bg-primary/12 data-[state=active]:text-primary data-[state=active]:shadow-sm',
       props.class
     )"
   >

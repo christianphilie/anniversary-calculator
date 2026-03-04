@@ -8,7 +8,7 @@ function createState(start: Date | null): { value: AppState } {
       start,
       label: 'Test',
       units: ['years', 'months'],
-      patterns: { rounded: true, repdigit: false },
+      patterns: { rounded: true, repdigit: false, ascending: false },
       eventsAll: [],
       eventsView: [],
       selected: new Set<string>(),

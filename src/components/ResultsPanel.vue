@@ -1,6 +1,6 @@
 <template>
   <!-- Milestones Section -->
-  <Card data-panel-shell>
+  <Card id="results-panel" data-panel-shell>
     <CardHeader
       data-panel-header
       class="sticky top-[var(--sticky-panel-header-top)] z-20 h-12 rounded-t-[calc(var(--radius-lg)-1px)] flex flex-row items-center justify-between gap-3 space-y-0 border-b border-border bg-card/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-card/80"
@@ -25,13 +25,42 @@
         @click="jumpToToday"
       >
         <CalendarFold />
-        Heute
+        {{ t('form.goToToday') }}
       </Button>
     </CardHeader>
     <div class="year-navigation-sticky" v-if="!isLoading && state.eventsView.length">
       <YearNavigation />
     </div>
     <CardContent class="p-4">
+      <div
+        v-if="state.start"
+        class="relative mb-4 rounded-lg border border-primary/22 bg-linear-to-br from-primary/10 via-primary/4 to-transparent p-3"
+      >
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-semibold text-foreground">{{ t('results.currentValuesTitle') }}</span>
+        </div>
+        <div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div
+            v-for="item in currentValues"
+            :key="item.unit"
+            class="rounded-md border border-primary/15 bg-background/85 px-2.5 py-2"
+          >
+            <div class="text-sm font-semibold tabular-nums text-foreground">
+              {{ formatNumber(item.value) }}
+            </div>
+            <div class="text-[11px] leading-tight text-muted-foreground">
+              {{ getMetricLabel(item.unit, item.value) }}
+            </div>
+          </div>
+        </div>
+        <Badge
+          variant="outline"
+          class="live-badge-pulse absolute bottom-3 right-3 h-5 rounded-full px-2 text-[11px] text-primary"
+        >
+          {{ t('results.live') }}
+        </Badge>
+      </div>
+
       <div
         v-if="isLoading"
         class="grid min-h-32 place-items-center gap-2 rounded-md border border-dashed border-border bg-muted/70 px-4 py-6 text-center text-sm text-muted-foreground"
@@ -75,21 +104,26 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { BarChart3, CalendarFold, LoaderCircle } from 'lucide-vue-next'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { useAppState } from '../composables/useAppState'
 import { useI18n } from '../i18n'
+import { getNumberFormatter, getUnitLabel } from '../utils/i18n'
+import { addMonths } from '../utils/date'
 import { CONFIG } from '../types'
+import type { Unit } from '../types'
 import { scrollElementBelowStickyHeaders } from '../utils/sticky'
 import YearSeparator from './YearSeparator.vue'
 import MilestoneItem from './MilestoneItem.vue'
 import YearNavigation from './YearNavigation.vue'
 
 const { state, isLoading, recompute } = useAppState()
-const { t } = useI18n()
+const { locale, t } = useI18n()
+const now = ref(new Date())
+let nowTimer: ReturnType<typeof setInterval> | null = null
 
 // Cache current year to avoid multiple Date object creations
 const currentYear = computed(() => new Date().getFullYear())
@@ -106,6 +140,56 @@ const availableYears = computed(() => {
   })
   return Array.from(years).sort((a, b) => a - b)
 })
+
+const numberFormatter = computed(() => getNumberFormatter(locale.value))
+
+const currentValues = computed((): Array<{ unit: Unit; value: number }> => {
+  if (!state.value.start) return []
+
+  const start = state.value.start
+  const end = now.value
+  const isPast = end >= start
+  const from = isPast ? start : end
+  const to = isPast ? end : start
+
+  const diffMs = Math.max(0, to.getTime() - from.getTime())
+  const seconds = Math.floor(diffMs / 1000)
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+  const days = Math.floor(hours / 24)
+  const weeks = Math.floor(days / 7)
+  const months = getWholeMonthsBetween(from, to)
+  const years = Math.floor(months / 12)
+
+  return [
+    { unit: 'years', value: years },
+    { unit: 'months', value: months },
+    { unit: 'weeks', value: weeks },
+    { unit: 'days', value: days },
+    { unit: 'hours', value: hours },
+    { unit: 'minutes', value: minutes },
+    { unit: 'seconds', value: seconds }
+  ]
+})
+
+function getWholeMonthsBetween(from: Date, to: Date): number {
+  let months = (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth())
+  const anchor = addMonths(from, months)
+
+  if (anchor.getTime() > to.getTime()) {
+    months -= 1
+  }
+
+  return Math.max(0, months)
+}
+
+function getMetricLabel(unit: Unit, value: number): string {
+  return getUnitLabel(unit, value, locale.value)
+}
+
+function formatNumber(value: number): string {
+  return numberFormatter.value.format(value)
+}
 
 /**
  * Expands the year range backwards by up to CONFIG.YEARS_TO_ADD_ON_EXPAND years
@@ -209,4 +293,39 @@ function isLastYearSeparator(index: number): boolean {
   const year = state.value.eventsView[index]?.date.getFullYear()
   return year !== undefined && year === availableYears.value[availableYears.value.length - 1]
 }
+
+onMounted(() => {
+  nowTimer = setInterval(() => {
+    now.value = new Date()
+  }, 1000)
+})
+
+onUnmounted(() => {
+  if (nowTimer) {
+    clearInterval(nowTimer)
+    nowTimer = null
+  }
+})
 </script>
+
+<style scoped>
+.live-badge-pulse {
+  animation: live-badge-pulse 1s ease-in-out infinite;
+}
+
+@keyframes live-badge-pulse {
+  0%,
+  100% {
+    background: color-mix(in srgb, var(--primary) 14%, transparent);
+    border-color: color-mix(in srgb, var(--primary) 45%, var(--border) 55%);
+    color: color-mix(in srgb, var(--primary) 88%, var(--foreground) 12%);
+    transform: scale(1);
+  }
+  50% {
+    background: color-mix(in srgb, var(--primary) 28%, transparent);
+    border-color: color-mix(in srgb, var(--primary) 70%, var(--border) 30%);
+    color: var(--primary);
+    transform: scale(1.04);
+  }
+}
+</style>

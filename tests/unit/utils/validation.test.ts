@@ -118,13 +118,14 @@ describe('validation utilities', () => {
 
   describe('validatePatterns', () => {
     it('should accept patterns with at least one enabled', () => {
-      expect(validatePatterns({ rounded: true, repdigit: false }).valid).toBe(true)
-      expect(validatePatterns({ rounded: false, repdigit: true }).valid).toBe(true)
-      expect(validatePatterns({ rounded: true, repdigit: true }).valid).toBe(true)
+      expect(validatePatterns({ rounded: true, repdigit: false, ascending: false }).valid).toBe(true)
+      expect(validatePatterns({ rounded: false, repdigit: true, ascending: false }).valid).toBe(true)
+      expect(validatePatterns({ rounded: false, repdigit: false, ascending: true }).valid).toBe(true)
+      expect(validatePatterns({ rounded: true, repdigit: true, ascending: true }).valid).toBe(true)
     })
 
     it('should reject patterns with both disabled', () => {
-      const result = validatePatterns({ rounded: false, repdigit: false })
+      const result = validatePatterns({ rounded: false, repdigit: false, ascending: false })
       expect(result.valid).toBe(false)
       expect(result.error).toContain('mindestens ein Muster')
     })

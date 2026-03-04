@@ -44,15 +44,24 @@ export default {
     showMoreYears: 'Mehr Jahre anzeigen',
     jumpToYear: 'Zu Jahr springen',
     jumpToYears: 'Zu Jahren springen',
-    goToToday: 'Zu heute',
+    goToToday: 'Zu heute springen',
     scrollLeft: 'Nach links scrollen',
     scrollRight: 'Nach rechts scrollen',
+    quickStartTitle: "So funktioniert's",
+    quickStartStepDate: 'Gib Datum und Uhrzeit für die Berechnung deiner Jubiläen ein',
+    quickStartStepTitle: 'Füge einen Titel hinzu (z. B. "Christians Geburtstag")',
+    quickStartStepResultsRight: 'Rechts erscheinen direkt deine berechneten Jubiläen',
+    quickStartStepResultsBelow: 'Unten erscheinen direkt deine berechneten Jubiläen',
+    jumpToResults: 'Zu Jubiläen',
+    mobileResultsHint: 'Die Jubiläen werden direkt unterhalb dieses Bereichs angezeigt.',
     moreFilters: 'Filter',
     loadMore: 'Mehr laden',
     roundedMultiples: 'Runde Vielfache',
     roundedMultiplesExamples: '500, 2.000, 10.000, 1.000.000 …',
     repdigits: 'Schnapszahlen',
-    repdigitsExamples: '11, 2.222, 333, 444.444.444 …'
+    repdigitsExamples: '11, 2.222, 333, 444.444.444 …',
+    ascendingNumbers: 'Ziffernfolgen',
+    ascendingNumbersExamples: '123, 12345, 123456789 …'
   },
   units: {
     years: 'Jahre',
@@ -72,7 +81,8 @@ export default {
   },
   patterns: {
     rounded: 'Runde Vielfache',
-    repdigit: 'Schnapszahlen'
+    repdigit: 'Schnapszahlen',
+    ascending: 'Ziffernfolgen'
   },
   theme: {
     light: 'Hell',
@@ -83,6 +93,10 @@ export default {
   results: {
     empty: 'Keine Einträge im Zeitraum. Passe Einheiten/Muster oder den Jahresbereich an.',
     loading: 'Berechne Jubiläen...',
+    currentValuesTitle: 'Aktuelle Werte',
+    currentValuesHintPast: 'Stand jetzt seit dem eingegebenen Zeitpunkt',
+    currentValuesHintFuture: 'Stand jetzt bis zum eingegebenen Zeitpunkt',
+    live: 'Live',
     downloadTooltip: 'Kalenderdatei für {{count}} Ereignis{{plural}} im .ics-Format herunterladen',
     downloadTooltipNone: 'Keine ausgewählten sichtbaren Einträge',
     selectAll: 'Alle auswählen',

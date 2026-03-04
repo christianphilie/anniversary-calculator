@@ -171,10 +171,10 @@ export function validateUnits(units: string[], t: TranslateFunction = defaultT):
 }
 
 export function validatePatterns(
-  patterns: { rounded: boolean; repdigit: boolean },
+  patterns: { rounded: boolean; repdigit: boolean; ascending: boolean },
   t: TranslateFunction = defaultT
 ): ValidationResult {
-  if (!patterns.rounded && !patterns.repdigit) {
+  if (!patterns.rounded && !patterns.repdigit && !patterns.ascending) {
     return { valid: false, error: t('validation.patternsRequired') }
   }
 
