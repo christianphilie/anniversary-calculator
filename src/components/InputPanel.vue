@@ -2,24 +2,36 @@
   <div class="min-w-0 overflow-x-hidden px-1 pb-1">
     <ErrorAlert />
     <form class="min-w-0 space-y-4" @submit.prevent="handleSubmit">
-        <div class="rounded-xl border border-primary/25 bg-linear-to-br from-primary/12 via-primary/6 to-transparent p-3 shadow-sm">
-          <div class="flex items-start justify-between gap-3">
+        <div
+          v-if="showQuickStart"
+          class="relative rounded-xl bg-blue-500 p-3 text-blue-50 shadow-sm dark:bg-blue-500/42 dark:ring-1 dark:ring-blue-300/30"
+        >
+          <button
+            type="button"
+            class="absolute top-2 right-2 inline-flex h-6 w-6 items-center justify-center rounded-md text-white/80 transition-colors hover:bg-white/20 hover:text-white dark:text-blue-100/90 dark:hover:bg-blue-100/18 dark:hover:text-blue-50"
+            :aria-label="t('common.close')"
+            :title="t('common.close')"
+            @click="dismissQuickStart"
+          >
+            <X class="h-3.5 w-3.5" aria-hidden="true" />
+          </button>
+          <div class="flex items-start justify-between gap-3 pr-8">
             <div class="min-w-0">
-              <p class="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary">
+              <p class="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-blue-100 dark:text-blue-50">
                 <BookOpen class="h-3.5 w-3.5" aria-hidden="true" />
                 <span>{{ t('form.quickStartTitle') }}</span>
               </p>
-              <ul class="mt-2 grid gap-1.5 text-xs text-muted-foreground">
+              <ul class="mt-2 grid gap-1.5 text-xs text-blue-100/95 dark:text-blue-50/95">
                 <li class="inline-flex items-start gap-2">
-                  <span class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/16 text-[10px] font-semibold text-primary">1</span>
+                  <span class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20 text-[10px] font-semibold text-white dark:bg-blue-100/22 dark:text-blue-50">1</span>
                   <span>{{ t('form.quickStartStepDate') }}</span>
                 </li>
                 <li class="inline-flex items-start gap-2">
-                  <span class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/16 text-[10px] font-semibold text-primary">2</span>
+                  <span class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20 text-[10px] font-semibold text-white dark:bg-blue-100/22 dark:text-blue-50">2</span>
                   <span>{{ t('form.quickStartStepTitle') }}</span>
                 </li>
                 <li class="inline-flex items-start gap-2">
-                  <span class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/16 text-[10px] font-semibold text-primary">3</span>
+                  <span class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20 text-[10px] font-semibold text-white dark:bg-blue-100/22 dark:text-blue-50">3</span>
                   <span class="hidden min-[1025px]:inline">{{ t('form.quickStartStepResultsRight') }}</span>
                   <span class="min-[1025px]:hidden">{{ t('form.quickStartStepResultsBelow') }}</span>
                 </li>
@@ -27,7 +39,7 @@
             </div>
             <a
               href="#results-panel"
-              class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border border-primary/35 bg-primary/12 px-2.5 text-xs font-medium text-primary transition-colors hover:bg-primary/18 md:hidden"
+              class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border border-white/40 bg-white/15 px-2.5 text-xs font-medium text-white transition-colors hover:bg-white/25 dark:border-blue-100/35 dark:bg-blue-100/12 dark:text-blue-50 dark:hover:bg-blue-100/20 md:hidden"
             >
               <span>{{ t('form.jumpToResults') }}</span>
               <ArrowDown class="h-3.5 w-3.5" aria-hidden="true" />
@@ -156,7 +168,7 @@
                       v-for="unit in units"
                       :key="unit.value"
                       :class="cn(
-                        'flex items-center gap-3 rounded-lg border px-3 py-2 transition-colors',
+                        'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors',
                         getUnitFilterRowClass(unit.value)
                       )"
                     >
@@ -273,7 +285,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import { ArrowDown, BookOpen, ChevronDown, Funnel } from 'lucide-vue-next'
+import { ArrowDown, BookOpen, ChevronDown, Funnel, X } from 'lucide-vue-next'
 import type { Unit } from '../types'
 import { CONFIG } from '../types'
 import { UNIT_COLOR_CLASSES } from '../constants/unitColors'
@@ -324,11 +336,14 @@ interface InputFormData {
 
 const today = new Date()
 const todayYear = today.getFullYear()
+const defaultStartDate = new Date(1989, 2, 28, 19, 21, 0)
 const filtersDetailsRef = ref<HTMLDetailsElement | null>(null)
+const QUICK_START_DISMISSED_SESSION_KEY = 'anniversary.quickStartDismissed'
+const showQuickStart = ref(true)
 
 const formData = ref<InputFormData>({
   label: '',
-  date: toLocalDateInputValue(today),
+  date: toLocalDateInputValue(defaultStartDate),
   time: DEFAULT_TIME,
   units: ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds'] as Unit[],
   patterns: { rounded: true, repdigit: true, ascending: true },
@@ -717,6 +732,15 @@ function toggleUnit(unit: Unit, checked: boolean | 'indeterminate'): void {
   }, CONFIG.DEBOUNCE_DELAY)
 }
 
+function dismissQuickStart(): void {
+  showQuickStart.value = false
+  try {
+    window.sessionStorage.setItem(QUICK_START_DISMISSED_SESSION_KEY, '1')
+  } catch {
+    // Ignore storage failures and keep hidden only in-memory for this page load.
+  }
+}
+
 // Watch for changes and recompute with debounce (but NOT for date/yearFrom/yearTo - those are handled on blur)
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 watch(
@@ -772,6 +796,12 @@ watch(() => [state.value.yearFrom, state.value.yearTo], ([newYearFrom, newYearTo
 // Note: Date changes are handled in handleDateBlur() to avoid validation during typing
 
 onMounted(() => {
+  try {
+    showQuickStart.value = window.sessionStorage.getItem(QUICK_START_DISMISSED_SESSION_KEY) !== '1'
+  } catch {
+    showQuickStart.value = true
+  }
+
   if (filtersDetailsRef.value) {
     filtersDetailsRef.value.open = window.matchMedia('(min-width: 1025px)').matches
   }

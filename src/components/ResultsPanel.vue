@@ -34,28 +34,28 @@
     <CardContent class="p-4">
       <div
         v-if="state.start"
-        class="relative mb-4 rounded-lg border border-primary/22 bg-linear-to-br from-primary/10 via-primary/4 to-transparent p-3"
+        class="relative mb-4 space-y-4 rounded-xl border border-primary/20 bg-primary/4 p-3"
       >
         <div class="flex items-center gap-2">
-          <span class="text-sm font-semibold text-foreground">{{ t('results.currentValuesTitle') }}</span>
+          <span class="text-sm font-semibold text-sky-900/90 dark:text-sky-100/90">{{ t('results.currentValuesTitle') }}</span>
         </div>
         <div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           <div
             v-for="item in currentValues"
             :key="item.unit"
-            class="rounded-md border border-primary/15 bg-background/85 px-2.5 py-2"
+            class="rounded-md bg-white/68 px-2.5 py-2 ring-1 ring-sky-500/18 dark:bg-sky-950/26 dark:ring-sky-300/20"
           >
-            <div class="text-sm font-semibold tabular-nums text-foreground">
+            <div class="text-sm font-semibold tabular-nums text-sky-900/90 dark:text-sky-100/90">
               {{ formatNumber(item.value) }}
             </div>
-            <div class="text-[11px] leading-tight text-muted-foreground">
+            <div class="text-[11px] leading-tight text-sky-800/72 dark:text-sky-200/72">
               {{ getMetricLabel(item.unit, item.value) }}
             </div>
           </div>
         </div>
         <Badge
           variant="outline"
-          class="live-badge-pulse absolute bottom-3 right-3 h-5 rounded-full px-2 text-[11px] text-primary"
+          class="live-badge-pulse absolute bottom-3 right-3 h-5 rounded-full border-sky-500/30 bg-white/55 px-2 text-[11px] text-sky-700 dark:border-sky-300/32 dark:bg-sky-950/40 dark:text-sky-200"
         >
           {{ t('results.live') }}
         </Badge>

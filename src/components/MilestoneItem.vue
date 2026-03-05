@@ -1,7 +1,7 @@
 <template>
   <div
     :class="cn(
-      'group flex min-w-0 items-center gap-3 rounded-md border p-3 transition-colors',
+      'group flex min-w-0 items-center gap-3 rounded-md p-3 transition-colors',
       rowClass
     )"
     :data-year="event.date.getFullYear()"
