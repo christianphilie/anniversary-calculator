@@ -53,7 +53,6 @@ export default {
     quickStartStepResultsRight: 'Your calculated anniversaries appear directly on the right',
     quickStartStepResultsBelow: 'Your calculated anniversaries appear directly below',
     jumpToResults: 'To anniversaries',
-    mobileResultsHint: 'Your anniversaries are shown directly below this section.',
     moreFilters: 'Filters',
     loadMore: 'Load more',
     roundedMultiples: 'Rounded multiples',

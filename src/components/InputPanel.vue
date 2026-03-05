@@ -15,7 +15,7 @@
           >
             <X class="h-3.5 w-3.5" aria-hidden="true" />
           </button>
-          <div class="flex items-start justify-between gap-3 pr-8">
+          <div class="flex items-start gap-3 pr-8">
             <div class="min-w-0">
               <p class="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-blue-100 dark:text-blue-50">
                 <BookOpen class="h-3.5 w-3.5" aria-hidden="true" />
@@ -37,13 +37,6 @@
                 </li>
               </ul>
             </div>
-            <a
-              href="#results-panel"
-              class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border border-white/40 bg-white/15 px-2.5 text-xs font-medium text-white transition-colors hover:bg-white/25 dark:border-blue-100/35 dark:bg-blue-100/12 dark:text-blue-50 dark:hover:bg-blue-100/20 md:hidden"
-            >
-              <span>{{ t('form.jumpToResults') }}</span>
-              <ArrowDown class="h-3.5 w-3.5" aria-hidden="true" />
-            </a>
           </div>
         </div>
 
@@ -57,6 +50,7 @@
               v-model="formData.date"
               type="date"
               class="min-w-0"
+              @change="markPrimaryInputChanged"
               @blur="handleDateBlur"
               :aria-invalid="fieldErrors.date ? 'true' : 'false'"
               :aria-describedby="fieldErrors.date ? 'date-error' : undefined"
@@ -75,6 +69,7 @@
               type="time"
               step="1"
               class="min-w-0"
+              @change="markPrimaryInputChanged"
               :aria-invalid="fieldErrors.time ? 'true' : 'false'"
               :aria-describedby="fieldErrors.time ? 'time-error' : undefined"
             />
@@ -92,6 +87,7 @@
               v-model="formData.label"
               type="text"
               :placeholder="t('form.labelPlaceholder')"
+              @input="markPrimaryInputChanged"
               @blur="handleLabelBlur"
               :aria-invalid="fieldErrors.label ? 'true' : 'false'"
               :aria-describedby="fieldErrors.label ? 'label-error' : undefined"
@@ -101,6 +97,15 @@
             </span>
           </div>
         </div>
+
+        <a
+          v-if="hasPrimaryInputChanged"
+          href="#results-panel"
+          class="inline-flex h-9 items-center gap-1.5 self-start rounded-md border border-primary/30 bg-primary/10 px-3 text-sm font-medium text-primary transition-colors hover:bg-primary/20 min-[1025px]:hidden"
+        >
+          <span>{{ t('form.jumpToResults') }}</span>
+          <ArrowDown class="h-3.5 w-3.5" aria-hidden="true" />
+        </a>
 
         <Separator class="my-6" />
 
@@ -269,10 +274,6 @@
           </div>
         </details>
 
-        <p class="inline-flex items-center gap-1.5 text-xs text-muted-foreground md:hidden">
-          <ArrowDown class="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-          <span>{{ t('form.mobileResultsHint') }}</span>
-        </p>
     </form>
   </div>
 </template>
@@ -340,6 +341,7 @@ const defaultStartDate = new Date(1989, 2, 28, 19, 21, 0)
 const filtersDetailsRef = ref<HTMLDetailsElement | null>(null)
 const QUICK_START_DISMISSED_SESSION_KEY = 'anniversary.quickStartDismissed'
 const showQuickStart = ref(true)
+const hasPrimaryInputChanged = ref(false)
 
 const formData = ref<InputFormData>({
   label: '',
@@ -739,6 +741,10 @@ function dismissQuickStart(): void {
   } catch {
     // Ignore storage failures and keep hidden only in-memory for this page load.
   }
+}
+
+function markPrimaryInputChanged(): void {
+  hasPrimaryInputChanged.value = true
 }
 
 // Watch for changes and recompute with debounce (but NOT for date/yearFrom/yearTo - those are handled on blur)

@@ -53,7 +53,6 @@ export default {
     quickStartStepResultsRight: 'Rechts erscheinen direkt deine berechneten Jubiläen',
     quickStartStepResultsBelow: 'Unten erscheinen direkt deine berechneten Jubiläen',
     jumpToResults: 'Zu Jubiläen',
-    mobileResultsHint: 'Die Jubiläen werden direkt unterhalb dieses Bereichs angezeigt.',
     moreFilters: 'Filter',
     loadMore: 'Mehr laden',
     roundedMultiples: 'Runde Vielfache',
