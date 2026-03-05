@@ -52,7 +52,7 @@ export default {
     quickStartStepTitle: 'Füge einen Titel hinzu (z. B. "Christians Geburtstag")',
     quickStartStepResultsRight: 'Rechts erscheinen direkt deine berechneten Jubiläen',
     quickStartStepResultsBelow: 'Unten erscheinen direkt deine berechneten Jubiläen',
-    jumpToResults: 'Zu Jubiläen',
+    jumpToResults: 'Zu den Jubiläen',
     moreFilters: 'Filter',
     loadMore: 'Mehr laden',
     roundedMultiples: 'Runde Vielfache',

@@ -101,7 +101,7 @@
         <a
           v-if="hasPrimaryInputChanged"
           href="#results-panel"
-          class="inline-flex h-9 items-center gap-1.5 self-start rounded-md border border-primary/30 bg-primary/10 px-3 text-sm font-medium text-primary transition-colors hover:bg-primary/20 min-[1025px]:hidden"
+          class="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-md border border-primary/30 bg-primary/10 px-3 text-sm font-medium text-primary transition-colors hover:bg-primary/20 min-[1025px]:hidden"
         >
           <span>{{ t('form.jumpToResults') }}</span>
           <ArrowDown class="h-3.5 w-3.5" aria-hidden="true" />
