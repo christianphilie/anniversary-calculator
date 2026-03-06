@@ -337,7 +337,7 @@ interface InputFormData {
 
 const today = new Date()
 const todayYear = today.getFullYear()
-const defaultStartDate = new Date(1989, 2, 28, 19, 21, 0)
+const defaultStartDate = new Date(2000, 0, 1, 0, 0, 0)
 const filtersDetailsRef = ref<HTMLDetailsElement | null>(null)
 const QUICK_START_DISMISSED_SESSION_KEY = 'anniversary.quickStartDismissed'
 const showQuickStart = ref(true)

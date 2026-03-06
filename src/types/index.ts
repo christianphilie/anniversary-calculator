@@ -55,7 +55,7 @@ export const CONFIG = {
     years: 1
   },
   REPDIGIT_MAX_LENGTH: 12,
-  DEFAULT_TIME: '19:21:00',
+  DEFAULT_TIME: '00:00:00',
   // Year range constants
   MAX_YEARS_IN_FUTURE: 100, // Maximum years in the future from current year
   YEARS_TO_ADD_ON_EXPAND: 10, // Years to add when expanding range
